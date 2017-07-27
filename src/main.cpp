@@ -2,6 +2,7 @@
 #include "typedef.hpp"
 #include "manager.hpp"
 #include "visu.hpp"
+#include "trigger.hpp"
 
 #include <stdio.h>
 #include <string>
@@ -25,12 +26,14 @@ int main(int argc, char** argv) {
   }
   MemoryAccess mem;
   GameManager csgo = GameManager(mem);
+  Trigger trigger(csgo);
   while (true) {
     // cout << "getting Players" << endl;
-    csgo.getPlayers();
+    csgo.grabPlayers();
+    trigger.triggerCheck();
     // csgo.printPlayers();
     // cout << "printing Players" << endl;
-    csgo.printPlayerLocationsToFile("locs.csv");
+    // csgo.printPlayerLocationsToFile("locs.csv");
     this_thread::sleep_for(chrono::milliseconds(300));
   }
   return 0;

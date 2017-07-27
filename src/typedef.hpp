@@ -24,8 +24,10 @@ struct QAngle {
 struct EntityType {
 	char __buf_0x00[0x88]; // 0x0
 	int m_bIsAutoaimTarget; // 0x88
-	unsigned int m_iEntityId; // 0x8C
-	char __buf_0x8C[0x10]; // 0x90
+  char __buf_0x8c[0x8];
+  unsigned int m_iEntityId; //0x94
+	// unsigned int m_iEntityId; // 0x8C
+	// char __buf_0x8C[0x10]; // 0x90
 	int m_clrRender; // 0xA0
 	int m_cellbits; // 0xA4
 	char __buf_0xA8[0x4]; // 0xA8

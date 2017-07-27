@@ -1,9 +1,11 @@
+#pragma once
 #include "memory_access.hpp"
 #include "typedef.hpp"
 
 #include <string>
 #include <vector>
-class GameManager{
+
+class GameManager {
 public:
   GameManager(MemoryAccess& mem);
   void grabPlayers();

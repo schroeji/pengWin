@@ -37,7 +37,7 @@ void GameManager::grabPlayers(){
     // cout << "reading obj: " << i <<endl;
     EntityType* player = new EntityType;
     mem.read(objects[i].m_pEntity, player, sizeof(EntityType));
-    if (player->m_iTeamNum == Team::CT || player->m_iTeamNum == Team::T || player->m_iHealth > 0)
+    if ((player->m_iTeamNum == Team::CT || player->m_iTeamNum == Team::T) && player->m_iHealth > 0)
       players.push_back(player);
     else
       delete player;
