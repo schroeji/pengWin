@@ -1,5 +1,4 @@
 
-#include <Python.h>
 #include "visu.hpp"
 #include <vector>
 #include <iostream>

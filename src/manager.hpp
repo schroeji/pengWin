@@ -6,9 +6,11 @@
 class GameManager{
 public:
   GameManager(MemoryAccess& mem);
-  void getPlayers();
+  void grabPlayers();
   void printPlayers();
   void printPlayerLocationsToFile(const std::string&);
+  MemoryAccess& getMemoryAccess();
+  std::vector<EntityType*>& getPlayers();
 
 private:
   MemoryAccess& mem;

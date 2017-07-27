@@ -20,7 +20,6 @@ pid_t MemoryAccess::getPid() {
   FILE* in;
   char buf[128];
   string cmd = "pidof -s " + GAME_NAME;
-  // const char* cmd = ("pidof -s " + GAME_NAME).c_str();
   in = popen(cmd.c_str(), "r");
   if ( !(in && fgets(buf, 128, in)) )
     cout << "No PID found"<< endl;
@@ -29,14 +28,14 @@ pid_t MemoryAccess::getPid() {
   return pid;
 }
 
-uint64_t MemoryAccess::getClientBase() {
+unsigned long int MemoryAccess::getClientBase() {
   client_base = getModule("client_client.so");
   cout << hex << "Client Base: " << client_base  << endl;
   updateAddrs();
   return client_base;
 }
 
-uint64_t MemoryAccess::getModule(const string& modname) {
+unsigned long int MemoryAccess::getModule(const string& modname) {
   string cmd = "grep " + modname + " /proc/" + to_string(pid) + "/maps | head -n 1 | cut -d \"-\" -f1";
   FILE* in;
   char buf[128];
@@ -56,4 +55,16 @@ bool MemoryAccess::read(void* addr, void* buff, size_t size) {
   remote_mem.iov_base = addr;
   remote_mem.iov_len = size;
   return (process_vm_readv(pid, &local_mem, 1, &remote_mem, 1, 0) == (signed) size);
+}
+
+unsigned int MemoryAccess::getCrosshairTarget() {
+  unsigned int ret;
+  read((void*) (local_player + crosshair_id_offset), &ret, sizeof(ret));
+  return ret;
+}
+
+Team MemoryAccess::getTeam() {
+  unsigned int team;
+  read((void*) (local_player + team_number_offset), &team, sizeof(team));
+  return team;
 }

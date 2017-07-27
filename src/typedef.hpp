@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 struct Vector {
 	float x;
@@ -87,7 +88,7 @@ struct ObjectType {
   static const int ENTRY_IN_USE = -2;
 }; // sizeof() == 0x34
 
-enum Teams {
+enum Team {
   CT = 3,
   T = 2
 };

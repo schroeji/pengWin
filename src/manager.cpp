@@ -17,7 +17,7 @@ GameManager::GameManager(MemoryAccess& mem) : mem(mem) {
   }
 }
 
-void GameManager::getPlayers(){
+void GameManager::grabPlayers(){
 	if (! mem.read((void*) mem.glow_addr, &manager, sizeof(ObjectManager))) {
     cout << "Could not get ObjectManager" << endl;
     return;
@@ -37,11 +37,15 @@ void GameManager::getPlayers(){
     // cout << "reading obj: " << i <<endl;
     EntityType* player = new EntityType;
     mem.read(objects[i].m_pEntity, player, sizeof(EntityType));
-    if (player->m_iTeamNum == Teams::CT || player->m_iTeamNum == Teams::T || player->m_iHealth > 0)
+    if (player->m_iTeamNum == Team::CT || player->m_iTeamNum == Team::T || player->m_iHealth > 0)
       players.push_back(player);
     else
       delete player;
   }
+}
+
+vector<EntityType*>& GameManager::getPlayers() {
+  return players;
 }
 
 void GameManager::printPlayers() {
@@ -49,9 +53,9 @@ void GameManager::printPlayers() {
   for (EntityType* player : players) {
     cout << dec << "Player: " << i << endl;
     cout << "hp: " << player->m_iHealth << endl;
-    if(player->m_iTeamNum == Teams::CT)
+    if(player->m_iTeamNum == Team::CT)
       cout << "Team: CT" << endl;
-    else if(player->m_iTeamNum == Teams::T)
+    else if(player->m_iTeamNum == Team::T)
       cout << "Team: T" << endl;
     printf("Origin x=%f y=%f z=%f\n", player->m_vecOrigin.x, player->m_vecOrigin.y, player->m_vecOrigin.z);
     printf("ID: %d", player->m_iEntityId);
@@ -74,4 +78,8 @@ void GameManager::printPlayerLocationsToFile(const string& filename) {
     i++;
   }
   file.close();
+}
+
+MemoryAccess& GameManager::getMemoryAccess() {
+  return mem;
 }

@@ -10,12 +10,14 @@ CFLAGS  = -g -Wall
 TARGET = main
 
 #includes
-INC=-I/usr/include/python3.6m -lpython3.6m
+# INC=
+
+SRC=$(wildcard src/*.cpp)
 
 all: $(TARGET)
 
-$(TARGET): $(TARGET).cpp
-	$(CC) $(CFLAGS) $(INC) -o $(TARGET) memory_access.cpp manager.cpp visu.cpp $(TARGET).cpp
+$(TARGET): src/main.cpp
+	$(CC) $(CFLAGS) $(INC) -o $(TARGET) $(SRC)
 
 clean:
 	$(RM) $(TARGET)
