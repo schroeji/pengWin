@@ -10,7 +10,7 @@ xdata, ydata = [], []
 ln = plt.scatter([], [], animated=True)
 # ln.set_offsets([[0.5], [0.4]])
 # print(ln.get_offsets())
-location_file = "locs.csv"
+location_file = "/tmp/locs.csv"
 
 def getData(i):
   try :
@@ -28,10 +28,10 @@ def getData(i):
   hps = data[:, 1].astype(int, copy=False)
   ln.set_offsets(list(zip(zs, xs)))
   ln.set_color(cs)
-  # txt = [ax.annotate(str(hps[i]),(zs[i], xs[i]), color=cs[i]) for i in range(len(xs))]
-  # txt.insert(0, ln)
-  return ln,
-  # return tuple(txt)
+  txt = [ax.annotate(str(hps[i]),(zs[i], xs[i]), color=cs[i]) for i in range(len(xs))]
+  txt.insert(0, ln)
+  # return ln,
+  return tuple(txt)
 
 def blit_init():
   if(map_name == "de_dust2"):

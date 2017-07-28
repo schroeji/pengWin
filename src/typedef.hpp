@@ -28,6 +28,7 @@ struct EntityType {
   unsigned int m_iEntityId; //0x94
 	// unsigned int m_iEntityId; // 0x8C
 	// char __buf_0x8C[0x10]; // 0x90
+  char __buf_0x98[0x8];
 	int m_clrRender; // 0xA0
 	int m_cellbits; // 0xA4
 	char __buf_0xA8[0x4]; // 0xA8

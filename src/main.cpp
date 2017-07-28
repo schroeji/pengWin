@@ -13,6 +13,22 @@
 
 using namespace std;
 
+
+bool test(MemoryAccess& mem) {
+  unsigned long int OFFSET_CLIENTSTATE = 0x5D0214;
+  unsigned long int OFFSET_MAPNAME = 0x26C;
+  unsigned int Address = 0x0;
+  unsigned long int engine_base = mem.getModule("engine_client.so");
+  mem.read((void*)(engine_base + OFFSET_CLIENTSTATE), &Address, sizeof(Address));
+  cout << hex << "Addr: " << Address << endl;
+  if (!Address){ return false; }
+  char MapName[256];
+  if (!MapName){ return false; }
+  mem.read((void*)(Address + OFFSET_MAPNAME), &MapName, sizeof(MapName));
+  cout << "map_name:" << MapName << endl;
+  return MapName;
+}
+
 int main(int argc, char** argv) {
   if (getuid() != 0){
     cout << "Not root" << endl;
@@ -26,14 +42,13 @@ int main(int argc, char** argv) {
   }
   MemoryAccess mem;
   GameManager csgo = GameManager(mem);
-  Trigger trigger(csgo);
+  // test(mem);
+  // Trigger trigger(csgo);
   while (true) {
-    // cout << "getting Players" << endl;
     csgo.grabPlayers();
-    trigger.triggerCheck();
+    // trigger.triggerCheck();
     // csgo.printPlayers();
-    // cout << "printing Players" << endl;
-    // csgo.printPlayerLocationsToFile("locs.csv");
+    csgo.printPlayerLocationsToFile("/tmp/locs.csv");
     this_thread::sleep_for(chrono::milliseconds(300));
   }
   return 0;

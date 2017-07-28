@@ -6,13 +6,16 @@ private:
   const std::string GAME_NAME = "csgo_linux64";
   pid_t pid;
   unsigned long int client_base;
-  unsigned long int local_player_addr;
-  unsigned long int attack_addr_location;
+  unsigned long int local_player_addr_location;
+  unsigned long int attack_addr_call_location;
 
   //offsets to client base
   unsigned long int local_player_offset = 0x1c79b68;
   unsigned long int glow_offset = 0x2515360;
   unsigned long int attack_offset = 0x85a85d;
+
+  //offsets to engine base
+  unsigned long int map_name_offset = 0x1217705;
 
   //offsets to localPlayer
   unsigned long int crosshair_id_offset = 0xBBD8;
@@ -21,7 +24,7 @@ private:
   void updateAddrs();
 
 public:
-  unsigned long int local_player;
+  unsigned long int local_player_addr;
   unsigned long int glow_addr;
   unsigned long int attack_addr;
 
@@ -29,7 +32,9 @@ public:
   unsigned long int getModule(const std::string&);
   bool read(void*, void*, size_t);
   bool write(void*, void*, size_t);
+  bool GetCallAddress(void*);
   unsigned long int getClientBase();
   unsigned int getCrosshairTarget();
+  unsigned long int getCallAddress(void*);
   Team getTeam();
 };

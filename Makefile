@@ -10,7 +10,7 @@ CFLAGS  = -g -Wall
 TARGET = main
 
 #includes
-# INC=
+INC=-lX11
 
 SRC=$(wildcard src/*.cpp)
 
