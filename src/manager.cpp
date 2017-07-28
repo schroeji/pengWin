@@ -9,10 +9,14 @@
 using namespace std;
 
 GameManager::GameManager(MemoryAccess& mem) : mem(mem) {
-  if(!mem.getPid())
+  if (!mem.getPid())
     exit(0);
-  if(!mem.getClientBase()){
+  if (!mem.getClientBase()) {
     cout << "Could not find Client Base" << endl;
+    exit(0);
+  }
+  if (!mem.getEngineBase()){
+    cout << "Could not find Engine Base" << endl;
     exit(0);
   }
 }

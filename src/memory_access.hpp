@@ -5,7 +5,9 @@ class MemoryAccess {
 private:
   const std::string GAME_NAME = "csgo_linux64";
   pid_t pid;
-  unsigned long int client_base;
+  unsigned long int client_base = 0;
+  unsigned long int engine_base = 0;
+
   unsigned long int local_player_addr_location;
   unsigned long int attack_addr_call_location;
 
@@ -27,14 +29,16 @@ public:
   unsigned long int local_player_addr;
   unsigned long int glow_addr;
   unsigned long int attack_addr;
+  unsigned long int map_name_addr;
 
   pid_t getPid();
   unsigned long int getModule(const std::string&);
   bool read(void*, void*, size_t);
   bool write(void*, void*, size_t);
-  bool GetCallAddress(void*);
   unsigned long int getClientBase();
+  unsigned long int getEngineBase();
   unsigned int getCrosshairTarget();
   unsigned long int getCallAddress(void*);
   Team getTeam();
+  std::string getMapName();
 };

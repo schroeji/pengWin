@@ -1,5 +1,9 @@
 #pragma once
+
+#include <stdio.h>
 #include <stdint.h>
+#include <vector>
+#include <string>
 
 struct Vector {
 	float x;
@@ -107,3 +111,5 @@ public:
   unsigned int unk4; // 0024 (054612E4)
   unsigned int unk5; // 0028 (054612E8)
 };
+
+std::vector<std::string> split_string(const std::string&, const std::string&);
