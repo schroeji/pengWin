@@ -11,7 +11,10 @@
 
 using namespace std;
 
-Clicker::Clicker(MemoryAccess& mem) : mem(mem) {}
+Clicker::Clicker(MemoryAccess& mem) : mem(mem) {
+  displayClick = XOpenDisplay(NULL);
+  memset(&event, 0, sizeof (event));
+}
 
 void Clicker::memClick() {
   unsigned int attack = 0x05;
@@ -22,9 +25,6 @@ void Clicker::memClick() {
 }
 
 void Clicker::xClick() {
-  Display* displayClick = XOpenDisplay(NULL);
-  XEvent event;
-  memset(&event, 0, sizeof (event));
   event.xbutton.button = Button1;
   event.xbutton.same_screen = True;
   event.xbutton.subwindow = DefaultRootWindow (displayClick);
@@ -40,7 +40,7 @@ void Clicker::xClick() {
   event.type = ButtonPress;
   XSendEvent (displayClick, PointerWindow, True, ButtonPressMask, &event);
   XFlush (displayClick);
-  this_thread::sleep_for(chrono::milliseconds(1));
+  this_thread::sleep_for(chrono::milliseconds(50));
   // Release
   event.type = ButtonRelease;
   XSendEvent (displayClick, PointerWindow, True, ButtonReleaseMask, &event);

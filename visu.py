@@ -18,6 +18,8 @@ def getData(i):
     data = np.loadtxt(location_file, delimiter=",")
   except:
     return ln,
+  if(len(data) == 0):
+    return ln,
   if(len(data.shape) == 1):
     data = data.reshape((1, 6))
   data = data[data[:, 1] != 0]
@@ -35,26 +37,29 @@ def getData(i):
 
 def blit_init():
   if(map_name == "de_dust2"):
-    xlims = (-2420, 1954)
-    ylims = (-1155, 3327)
+    xlims = (-2400, 1954)
+    ylims = (-1155, 3383)
   elif(map_name == "de_inferno"):
-    xlims = (-2140, 2950)
-    ylims = (-1140, 3833)
+    xlims = (-2087, 2950)
+    ylims = (-1140, 3870)
   elif(map_name == "de_mirage"):
-    xlims = (-3270, 1855)
-    ylims = (-3385, 1680)
+    xlims = (-3230, 1855)
+    ylims = (-3385, 1713)
   elif(map_name == "de_cache"):
-    xlims = (-2028, 3653)
+    xlims = (-2000, 3653)
     ylims = (-2420, 3250)
   elif(map_name == "de_overpass"):
-    xlims = (-4837, 525)
-    ylims = (-3583, 1795)
+    xlims = (-4831, 525)
+    ylims = (-3583, 1781)
   elif(map_name == "de_cbble"):
-    xlims = (-3825, 2325)
-    ylims = (-3100, 3050)
+    xlims = (-3840, 2325)
+    ylims = (-3100, 3072)
   elif(map_name == "de_train"):
-    xlims = (-2481, 2365)
-    ylims = (-2445, 2372)
+    xlims = (-2477, 2365)
+    ylims = (-2445, 2392)
+  elif(map_name == "de_nuke"):
+    xlims = (-3453, 3750)
+    ylims = (-4290, 2887)
   ax.imshow(img, extent=[ax.get_xlim()[0], ax.get_xlim()[1], ax.get_ylim()[0], ax.get_ylim()[1]])
   ax.set_xlim(xlims)
   ax.set_ylim(ylims)

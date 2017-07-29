@@ -9,20 +9,20 @@ using namespace std;
 
 void MemoryAccess::updateAddrs() {
   local_player_addr_location = client_base + local_player_offset;
-  cout << hex << "local_player_addr: " << local_player_addr << endl;
+  // cout << hex << "local_player_addr: " << local_player_addr << endl;
   if(!read((void*) local_player_addr_location, &local_player_addr, sizeof(local_player_addr)))
     cout << "WARNING: could not get local_player" << endl;
-  cout << "local_player: " << local_player_addr << endl;
+  // cout << "local_player: " << local_player_addr << endl;
 
   glow_addr = client_base + glow_offset;
   cout << hex << "glow_addr: " << glow_addr << endl;
 
   attack_addr_call_location = client_base + attack_offset;
-  cout << hex << "attack_addr_call_location: " << attack_addr_call_location << endl;
+  // cout << hex << "attack_addr_call_location: " << attack_addr_call_location << endl;
   attack_addr = getCallAddress((void*) attack_addr_call_location);
   if(!attack_addr)
     cout << "WARNING: could not get attack_addr" << endl;
-  cout << hex << "attack_addr: " << attack_addr << endl;
+  // cout << hex << "attack_addr: " << attack_addr << endl;
 
   map_name_addr = engine_base + map_name_offset;
 }

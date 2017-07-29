@@ -10,6 +10,7 @@ public:
   GameManager(MemoryAccess& mem);
   void grabPlayers();
   void printPlayers();
+  void printEntities();
   void printPlayerLocationsToFile(const std::string&);
   MemoryAccess& getMemoryAccess();
   std::vector<EntityType*>& getPlayers();

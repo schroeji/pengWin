@@ -24,16 +24,16 @@ int main(int argc, char** argv) {
   bool debug = false;
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-radar")) {
-      cout << "enabled radar" << endl;
+      cout << "Enabled: Radar" << endl;
       use_radar = true;
     }
     else if (!strcmp(argv[i], "-trigger")) {
-      cout << "trigger enabled" << endl;
+      cout << "Enabled: Trigger" << endl;
       use_trigger = true;
     }
     else if (!strcmp(argv[i], "-debug")) {
       debug = true;
-      cout << "enabled debugging" << endl;
+      cout << "Enabled: Debugging" << endl;
     }
   }
 
@@ -55,11 +55,13 @@ int main(int argc, char** argv) {
     csgo.grabPlayers();
     if (use_trigger)
       trigger.triggerCheck();
-    if (debug)
+    if (debug) {
       csgo.printPlayers();
+      csgo.printEntities();
+    }
     if (use_radar)
       csgo.printPlayerLocationsToFile("/tmp/locs.csv");
-    this_thread::sleep_for(chrono::milliseconds(300));
+    this_thread::sleep_for(chrono::milliseconds(1000));
   }
   return 0;
 }
