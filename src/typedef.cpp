@@ -4,6 +4,7 @@
 #include <string.h>
 #include <string>
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 
@@ -22,4 +23,16 @@ std::vector<std::string> split_string(const std::string& split_str, const std::s
   }
   result.push_back(buf);
   return result;
+}
+
+void normalize_vector(Vector* vec) {
+  float squared_sum = vec->x * vec->x + vec->y * vec->y + vec->z * vec->z;
+  float root = sqrt(squared_sum);
+  vec->x /= root;
+  vec->y /= root;
+  vec->z /= root;
+}
+
+Vector getDist(Vector* a, Vector* b) {
+  return Vector{b->x - a->x, b->y - a->y, b->z - a->z};
 }

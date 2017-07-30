@@ -22,11 +22,15 @@ def getData(i):
     return ln,
   if(len(data.shape) == 1):
     data = data.reshape((1, 6))
+  local_player_index = int(data[0,0])
+  data = data[1:]
   data = data[data[:, 1] != 0]
   xs = data[:, 3]
   # ys = []
   zs = data[:, 5]
   cs = [ 'b' if c == 3 else 'r' for c in data[:,2]]
+  if(local_player_index != -1):
+    cs[local_player_index] = 'g'
   hps = data[:, 1].astype(int, copy=False)
   ln.set_offsets(list(zip(zs, xs)))
   ln.set_color(cs)

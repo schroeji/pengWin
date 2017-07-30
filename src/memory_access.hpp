@@ -18,6 +18,7 @@ private:
 
   //offsets to engine base
   unsigned long int map_name_offset = 0x1217705;
+  unsigned long int engpofs =  0x00EAE60C;
 
   //offsets to localPlayer
   unsigned long int crosshair_id_offset = 0xBBD8;
@@ -31,6 +32,8 @@ public:
   unsigned long int attack_addr;
   unsigned long int map_name_addr;
 
+  unsigned long int engp;
+
   pid_t getPid();
   unsigned long int getModule(const std::string&);
   bool read(void*, void*, size_t);
@@ -39,6 +42,7 @@ public:
   unsigned long int getEngineBase();
   unsigned int getCrosshairTarget();
   unsigned long int getCallAddress(void*);
+  unsigned long int getEngp();
   Team getTeam();
   std::string getMapName();
 };

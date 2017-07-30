@@ -119,3 +119,8 @@ string MemoryAccess::getMapName() {
   string ret(no_bsp[0]);
   return ret;
 }
+
+unsigned long int MemoryAccess::getEngp() {
+  read((void*) (engine_base + engpofs), &engp, sizeof(engp));
+  return engp;
+}

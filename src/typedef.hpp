@@ -113,3 +113,6 @@ public:
 };
 
 std::vector<std::string> split_string(const std::string&, const std::string&);
+
+void normalize_vector(Vector*);
+Vector getDist(Vector*, Vector*);

@@ -37,12 +37,16 @@ void GameManager::grabPlayers(){
   }
   // cout << "got objects" << endl;
   players.clear();
+  local_player_index = -1;
   for (unsigned int i = 0; i < count; i++) {
     // cout << "reading obj: " << i <<endl;
     EntityType* player = new EntityType;
     mem.read(objects[i].m_pEntity, player, sizeof(EntityType));
-    if ((player->m_iTeamNum == Team::CT || player->m_iTeamNum == Team::T) && player->m_iHealth > 0)
+    if ((player->m_iTeamNum == Team::CT || player->m_iTeamNum == Team::T) && player->m_iHealth > 0) {
       players.push_back(player);
+      if (objects[i].m_pEntity == (void*) mem.local_player_addr)
+        local_player_index = i;
+    }
     else
       delete player;
   }
@@ -105,6 +109,8 @@ void GameManager::printPlayerLocationsToFile(const string& filename) {
   file.open(filename);
   if (players.empty())
     return;
+  // print local player index into array[0,0]
+  file << local_player_index << ",0,0,0,0,0" << endl;
   // Format: number,hp,team,x,y,z
   int i = 0;
   for (EntityType* player : players) {
@@ -119,4 +125,11 @@ void GameManager::printPlayerLocationsToFile(const string& filename) {
 
 MemoryAccess& GameManager::getMemoryAccess() {
   return mem;
+}
+
+EntityType* GameManager::getLocalPlayer() {
+  if(!players.empty() && local_player_index != -1)
+    return players[local_player_index];
+  else
+    return nullptr;
 }

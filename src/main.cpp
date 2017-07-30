@@ -3,6 +3,7 @@
 #include "manager.hpp"
 #include "visu.hpp"
 #include "trigger.hpp"
+#include "aimer.hpp"
 
 #include <stdio.h>
 #include <string.h>
@@ -21,6 +22,7 @@ int main(int argc, char** argv) {
   }
   bool use_radar = false;
   bool use_trigger = false;
+  bool use_aimbot = false;
   bool debug = false;
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-radar")) {
@@ -35,10 +37,15 @@ int main(int argc, char** argv) {
       debug = true;
       cout << "Enabled: Debugging" << endl;
     }
+    else if (!strcmp(argv[i], "-aimbot")) {
+      use_aimbot = true;
+      cout << "Enabled: Aimbot" << endl;
+    }
   }
 
   MemoryAccess mem;
   GameManager csgo = GameManager(mem);
+
   if (use_radar) {
     string map_name = "";
     while (map_name == "") {
@@ -51,6 +58,7 @@ int main(int argc, char** argv) {
   }
 
   Trigger trigger(csgo);
+  Aimer aimer(csgo);
   while (true) {
     csgo.grabPlayers();
     if (use_trigger)
@@ -62,6 +70,8 @@ int main(int argc, char** argv) {
     if (use_radar)
       csgo.printPlayerLocationsToFile("/tmp/locs.csv");
     this_thread::sleep_for(chrono::milliseconds(1000));
+    if(use_aimbot)
+      aimer.xSetAim(nullptr);
   }
   return 0;
 }

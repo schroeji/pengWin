@@ -8,7 +8,11 @@ private:
   GameManager& csgo;
   MemoryAccess& mem;
   Clicker clicker;
+  Display* display;
+  Window root_window;
+
 public:
   Aimer(GameManager& csgo);
   void setAim(EntityType*);
+  void xSetAim(EntityType*);
 };

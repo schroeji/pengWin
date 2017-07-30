@@ -14,9 +14,12 @@ public:
   void printPlayerLocationsToFile(const std::string&);
   MemoryAccess& getMemoryAccess();
   std::vector<EntityType*>& getPlayers();
+  EntityType* getLocalPlayer();
 
 private:
   MemoryAccess& mem;
   ObjectManager manager;
   std::vector<EntityType*> players;
+  // number of the local_player in players
+  int local_player_index = - 1;
 };
