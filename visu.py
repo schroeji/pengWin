@@ -6,6 +6,7 @@ import os
 import time
 
 fig, ax = plt.subplots()
+fig.canvas.set_window_title('Radar')
 xdata, ydata = [], []
 ln = plt.scatter([], [], animated=True)
 # ln.set_offsets([[0.5], [0.4]])

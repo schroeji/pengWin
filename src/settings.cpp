@@ -12,7 +12,7 @@ Settings::Settings(const string& file) {
   instance = this;
 }
 
-Settings& Settings::getInstance() {
+Settings Settings::getInstance() {
   return *instance;
 }
 
@@ -40,7 +40,14 @@ void Settings::load(const string& file) {
           attack_offset = strtoul(splits[1].c_str(), NULL, 16);
         else if (splits[0] == "local_player_offset")
           local_player_offset = strtoul(splits[1].c_str(), NULL, 16);
+        else if (splits[0] == "main_loop_sleep")
+          main_loop_sleep = strtol(splits[1].c_str(), NULL, 10);
+        else if (splits[0] == "trigger_delay")
+          trigger_delay = strtol(splits[1].c_str(), NULL, 10);
+        else if (splits[0] == "trigger_use_random")
+          trigger_use_random = (splits[1] == "true");
       }
     }
   }
+  settings_file.close();
 }

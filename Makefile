@@ -14,7 +14,7 @@ TARGET_DUMPER = offset_dumper
 INC=-lX11
 
 SRC=$(wildcard src/*.cpp)
-SRC_DUMPER = src/memory_access.cpp src/typedef.cpp src/offset_dumper/offset_finder.cpp
+SRC_DUMPER = src/memory_access.cpp src/typedef.cpp src/offset_dumper/offset_finder.cpp src/settings.cpp
 
 all: $(TARGET) $(TARGET_DUMPER)
 

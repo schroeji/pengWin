@@ -9,11 +9,12 @@
 
 using namespace std;
 
-MemoryAccess::MemoryAccess() {
-  Settings settings = Settings::getInstance();
-  glow_offset = settings.glow_offset;
-  attack_offset = settings.attack_offset;
-  local_player_offset = settings.local_player_offset;
+MemoryAccess::MemoryAccess(Settings* settings) {
+  if (settings != nullptr) {
+    glow_offset = settings->glow_offset;
+    attack_offset = settings->attack_offset;
+    local_player_offset = settings->local_player_offset;
+  }
 }
 
 void MemoryAccess::updateAddrs() {

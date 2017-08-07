@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
     cout << "attack offset: " << settings.attack_offset << endl;
     cout << "local player offset: " << settings.local_player_offset << endl;
   }
-  MemoryAccess mem;
+  MemoryAccess mem(&settings);
   GameManager csgo = GameManager(mem);
 
   if (use_radar) {
@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     }
     if (use_radar)
       csgo.printPlayerLocationsToFile("/tmp/locs.csv");
-    this_thread::sleep_for(chrono::milliseconds(1000));
+    this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     if(use_aimbot) {
       vector<EntityType*> players = csgo.getPlayers();
       aimer.xSetAim(players[1]);

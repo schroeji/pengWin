@@ -1,5 +1,7 @@
 #pragma once
 #include "typedef.hpp"
+#include "settings.hpp"
+
 #include <string>
 class MemoryAccess {
 private:
@@ -12,9 +14,9 @@ private:
   addr_type attack_addr_call_location;
 
   //offsets to client base
-  addr_type local_player_offset = 0x1c79c68;
-  addr_type glow_offset = 0x2515460;
-  addr_type attack_offset = 0x85a85d;
+  addr_type local_player_offset;
+  addr_type glow_offset;
+  addr_type attack_offset;
 
   //offsets to engine base
   addr_type map_name_offset = 0x12177a5;
@@ -31,7 +33,7 @@ public:
   addr_type attack_addr;
   addr_type map_name_addr;
 
-  MemoryAccess();
+  MemoryAccess(Settings*);
   pid_t getPid();
   Addr_Range getModule(const std::string&);
   bool read(void*, void*, size_t);

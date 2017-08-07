@@ -9,11 +9,20 @@ private:
   static Settings* instance;
 
 public:
+  // offsets
   addr_type glow_offset;
   addr_type attack_offset;
   addr_type local_player_offset;
 
+  // main settings
+  long int main_loop_sleep;
+
+  // trigger settings
+  long int trigger_delay;
+  bool trigger_use_random = false;
+
+
   Settings(const string&);
-  static Settings& getInstance();
+  static Settings getInstance();
   void load(const string&);
 };
