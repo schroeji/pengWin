@@ -36,3 +36,11 @@ void normalize_vector(Vector* vec) {
 Vector getDist(Vector* a, Vector* b) {
   return Vector{b->x - a->x, b->y - a->y, b->z - a->z};
 }
+
+float scalar_prod(Vector* a, Vector* b) {
+  return (a->x * b->x) + (a->y * b->y) + (a->z * b->z);
+}
+
+float degree_to_radian(float x){
+  return x*0.01745329;
+}

@@ -112,7 +112,12 @@ public:
   unsigned int unk5; // 0028 (054612E8)
 };
 
+typedef std::pair<unsigned long int, unsigned long int> Addr_Range;
+typedef unsigned long int addr_type;
+
 std::vector<std::string> split_string(const std::string&, const std::string&);
 
 void normalize_vector(Vector*);
 Vector getDist(Vector*, Vector*);
+float scalar_prod(Vector*, Vector*);
+float degree_to_radian(float);

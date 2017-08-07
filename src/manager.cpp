@@ -11,11 +11,11 @@ using namespace std;
 GameManager::GameManager(MemoryAccess& mem) : mem(mem) {
   if (!mem.getPid())
     exit(0);
-  if (!mem.getClientBase()) {
+  if (!mem.getClientRange().first) {
     cout << "Could not find Client Base" << endl;
     exit(0);
   }
-  if (!mem.getEngineBase()){
+  if (!mem.getEngineRange().first){
     cout << "Could not find Engine Base" << endl;
     exit(0);
   }
@@ -68,6 +68,7 @@ void GameManager::printPlayers() {
     else if(player->m_iTeamNum == Team::T)
       cout << "Team: T" << endl;
     printf("Origin x=%f y=%f z=%f\n", player->m_vecOrigin.x, player->m_vecOrigin.y, player->m_vecOrigin.z);
+    printf("Angle: x=%f y=%f z=%f\n", player->m_angRotation.x, player->m_angRotation.y, player->m_angRotation.z);
     cout << "-----" << endl;
     i++;
   }

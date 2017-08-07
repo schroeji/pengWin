@@ -5,44 +5,43 @@ class MemoryAccess {
 private:
   const std::string GAME_NAME = "csgo_linux64";
   pid_t pid;
-  unsigned long int client_base = 0;
-  unsigned long int engine_base = 0;
+  Addr_Range engine_range;
+  Addr_Range client_range;
 
-  unsigned long int local_player_addr_location;
-  unsigned long int attack_addr_call_location;
+  addr_type local_player_addr_location;
+  addr_type attack_addr_call_location;
 
   //offsets to client base
-  unsigned long int local_player_offset = 0x1c79b68;
-  unsigned long int glow_offset = 0x2515360;
-  unsigned long int attack_offset = 0x85a85d;
+  addr_type local_player_offset = 0x1c79c68;
+  addr_type glow_offset = 0x2515460;
+  addr_type attack_offset = 0x85a85d;
 
   //offsets to engine base
-  unsigned long int map_name_offset = 0x1217705;
-  unsigned long int engpofs =  0x00EAE60C;
+  addr_type map_name_offset = 0x12177a5;
 
   //offsets to localPlayer
-  unsigned long int crosshair_id_offset = 0xBBD8;
-  unsigned long int team_number_offset = 0x128;
+  addr_type crosshair_id_offset = 0xBBD8;
+  addr_type team_number_offset = 0x128;
 
   void updateAddrs();
 
 public:
-  unsigned long int local_player_addr;
-  unsigned long int glow_addr;
-  unsigned long int attack_addr;
-  unsigned long int map_name_addr;
+  addr_type local_player_addr;
+  addr_type glow_addr;
+  addr_type attack_addr;
+  addr_type map_name_addr;
 
-  unsigned long int engp;
-
+  MemoryAccess();
   pid_t getPid();
-  unsigned long int getModule(const std::string&);
+  Addr_Range getModule(const std::string&);
   bool read(void*, void*, size_t);
   bool write(void*, void*, size_t);
-  unsigned long int getClientBase();
-  unsigned long int getEngineBase();
+  Addr_Range getClientRange();
+  Addr_Range getEngineRange();
   unsigned int getCrosshairTarget();
-  unsigned long int getCallAddress(void*);
-  unsigned long int getEngp();
+  addr_type getCallAddress(void*);
+  addr_type getEngp();
   Team getTeam();
   std::string getMapName();
+  addr_type find_pattern(const char*, const char*, Addr_Range);
 };
