@@ -21,5 +21,5 @@ private:
   ObjectManager manager;
   std::vector<EntityType*> players;
   // number of the local_player in players
-  int local_player_index = - 1;
+  int local_player_index = -1;
 };

@@ -46,6 +46,8 @@ void Settings::load(const string& file) {
           trigger_delay = strtol(splits[1].c_str(), NULL, 10);
         else if (splits[0] == "trigger_use_random")
           trigger_use_random = (splits[1] == "true");
+        else if (splits[0] == "find_map")
+          find_map = (splits[1] == "true");
       }
     }
   }

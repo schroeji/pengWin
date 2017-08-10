@@ -13,6 +13,7 @@
 #include <chrono>
 #include <thread>
 #include <unistd.h>
+#define hotkeycode XK_Caps_Lock
 
 using namespace std;
 
@@ -56,10 +57,15 @@ int main(int argc, char** argv) {
 
   if (use_radar) {
     string map_name = "";
-    if (debug) cout << "Scanning for map..." << endl;
-    while (map_name == "") {
-      map_name = mem.getMapName();
-      this_thread::sleep_for(chrono::milliseconds(300));
+    if (settings.find_map) {
+      if (debug) cout << "Scanning for map..." << endl;
+      while (map_name == "") {
+        map_name = mem.getMapName();
+        this_thread::sleep_for(chrono::milliseconds(300));
+      }
+    } else {
+      cout << "Map detection deactivated. Please choose map:" << endl;
+      cin >> map_name;
     }
     cout << "Found Map: " << map_name << endl;
     Visu visu(map_name);
@@ -70,12 +76,12 @@ int main(int argc, char** argv) {
   Aimer aimer(csgo);
   while (true) {
     csgo.grabPlayers();
-    if (use_trigger)
-      trigger.triggerCheck();
     if (debug) {
       csgo.printPlayers();
       // csgo.printEntities();
     }
+    if (use_trigger)
+      trigger.triggerCheck();
     if (use_radar)
       csgo.printPlayerLocationsToFile("/tmp/locs.csv");
     this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));

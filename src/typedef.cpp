@@ -40,7 +40,3 @@ Vector getDist(Vector* a, Vector* b) {
 float scalar_prod(Vector* a, Vector* b) {
   return (a->x * b->x) + (a->y * b->y) + (a->z * b->z);
 }
-
-float degree_to_radian(float x){
-  return x*0.01745329;
-}

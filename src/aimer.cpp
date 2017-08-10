@@ -30,17 +30,19 @@ void Aimer::xSetAim(EntityType* enemy) {
     XFlush(display);
     return;
   }
-  EntityType* local_player = csgo.getLocalPlayer();
+  // EntityType* local_player = csgo.getLocalPlayer();
+  EntityType* local_player = csgo.getPlayers()[0];
   Vector player_pos = local_player->m_vecOrigin;
   Vector enemy_pos = enemy->m_vecOrigin;
   Vector dist = getDist(&player_pos, &enemy_pos);
   printf("dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
   normalize_vector(&dist);
-  QAngle currAngle = local_player->m_angRotation;
+
+  QAngle currAngle = local_player->m_angNetworkAngles;
   float radians = degree_to_radian(currAngle.y);
   float y = cos(radians);
-  Vector current_view = {sqrt(1 - y*y), y, 0};
+  Vector current_view = {0, y, sqrt(1 - y*y)};
   printf("view: %f, %f, %f\n", current_view.x, current_view.y, current_view.z);
   float missing_angle = acos(scalar_prod(&dist, &current_view));
-  cout << "missing angle: " << missing_angle << endl;
+  cout << "missing angle: " << radian_to_degree(missing_angle) << endl;
 }

@@ -58,8 +58,8 @@ struct EntityType {
 	int m_iPendingTeamNum; // 0x124
 	int m_iHealth; // 0x12C
 	unsigned long m_fFlags; // 0x130
-	//char __buf_0x130[0x8]; // 0x134
-	Vector m_vecViewOffset; // 0x134
+	char __buf_0x130[0x8]; // 0x134
+	// Vector m_vecViewOffset; // 0x134
 	Vector m_vecVelocity; // 0x140
 	Vector m_vecBaseVelocity; // 0x14C
 	QAngle m_angNetworkAngles; // 0x158
@@ -120,4 +120,10 @@ std::vector<std::string> split_string(const std::string&, const std::string&);
 void normalize_vector(Vector*);
 Vector getDist(Vector*, Vector*);
 float scalar_prod(Vector*, Vector*);
-float degree_to_radian(float);
+
+inline float degree_to_radian(float x) {
+  return x*0.01745329;
+}
+inline float radian_to_degree(float x) {
+  return x/0.01745329;
+}

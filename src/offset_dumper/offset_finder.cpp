@@ -78,13 +78,13 @@ int main(int argc, char** argv) {
   addr_type local_player_addr = mem.getCallAddress((void*) (localPlayerFunction + 0x7));
   addr_type local_player_offset = local_player_addr - clientRange.first;
   sprintf(offset_buf, "0x%lx", local_player_offset);
-  offset_names.push_back("local_attacklayer_offset");
+  offset_names.push_back("local_player_offset");
   offsets.push_back(string(offset_buf));
 
   addr_type attack_addr = mem.find_pattern(atk_mov_data, atk_mov_pattern, clientRange);
   addr_type atk_offset = attack_addr - clientRange.first;
   sprintf(offset_buf, "0x%lx", atk_offset);
-  offset_names.push_back("atk_offset");
+  offset_names.push_back("attack_offset");
   offsets.push_back(string(offset_buf));
 
   cout << hex << "GlowMan: " << glowManAddr << "  offset: " << glow_offset << endl;

@@ -21,6 +21,8 @@ public:
   long int trigger_delay;
   bool trigger_use_random = false;
 
+  //radar settings
+  bool find_map = false;
 
   Settings(const string&);
   static Settings getInstance();
