@@ -70,12 +70,12 @@ int main(int argc, char** argv) {
   Aimer aimer(csgo);
   while (true) {
     csgo.grabPlayers();
-    if (use_trigger)
-      trigger.triggerCheck();
     if (debug) {
       csgo.printPlayers();
       // csgo.printEntities();
     }
+    if (use_trigger)
+      trigger.triggerCheck();
     if (use_radar)
       csgo.printPlayerLocationsToFile("/tmp/locs.csv");
     this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));

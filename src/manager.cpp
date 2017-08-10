@@ -68,7 +68,10 @@ void GameManager::printPlayers() {
     else if(player->m_iTeamNum == Team::T)
       cout << "Team: T" << endl;
     printf("Origin x=%f y=%f z=%f\n", player->m_vecOrigin.x, player->m_vecOrigin.y, player->m_vecOrigin.z);
-    printf("Angle: x=%f y=%f z=%f\n", player->m_angRotation.x, player->m_angRotation.y, player->m_angRotation.z);
+    // printf("Angle: x=%f y=%f z=%f\n", player->m_angRotation.x, player->m_angRotation.y, player->m_angRotation.z);
+    // printf("Angle2: x=%f y=%f z=%f\n", player->m_angAbsRotation.x, player->m_angAbsRotation.y, player->m_angAbsRotation.z);
+    // printf("Angle3: x=%f y=%f z=%f\n", player->m_vecAngVelocity.x, player->m_vecAngVelocity.y, player->m_vecAngVelocity.z);
+    printf("Angle4: x=%f y=%f z=%f\n", player->m_angNetworkAngles.x, player->m_angNetworkAngles.y, player->m_angNetworkAngles.z);
     cout << "-----" << endl;
     i++;
   }
@@ -88,7 +91,7 @@ void GameManager::printEntities() {
     cout << "Could not get objects" << endl;
     return;
   }
-  cout << "----------Entities------------" << endl;
+  cout << "---------Entities---------" << endl;
   for (unsigned int i = 0; i < count; i++) {
     EntityType* entity = new EntityType;
     mem.read(objects[i].m_pEntity, entity, sizeof(EntityType));
@@ -100,9 +103,10 @@ void GameManager::printEntities() {
     // else if(player->m_iTeamNum == Team::T)
       // cout << "Team: T" << endl;
     printf("Origin x=%f y=%f z=%f\n", entity->m_vecOrigin.x, entity->m_vecOrigin.y, entity->m_vecOrigin.z);
-    cout << "-----" << endl;
+    cout << "------" << endl;
     i++;
   }
+
 }
 
 void GameManager::printPlayerLocationsToFile(const string& filename) {
