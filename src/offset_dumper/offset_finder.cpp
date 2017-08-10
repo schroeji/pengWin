@@ -36,13 +36,29 @@ int main(int argc, char** argv) {
   mem.getPid();
   Addr_Range clientRange = mem.getClientRange();
   Addr_Range engineRange = mem.getEngineRange();
+  cout << dec << "Client size: " << clientRange.second - clientRange.first << endl;
+  cout << "Engine size: " << engineRange.second - engineRange.first << endl;
   const char glowPointerCall_data[] = "\xE8\x00\x00\x00\x00\x48\x8b\x3d\x00\x00\x00\x00\xBE\x01\x00\x00\x00\xC7";
   const char glowPointerCall_pattern[] = "x????xxx????xxxxxx";
   const char local_player_addr_data[] = "\x48\x89\xe5\x74\x0e\x48\x8d\x05\x00\x00\x00\x00";
   const char local_player_addr_pattern[] = "xxxxxxxx????";
   const char atk_mov_data[] = "\x44\x89\xe8\x83\xe0\x01\xf7\xd8\x83\xe8\x03\x45\x84\xe4\x74\x00\x21\xd0";
   const char atk_mov_pattern[] = "xxxxxxxxxxxxxxx?xx";
+  const char clientState_data[] = "\xA1\x00\x00\x00\x00\x33\xD2\x6A\x00\x6A\x00\x33\xC9\x89\xB0";
+  const char clientState_pattern[] = "x????xxxxxxxxxx";
 
+  const char glowObjManTest_data[] = "\xA1\x00\x00\x00\x00\xA8\x01\x75\x4B";
+  const char glowObjManTest_pattern[] = "x????xxxx";
+
+  const char viewAngles_data[] = "\xF3\x0F\x11\x80\x00\x00\x00\x00\xD9\x46\x04\xD9\x05";
+  const char viewAngles_pattern[] = "xxxx????xxxxx";
+
+  addr_type clientState_test = mem.find_pattern(clientState_data, clientState_pattern, engineRange);
+  addr_type viewAngels = mem.find_pattern(viewAngles_data, viewAngles_pattern, engineRange);
+  addr_type test = mem.find_pattern(glowObjManTest_data, glowObjManTest_pattern, clientRange);
+  unsigned int test1, test2;
+  mem.read((void*) test, &test1, sizeof(test1));
+  mem.read((void*) (test + 0x1), &test2, sizeof(test2));
 
   vector<string> offsets;
   vector<string> offset_names;
@@ -71,6 +87,12 @@ int main(int argc, char** argv) {
   offset_names.push_back("atk_offset");
   offsets.push_back(string(offset_buf));
 
+  cout << hex << "GlowMan: " << glowManAddr << "  offset: " << glow_offset << endl;
+  cout << glowPointerCall << endl << glowFunctionCall << endl;
+  cout << "Test: " << clientState_test << endl;
+  cout << "Test1: " << test1 << endl;
+  cout << "Test2: " << test2 << endl;
+  cout << viewAngels << endl;
   write_offsets(offset_names, offsets, "settings.cfg");
   write_settings("settings.cfg");
 }

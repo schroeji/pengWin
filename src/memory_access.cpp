@@ -126,6 +126,7 @@ addr_type MemoryAccess::find_pattern(const char* data, const char* pattern, Addr
     totalsize -= readsize;
     chunknum++;
   }
+  cout << "WARNING: no match for pattern" << endl;
   return 0x0;
 }
 
@@ -133,7 +134,7 @@ addr_type MemoryAccess::getCallAddress(void* addr) {
   unsigned int jump_len;
 
   if (read((char*) addr+ 1, &jump_len, sizeof(unsigned int))) {
-    return jump_len+ (unsigned long) addr+ 5;
+    return jump_len + (unsigned long) addr + 5;
   }
 
   return 0;
