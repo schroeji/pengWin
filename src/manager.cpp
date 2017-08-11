@@ -68,7 +68,41 @@ void GameManager::printPlayers() {
     else if(player->m_iTeamNum == Team::T)
       cout << "Team: T" << endl;
     printf("Origin x=%f y=%f z=%f\n", player->m_vecOrigin.x, player->m_vecOrigin.y, player->m_vecOrigin.z);
+    printf("Angle: x=%f y=%f z=%f\n", player->m_angRotation.x, player->m_angRotation.y, player->m_angRotation.z);
+    cout << "-----" << endl;
+    i++;
+  }
+}
 
+void GameManager::printEntities() {
+  if (! mem.read((void*) mem.glow_addr, &manager, sizeof(ObjectManager))) {
+    cout << "Could not get ObjectManager" << endl;
+    return;
+  }
+	size_t count = manager.objects.Count;
+	void* data_ptr = (void*) manager.objects.DataPtr;
+  ObjectType objects[1024];
+  // cout << hex << "Data : " << data_ptr << endl;
+  // cout << dec << "count : " << count << endl;
+  if(!mem.read(data_ptr, (void*) objects, sizeof(ObjectType) * count)){
+    cout << "Could not get objects" << endl;
+    return;
+  }
+  cout << "----------Entities------------" << endl;
+  for (unsigned int i = 0; i < count; i++) {
+    EntityType* entity = new EntityType;
+    mem.read(objects[i].m_pEntity, entity, sizeof(EntityType));
+    cout << dec << "Nr: " << i << endl;
+    printf("ID: %d\n", entity->m_iEntityId);
+    cout << "hp: " << entity->m_iHealth << endl;
+    // if(player->m_iTeamNum == Team::CT)
+      // cout << "Team: CT" << endl;
+    // else if(player->m_iTeamNum == Team::T)
+      // cout << "Team: T" << endl;
+    printf("Origin x=%f y=%f z=%f\n", entity->m_vecOrigin.x, entity->m_vecOrigin.y, entity->m_vecOrigin.z);
+    cout << "-----" << endl;
+    i++;
+  }
 }
 
 void GameManager::printPlayerLocationsToFile(const string& filename) {

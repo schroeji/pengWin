@@ -36,6 +36,8 @@ int main(int argc, char** argv) {
   mem.getPid();
   Addr_Range clientRange = mem.getClientRange();
   Addr_Range engineRange = mem.getEngineRange();
+  clientRange.second = 0x7fedf04cc000;
+  engineRange.second = 0x7fee03028000;
   cout << dec << "Client size: " << clientRange.second - clientRange.first << endl;
   cout << "Engine size: " << engineRange.second - engineRange.first << endl;
   const char glowPointerCall_data[] = "\xE8\x00\x00\x00\x00\x48\x8b\x3d\x00\x00\x00\x00\xBE\x01\x00\x00\x00\xC7";
@@ -44,9 +46,13 @@ int main(int argc, char** argv) {
   const char local_player_addr_pattern[] = "xxxxxxxx????";
   const char atk_mov_data[] = "\x44\x89\xe8\x83\xe0\x01\xf7\xd8\x83\xe8\x03\x45\x84\xe4\x74\x00\x21\xd0";
   const char atk_mov_pattern[] = "xxxxxxxxxxxxxxx?xx";
+
   const char clientState_data[] = "\xA1\x00\x00\x00\x00\x33\xD2\x6A\x00\x6A\x00\x33\xC9\x89\xB0";
   const char clientState_pattern[] = "x????xxxxxxxxxx";
-
+  // const char clientState_data[] = "\x05\x00\x00\x00\x00\xC3\xCC\xCC\xCC\xCC\xCC\xCC\xCC\xA1";
+  // const char clientState_pattern[] = "x????xxxxxxxxx";
+  // const char clientState_data[] = "A1\x00\x00\x00\x00\xF3\x0F\x11\x80\x00\x00\x00\x00\xD9\x46\x04\xD9\x05";
+  // const char clientState_pattern[] = "x????xxxx????xxxxx";
   const char glowObjManTest_data[] = "\xA1\x00\x00\x00\x00\xA8\x01\x75\x4B";
   const char glowObjManTest_pattern[] = "x????xxxx";
 
@@ -54,17 +60,21 @@ int main(int argc, char** argv) {
   const char viewAngles_pattern[] = "xxxx????xxxxx";
 
   addr_type clientState_test = mem.find_pattern(clientState_data, clientState_pattern, engineRange);
-  addr_type viewAngels = mem.find_pattern(viewAngles_data, viewAngles_pattern, engineRange);
-  addr_type test = mem.find_pattern(glowObjManTest_data, glowObjManTest_pattern, clientRange);
+  // addr_type viewAngels = mem.find_pattern(viewAngles_data, viewAngles_pattern, engineRange);
+  // addr_type test = mem.find_pattern(glowObjManTest_data, glowObjManTest_pattern, clientRange);
   unsigned int test1, test2;
-  mem.read((void*) test, &test1, sizeof(test1));
-  mem.read((void*) (test + 0x1), &test2, sizeof(test2));
+  const char local_player_test[] = "\xA3\x00\x00\x00\x00\xC7\x05\x00\x00\x00\x00\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x59\xC3\x6A\x00";
+  const char local_player_test_pattern[] = "x????xx????????x????xxx?";
+  test1 = mem.find_pattern(local_player_test, local_player_test_pattern, clientRange);
+  // mem.read((void*) test, &test1, sizeof(test1));
+  // mem.read((void*) (test + 0x1), &test2, sizeof(test2));
 
   vector<string> offsets;
   vector<string> offset_names;
   char offset_buf[64];
 
   addr_type glowPointerCall = mem.find_pattern(glowPointerCall_data, glowPointerCall_pattern, clientRange);
+  cout << hex << "GlowPointerCall at: " << glowPointerCall << endl;
   addr_type glowFunctionCall = mem.getCallAddress((void*) glowPointerCall);
   unsigned int glowOffset;
 	mem.read((void*) (glowFunctionCall + 0x10), &glowOffset, sizeof(int));
@@ -75,6 +85,7 @@ int main(int argc, char** argv) {
   offsets.push_back(string(offset_buf));
 
   addr_type localPlayerFunction = mem.find_pattern(local_player_addr_data, local_player_addr_pattern, clientRange);
+  cout << hex << "LocalPlayerFunctionCall at: " << localPlayerFunction << endl;
   addr_type local_player_addr = mem.getCallAddress((void*) (localPlayerFunction + 0x7));
   addr_type local_player_offset = local_player_addr - clientRange.first;
   sprintf(offset_buf, "0x%lx", local_player_offset);
@@ -82,6 +93,7 @@ int main(int argc, char** argv) {
   offsets.push_back(string(offset_buf));
 
   addr_type attack_addr = mem.find_pattern(atk_mov_data, atk_mov_pattern, clientRange);
+  cout << hex << "attack_adr at: " << attack_addr << endl;
   addr_type atk_offset = attack_addr - clientRange.first;
   sprintf(offset_buf, "0x%lx", atk_offset);
   offset_names.push_back("attack_offset");
@@ -89,10 +101,11 @@ int main(int argc, char** argv) {
 
   cout << hex << "GlowMan: " << glowManAddr << "  offset: " << glow_offset << endl;
   cout << glowPointerCall << endl << glowFunctionCall << endl;
-  cout << "Test: " << clientState_test << endl;
-  cout << "Test1: " << test1 << endl;
-  cout << "Test2: " << test2 << endl;
-  cout << viewAngels << endl;
+  cout << "clientStateTest: " << clientState_test << endl;
+  cout << "test1: " << test1 << endl;
+  // cout << "Test1: " << test1 << endl;
+  // cout << "Test2: " << test2 << endl;
+  // cout << viewAngels << endl;
   write_offsets(offset_names, offsets, "settings.cfg");
   write_settings("settings.cfg");
 }

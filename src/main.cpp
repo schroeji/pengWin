@@ -13,7 +13,6 @@
 #include <chrono>
 #include <thread>
 #include <unistd.h>
-#define hotkeycode XK_Caps_Lock
 
 using namespace std;
 
@@ -47,10 +46,7 @@ int main(int argc, char** argv) {
 
   Settings settings("settings.cfg");
   if (debug) {
-    cout << "Settings loaded:" << endl;
-    cout << hex << "glow offset: " << settings.glow_offset << endl;
-    cout << "attack offset: " << settings.attack_offset << endl;
-    cout << "local player offset: " << settings.local_player_offset << endl;
+    settings.print();
   }
   MemoryAccess mem(&settings);
   GameManager csgo = GameManager(mem);

@@ -10,13 +10,29 @@
 #include <thread>
 #include <chrono>
 #include <random>
+#include <X11/keysymdef.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+
+#define hotkeycode XK_Caps_Lock
 
 using namespace std;
 
 Trigger::Trigger(GameManager& csgo) : csgo(csgo),
                                       mem(csgo.getMemoryAccess()),
                                       clicker(Clicker(csgo.getMemoryAccess())),
-                                      settings(Settings::getInstance()){}
+                                      settings(Settings::getInstance()){
+  display = XOpenDisplay(NULL);
+  rootWindow = DefaultRootWindow(display);
+  unsigned int modifiers = AnyModifier;
+  int keycode = XKeysymToKeycode(display, hotkeycode);
+  int pointer_mode = GrabModeAsync;
+  int keyboard_mode = GrabModeAsync;
+  bool owner_events = False;
+  XUngrabKey(display, keycode, modifiers, rootWindow);
+  XGrabKey(display, keycode, modifiers, rootWindow, owner_events, pointer_mode,
+           keyboard_mode);
+}
 
 void Trigger::triggerCheck() {
   vector<EntityType*>& players = csgo.getPlayers();

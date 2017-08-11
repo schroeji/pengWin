@@ -53,3 +53,17 @@ void Settings::load(const string& file) {
   }
   settings_file.close();
 }
+
+void Settings::print() {
+  cout << "--------- Offsets ---------" << endl;
+  cout << hex << "glow offset: " << glow_offset << endl;
+  cout << "attack offset: " << attack_offset << endl;
+  cout << "local player offset: " << local_player_offset << endl;
+
+  cout << "--------- Settings ---------" << endl;
+  cout << dec << "main_loop_sleep: " << main_loop_sleep << endl;
+  cout << dec << "trigger_delay: " << trigger_delay << endl;
+  cout << dec << "trigger_use_random: " << trigger_use_random << endl;
+  cout << dec << "find_map: " << find_map << endl;
+  cout << "------------------------" << endl;
+}

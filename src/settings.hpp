@@ -27,4 +27,5 @@ public:
   Settings(const string&);
   static Settings getInstance();
   void load(const string&);
+  void print();
 };
