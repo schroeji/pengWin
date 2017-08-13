@@ -48,6 +48,8 @@ void Settings::load(const string& file) {
           trigger_use_random = (splits[1] == "true");
         else if (splits[0] == "find_map")
           find_map = (splits[1] == "true");
+        else if (splits[0] == "debug")
+          debug = (splits[1] == "true");
       }
     }
   }

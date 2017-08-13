@@ -16,6 +16,7 @@ public:
 
   // main settings
   long int main_loop_sleep;
+  bool debug = false;
 
   // trigger settings
   long int trigger_delay;

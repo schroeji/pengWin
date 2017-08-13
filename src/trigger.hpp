@@ -6,6 +6,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <boost/thread.hpp>
 
 class Trigger {
 private:
@@ -15,8 +16,12 @@ private:
   Settings settings;
   Display* display;
   Window rootWindow;
+  boost::thread triggerThread;
+  bool holding_hotkey;
 
 public:
   Trigger(GameManager& csgo);
+  ~Trigger();
   void triggerCheck();
+  void triggerLoop();
 };

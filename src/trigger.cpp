@@ -13,6 +13,8 @@
 #include <X11/keysymdef.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/extensions/XTest.h>
+#include <boost/thread.hpp>
 
 #define hotkeycode XK_Caps_Lock
 
@@ -24,37 +26,81 @@ Trigger::Trigger(GameManager& csgo) : csgo(csgo),
                                       settings(Settings::getInstance()){
   display = XOpenDisplay(NULL);
   rootWindow = DefaultRootWindow(display);
+}
+
+Trigger::~Trigger() {
+  XCloseDisplay(display);
+}
+
+void Trigger::triggerLoop() {
   unsigned int modifiers = AnyModifier;
-  int keycode = XKeysymToKeycode(display, hotkeycode);
+  unsigned int keycode = XKeysymToKeycode(display, hotkeycode);
   int pointer_mode = GrabModeAsync;
   int keyboard_mode = GrabModeAsync;
-  bool owner_events = False;
+  bool owner_events = false;
+  XEvent event;
+  if (settings.debug) cout << "Entered Triggerloop" << endl;
   XUngrabKey(display, keycode, modifiers, rootWindow);
   XGrabKey(display, keycode, modifiers, rootWindow, owner_events, pointer_mode,
            keyboard_mode);
+  XSelectInput(display, rootWindow, KeyPressMask);
+  while (true) {
+    XNextEvent(display, &event);
+    if (event.type == KeyPress) {
+      triggerThread = boost::thread(boost::bind(&Trigger::triggerCheck, this));
+      holding_hotkey = true;
+      if (settings.debug) cout << "Trigger Hotkey pressed." << endl;
+    } else {
+      cout << "delete me" << endl;
+      cout << (event.xbutton.button == keycode) << endl;
+    }
+    // while (holding_hotkey) {
+    //   XNextEvent(display, &event);
+    //   if(event.type == KeyRelease && event.xbutton.button == keycode) {
+    //     holding_hotkey = false;
+    //     triggerThread.join();
+    //     if (settings.debug) cout << "Thread joined" << endl;
+    //   } else {
+    //     XTestFakeKeyEvent(display, event.xbutton.button, event.type == KeyPress, 0);
+    //     // XSendEvent(display, rootWindow, true, NoEventMask, &event);
+    //     if (settings.debug) cout << "other event" << endl;
+    //   }
+    // }
+  }
+  XUngrabKey(display, keycode, modifiers, rootWindow);
 }
 
 void Trigger::triggerCheck() {
-  vector<EntityType*>& players = csgo.getPlayers();
-  Team ownTeam = mem.getTeam();
-  unsigned int crosshairTarget = mem.getCrosshairTarget();
-  if(!crosshairTarget)
-    return;
-  normal_distribution<double> distrib((double) settings.trigger_delay, (double) settings.trigger_delay / 2);
-  std::default_random_engine gen;
-  for (EntityType* player : players) {
-    if (player->m_iEntityId == crosshairTarget && player->m_iTeamNum != ownTeam){
-      if (settings.trigger_use_random) {
-        long int wait_time = (long) distrib(gen);
-        while (wait_time < 0)
-          wait_time = (long) distrib(gen);
-        this_thread::sleep_for(chrono::milliseconds(wait_time));
+  if (settings.debug) cout << "triggerCheck running..." << endl;
+  while (holding_hotkey) {
+    vector<EntityType*>& players = csgo.getPlayers();
+    if (players.size() < 2)
+      continue;
+    Team ownTeam = mem.getTeam();
+    unsigned int crosshairTarget = mem.getCrosshairTarget();
+    if (!crosshairTarget)
+      continue;
+
+    normal_distribution<double> distrib((double) settings.trigger_delay, (double) settings.trigger_delay / 2);
+    std::default_random_engine gen;
+    for (EntityType* player : players) {
+      if (settings.debug) cout << "Checking Player: " << player->m_iEntityId << endl;
+      if (player->m_iEntityId == crosshairTarget && player->m_iTeamNum != ownTeam){
+        if (settings.trigger_use_random) {
+          long int wait_time = (long) distrib(gen);
+          while (wait_time < 0)
+            wait_time = (long) distrib(gen);
+          this_thread::sleep_for(chrono::milliseconds(wait_time));
+        }
+        else {
+          this_thread::sleep_for(chrono::milliseconds(settings.trigger_delay));
+        }
+        // clicker.memClick();
+        if (settings.debug) cout << "fired shot" << endl;
+        clicker.xClick();
       }
-      else {
-        this_thread::sleep_for(chrono::milliseconds(settings.trigger_delay));
-      }
-      // clicker.memClick();
-      clicker.xClick();
     }
+    this_thread::sleep_for(chrono::milliseconds(1));
   }
+  if (settings.debug) cout << "triggerCheck ended..." << endl;
 }

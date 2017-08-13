@@ -45,6 +45,8 @@ int main(int argc, char** argv) {
   }
 
   Settings settings("settings.cfg");
+  debug = debug || settings.debug;
+  settings.debug = debug;
   if (debug) {
     settings.print();
   }
@@ -68,23 +70,26 @@ int main(int argc, char** argv) {
     visu.start();
   }
 
+
   Trigger trigger(csgo);
   Aimer aimer(csgo);
+  if (use_trigger) {
+    boost::thread triggerThread(boost::bind(&Trigger::triggerLoop, &trigger));
+  }
+
   while (true) {
     csgo.grabPlayers();
     if (debug) {
-      csgo.printPlayers();
+      // csgo.printPlayers();
       // csgo.printEntities();
     }
-    if (use_trigger)
-      trigger.triggerCheck();
     if (use_radar)
       csgo.printPlayerLocationsToFile("/tmp/locs.csv");
-    this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     if(use_aimbot) {
       vector<EntityType*> players = csgo.getPlayers();
       aimer.xSetAim(players[1]);
     }
+    this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
   }
   return 0;
 }

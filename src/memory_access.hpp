@@ -19,7 +19,7 @@ private:
   addr_type attack_offset;
 
   //offsets to engine base
-  addr_type map_name_offset = 0x12177a5;
+  addr_type map_name_offset = 0x1217da5;
 
   //offsets to localPlayer
   addr_type crosshair_id_offset = 0xBBD8;

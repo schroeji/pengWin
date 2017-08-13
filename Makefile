@@ -11,7 +11,7 @@ TARGET = external_hack
 TARGET_DUMPER = offset_dumper
 
 #includes
-INC=-lX11
+INC=-lX11 -lXtst -lboost_thread -lboost_system
 
 SRC=$(wildcard src/*.cpp)
 SRC_DUMPER = src/memory_access.cpp src/typedef.cpp src/offset_dumper/offset_finder.cpp src/settings.cpp
