@@ -35,6 +35,7 @@ void GameManager::grabPlayers(){
     cout << "Could not get objects" << endl;
     return;
   }
+  mem.updateLocalPlayerAddr();
   // cout << "got objects" << endl;
   players.clear();
   local_player_index = -1;

@@ -42,8 +42,8 @@ public:
   Addr_Range getEngineRange();
   unsigned int getCrosshairTarget();
   addr_type getCallAddress(void*);
-  addr_type getEngp();
   Team getTeam();
   std::string getMapName();
   addr_type find_pattern(const char*, const char*, Addr_Range);
+  void updateLocalPlayerAddr();
 };

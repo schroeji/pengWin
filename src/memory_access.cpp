@@ -165,3 +165,8 @@ string MemoryAccess::getMapName() {
   string ret(no_bsp[0]);
   return ret;
 }
+
+void MemoryAccess::updateLocalPlayerAddr() {
+  if(!read((void*) local_player_addr_location, &local_player_addr, sizeof(local_player_addr)))
+    cout << "WARNING: could not get localplayer" << endl;
+}

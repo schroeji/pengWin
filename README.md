@@ -8,7 +8,6 @@ Current Features:
 - Loading settings from file
 
 TODO:
-- Trigger Hotkey
 - Fix LocalPlayer detection
 - Offset Dumper for Map
 - Sound ESP
