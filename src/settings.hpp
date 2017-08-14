@@ -2,6 +2,7 @@
 #include "typedef.hpp"
 
 #include <string>
+#include <X11/Xlib.h>
 
 using namespace std;
 class Settings {
@@ -21,6 +22,7 @@ public:
   // trigger settings
   long int trigger_delay;
   bool trigger_use_random = false;
+  KeySym trigger_key;
 
   //radar settings
   bool find_map = false;

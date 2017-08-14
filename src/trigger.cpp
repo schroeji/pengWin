@@ -16,8 +16,6 @@
 #include <X11/extensions/XTest.h>
 #include <boost/thread.hpp>
 
-#define hotkeycode XK_Caps_Lock
-
 using namespace std;
 
 Trigger::Trigger(GameManager& csgo) : csgo(csgo),
@@ -26,6 +24,7 @@ Trigger::Trigger(GameManager& csgo) : csgo(csgo),
                                       settings(Settings::getInstance()){
   display = XOpenDisplay(NULL);
   rootWindow = DefaultRootWindow(display);
+  keycode = XKeysymToKeycode(display, settings.trigger_key);
 }
 
 Trigger::~Trigger() {
@@ -34,7 +33,6 @@ Trigger::~Trigger() {
 
 void Trigger::triggerLoop() {
   unsigned int modifiers = AnyModifier;
-  unsigned int keycode = XKeysymToKeycode(display, hotkeycode);
   int pointer_mode = GrabModeAsync;
   int keyboard_mode = GrabModeAsync;
   bool owner_events = false;

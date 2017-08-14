@@ -28,6 +28,8 @@ void write_settings(const string& file_name) {
   file << "main_loop_sleep=10" << endl;
   file << "trigger_delay=10" << endl;
   file << "trigger_use_random=false" << endl;
+  file << "# find your key with \"$ dumpkeys -l\"" << endl;
+  file << "trigger_key=Caps_Lock" << endl;
   file << "find_map=false" << endl;
   file << "debug=false" << endl;
   file.close();

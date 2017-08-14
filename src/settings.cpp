@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <X11/keysymdef.h>
 
 using namespace std;
 Settings* Settings::instance = nullptr;
@@ -46,6 +47,11 @@ void Settings::load(const string& file) {
           trigger_delay = strtol(splits[1].c_str(), NULL, 10);
         else if (splits[0] == "trigger_use_random")
           trigger_use_random = (splits[1] == "true");
+        else if (splits[0] == "trigger_key") {
+          trigger_key = XStringToKeysym(splits[1].c_str());
+          if (!trigger_key)
+            cout << "WARNING: invalid trigger_key" << endl;
+        }
         else if (splits[0] == "find_map")
           find_map = (splits[1] == "true");
         else if (splits[0] == "debug")

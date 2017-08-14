@@ -18,6 +18,7 @@ private:
   Window rootWindow;
   boost::thread triggerThread;
   bool holding_hotkey;
+  unsigned int keycode;
 
 public:
   Trigger(GameManager& csgo);
