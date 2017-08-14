@@ -54,18 +54,26 @@ void Trigger::triggerLoop() {
       cout << "delete me" << endl;
       cout << (event.xbutton.button == keycode) << endl;
     }
-    // while (holding_hotkey) {
-    //   XNextEvent(display, &event);
-    //   if(event.type == KeyRelease && event.xbutton.button == keycode) {
-    //     holding_hotkey = false;
-    //     triggerThread.join();
-    //     if (settings.debug) cout << "Thread joined" << endl;
-    //   } else {
-    //     XTestFakeKeyEvent(display, event.xbutton.button, event.type == KeyPress, 0);
-    //     // XSendEvent(display, rootWindow, true, NoEventMask, &event);
-    //     if (settings.debug) cout << "other event" << endl;
-    //   }
-    // }
+    while (holding_hotkey) {
+      XNextEvent(display, &event);
+      if(event.type == KeyRelease && event.xbutton.button == keycode) {
+        holding_hotkey = false;
+        triggerThread.join();
+        if (settings.debug) cout << "Thread joined" << endl;
+      } else {
+        // XTestFakeKeyEvent(display, event.xbutton.button, event.type == KeyPress, 0);
+        while (event.xbutton.subwindow) {
+          event.xbutton.window = event.xbutton.subwindow;
+          XQueryPointer (display, event.xbutton.window,
+                         &event.xbutton.root, &event.xbutton.subwindow,
+                         &event.xbutton.x_root, &event.xbutton.y_root,
+                         &event.xbutton.x, &event.xbutton.y,
+                         &event.xbutton.state);
+        }
+        XSendEvent(display, PointerWindow, true, NoEventMask, &event);
+        XFlush(display);
+      }
+    }
   }
   XUngrabKey(display, keycode, modifiers, rootWindow);
 }
@@ -84,7 +92,6 @@ void Trigger::triggerCheck() {
     normal_distribution<double> distrib((double) settings.trigger_delay, (double) settings.trigger_delay / 2);
     std::default_random_engine gen;
     for (EntityType* player : players) {
-      if (settings.debug) cout << "Checking Player: " << player->m_iEntityId << endl;
       if (player->m_iEntityId == crosshairTarget && player->m_iTeamNum != ownTeam){
         if (settings.trigger_use_random) {
           long int wait_time = (long) distrib(gen);
