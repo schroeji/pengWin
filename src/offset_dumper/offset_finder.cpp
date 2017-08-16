@@ -4,10 +4,13 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cstring>
 #include <fstream>
 #include <stdio.h>
+#include <dlfcn.h>
 
 using namespace std;
+
 
 void write_offsets(vector<string> names, vector<string> offsets, const string& file_name) {
   if(names.size() != offsets.size()){
@@ -40,8 +43,6 @@ int main(int argc, char** argv) {
   mem.getPid();
   Addr_Range clientRange = mem.getClientRange();
   Addr_Range engineRange = mem.getEngineRange();
-  clientRange.second = 0x7fedf04cc000;
-  engineRange.second = 0x7fee03028000;
   cout << dec << "Client size: " << clientRange.second - clientRange.first << endl;
   cout << "Engine size: " << engineRange.second - engineRange.first << endl;
   const char glowPointerCall_data[] = "\xE8\x00\x00\x00\x00\x48\x8b\x3d\x00\x00\x00\x00\xBE\x01\x00\x00\x00\xC7";
@@ -53,15 +54,7 @@ int main(int argc, char** argv) {
 
   const char clientState_data[] = "\xA1\x00\x00\x00\x00\x33\xD2\x6A\x00\x6A\x00\x33\xC9\x89\xB0";
   const char clientState_pattern[] = "x????xxxxxxxxxx";
-  // const char clientState_data[] = "\x05\x00\x00\x00\x00\xC3\xCC\xCC\xCC\xCC\xCC\xCC\xCC\xA1";
-  // const char clientState_pattern[] = "x????xxxxxxxxx";
-  // const char clientState_data[] = "A1\x00\x00\x00\x00\xF3\x0F\x11\x80\x00\x00\x00\x00\xD9\x46\x04\xD9\x05";
-  // const char clientState_pattern[] = "x????xxxx????xxxxx";
-  const char glowObjManTest_data[] = "\xA1\x00\x00\x00\x00\xA8\x01\x75\x4B";
-  const char glowObjManTest_pattern[] = "x????xxxx";
 
-  const char viewAngles_data[] = "\xF3\x0F\x11\x80\x00\x00\x00\x00\xD9\x46\x04\xD9\x05";
-  const char viewAngles_pattern[] = "xxxx????xxxxx";
 
   addr_type clientState_test = mem.find_pattern(clientState_data, clientState_pattern, engineRange);
   // addr_type viewAngels = mem.find_pattern(viewAngles_data, viewAngles_pattern, engineRange);

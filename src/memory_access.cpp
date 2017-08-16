@@ -9,7 +9,7 @@
 
 using namespace std;
 
-MemoryAccess::MemoryAccess(Settings* settings) {
+MemoryAccess::MemoryAccess(Settings* settings) : settings(settings) {
   if (settings != nullptr) {
     glow_offset = settings->glow_offset;
     attack_offset = settings->attack_offset;
@@ -29,9 +29,11 @@ void MemoryAccess::updateAddrs() {
 
   attack_addr_call_location = client_range.first + attack_offset;
   // cout << hex << "attack_addr_call_location: " << attack_addr_call_location << endl;
-  attack_addr = getCallAddress((void*) attack_addr_call_location);
-  if(!attack_addr)
-    cout << "WARNING: could not get attack_addr" << endl;
+  if (settings != nullptr) {
+    attack_addr = getCallAddress((void*) attack_addr_call_location);
+    if(!attack_addr)
+      cout << "WARNING: could not get attack_addr" << endl;
+  }
   // cout << hex << "attack_addr: " << attack_addr << endl;
 
   map_name_addr = engine_range.first + map_name_offset;

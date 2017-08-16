@@ -7,6 +7,7 @@ class MemoryAccess {
 private:
   const std::string GAME_NAME = "csgo_linux64";
   pid_t pid;
+  Settings* settings;
   Addr_Range engine_range;
   Addr_Range client_range;
 

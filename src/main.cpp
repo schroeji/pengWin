@@ -78,7 +78,6 @@ int main(int argc, char** argv) {
   }
 
   while (true) {
-    mem.updateLocalPlayerAddr();
     csgo.grabPlayers();
     if (debug) {
       // csgo.printPlayers();
