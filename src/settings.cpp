@@ -41,6 +41,8 @@ void Settings::load(const string& file) {
           attack_offset = strtoul(splits[1].c_str(), NULL, 16);
         else if (splits[0] == "local_player_offset")
           local_player_offset = strtoul(splits[1].c_str(), NULL, 16);
+        else if (splits[0] == "map_name_offset")
+          map_name_offset = strtoul(splits[1].c_str(), NULL, 16);
         else if (splits[0] == "main_loop_sleep")
           main_loop_sleep = strtol(splits[1].c_str(), NULL, 10);
         else if (splits[0] == "trigger_delay")

@@ -55,15 +55,21 @@ int main(int argc, char** argv) {
   const char clientState_data[] = "\xA1\x00\x00\x00\x00\x33\xD2\x6A\x00\x6A\x00\x33\xC9\x89\xB0";
   const char clientState_pattern[] = "x????xxxxxxxxxx";
 
+  const char map_name_data[] = "\xBA\x04\x01\x00\x00\x48\x0F\x45\xF7\x48\x8D\x3D\x1C\x1F\xE0\x00";
+  const char map_name_pattern[] = "xxxxxxxxxxxx????";
+
+
 
   addr_type clientState_test = mem.find_pattern(clientState_data, clientState_pattern, engineRange);
   // addr_type viewAngels = mem.find_pattern(viewAngles_data, viewAngles_pattern, engineRange);
   // addr_type test = mem.find_pattern(glowObjManTest_data, glowObjManTest_pattern, clientRange);
-  unsigned int test1, test2;
+  unsigned long int test1, test2;
   const char local_player_test[] = "\xA3\x00\x00\x00\x00\xC7\x05\x00\x00\x00\x00\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x59\xC3\x6A\x00";
   const char local_player_test_pattern[] = "x????xx????????x????xxx?";
-  test1 = mem.find_pattern(local_player_test, local_player_test_pattern, clientRange);
-  // mem.read((void*) test, &test1, sizeof(test1));
+  cout << "test2:" << test2 << endl;
+  unsigned int off;
+  mem.read((void*) (test1 + 0xC), &off, sizeof(test1));
+  cout << "off: " << off << endl;
   // mem.read((void*) (test + 0x1), &test2, sizeof(test2));
 
   vector<string> offsets;
@@ -94,6 +100,15 @@ int main(int argc, char** argv) {
   addr_type atk_offset = attack_addr - clientRange.first;
   sprintf(offset_buf, "0x%lx", atk_offset);
   offset_names.push_back("attack_offset");
+  offsets.push_back(string(offset_buf));
+
+  addr_type map_name_call = mem.find_pattern(map_name_data, map_name_pattern, engineRange);
+  addr_type map_name_addr = mem.getCallAddress((void*) (map_name_call + 0xB));
+  // example: "maps/de_dust2.bsp"
+  addr_type map_name_offset = map_name_addr - engineRange.first + 0x5; // add 5 because of "maps/"
+  cout << "map_name_offset: " << map_name_offset << endl;
+  sprintf(offset_buf, "0x%lx", map_name_offset);
+  offset_names.push_back("map_name_offset");
   offsets.push_back(string(offset_buf));
 
   cout << hex << "GlowMan: " << glowManAddr << "  offset: " << glow_offset << endl;

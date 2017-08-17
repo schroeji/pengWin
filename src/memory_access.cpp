@@ -14,6 +14,7 @@ MemoryAccess::MemoryAccess(Settings* settings) : settings(settings) {
     glow_offset = settings->glow_offset;
     attack_offset = settings->attack_offset;
     local_player_offset = settings->local_player_offset;
+    map_name_offset = settings->map_name_offset;
   }
 }
 
@@ -135,7 +136,7 @@ addr_type MemoryAccess::find_pattern(const char* data, const char* pattern, Addr
 addr_type MemoryAccess::getCallAddress(void* addr) {
   unsigned int jump_len;
 
-  if (read((char*) addr+ 1, &jump_len, sizeof(unsigned int))) {
+  if (read((char*) addr + 1, &jump_len, sizeof(unsigned int))) {
     return jump_len + (unsigned long) addr + 5;
   }
 

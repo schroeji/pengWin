@@ -14,6 +14,7 @@ public:
   addr_type glow_offset;
   addr_type attack_offset;
   addr_type local_player_offset;
+  addr_type map_name_offset;
 
   // main settings
   long int main_loop_sleep;
