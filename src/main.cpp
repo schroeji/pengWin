@@ -5,6 +5,7 @@
 #include "trigger.hpp"
 #include "aimer.hpp"
 #include "settings.hpp"
+#include "bunnyhop.hpp"
 
 #include <stdio.h>
 #include <string.h>
@@ -25,6 +26,7 @@ int main(int argc, char** argv) {
   bool use_trigger = false;
   bool use_aimbot = false;
   bool debug = false;
+  bool use_bhop = false;
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-radar")) {
       cout << "Enabled: Radar" << endl;
@@ -41,6 +43,10 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "-aimbot")) {
       use_aimbot = true;
       cout << "Enabled: Aimbot" << endl;
+    }
+    else if (!strcmp(argv[i], "-bhop")) {
+      use_bhop = true;
+      cout << "Enabled: Bunnyhop" << endl;
     }
   }
 
@@ -73,6 +79,7 @@ int main(int argc, char** argv) {
 
   Trigger trigger(csgo);
   Aimer aimer(csgo);
+  BunnyHopper bhopper(csgo);
   if (use_trigger) {
     boost::thread triggerThread(boost::bind(&Trigger::triggerLoop, &trigger));
   }
@@ -80,15 +87,17 @@ int main(int argc, char** argv) {
   while (true) {
     csgo.grabPlayers();
     if (debug) {
-      // csgo.printPlayers();
+      csgo.printPlayers();
       // csgo.printEntities();
     }
     if (use_radar)
       csgo.printPlayerLocationsToFile("/tmp/locs.csv");
-    if(use_aimbot) {
+    if (use_aimbot) {
       vector<EntityType*> players = csgo.getPlayers();
       aimer.xSetAim(players[1]);
     }
+    if (use_bhop)
+      bhopper.jumpCheck();
     this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
   }
   return 0;

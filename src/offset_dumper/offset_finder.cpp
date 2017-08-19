@@ -24,6 +24,13 @@ void write_offsets(vector<string> names, vector<string> offsets, const string& f
   file.close();
 }
 
+void print_offsets(vector<string> names, vector<string> offsets) {
+  cout << "--------- Found Offsets ---------" << endl;
+  for (size_t i = 0; i < names.size(); i++){
+    cout << names[i] << "=" << offsets[i] << endl;
+  }
+}
+
 void write_settings(const string& file_name) {
   ofstream file(file_name, ios_base::app);
   file << endl;
@@ -33,7 +40,7 @@ void write_settings(const string& file_name) {
   file << "trigger_use_random=false" << endl;
   file << "# find your key with \"$ dumpkeys -l\"" << endl;
   file << "trigger_key=Caps_Lock" << endl;
-  file << "find_map=false" << endl;
+  file << "find_map=true" << endl;
   file << "debug=false" << endl;
   file.close();
 }
@@ -57,7 +64,8 @@ int main(int argc, char** argv) {
 
   const char map_name_data[] = "\xBA\x04\x01\x00\x00\x48\x0F\x45\xF7\x48\x8D\x3D\x1C\x1F\xE0\x00";
   const char map_name_pattern[] = "xxxxxxxxxxxx????";
-
+  const char force_jump_data[] = "\x44\x89\xe8\xc1\xe0\x1d\xc1\xf8\x1f\x83\xe8\x03\x45\x84\xe4\x74\x08\x21\xd0";
+  const char force_jump_pattern[] = "xxxxxxxxxxxxxxxx?xx";
 
 
   addr_type clientState_test = mem.find_pattern(clientState_data, clientState_pattern, engineRange);
@@ -66,10 +74,6 @@ int main(int argc, char** argv) {
   unsigned long int test1, test2;
   const char local_player_test[] = "\xA3\x00\x00\x00\x00\xC7\x05\x00\x00\x00\x00\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x59\xC3\x6A\x00";
   const char local_player_test_pattern[] = "x????xx????????x????xxx?";
-  cout << "test2:" << test2 << endl;
-  unsigned int off;
-  mem.read((void*) (test1 + 0xC), &off, sizeof(test1));
-  cout << "off: " << off << endl;
   // mem.read((void*) (test + 0x1), &test2, sizeof(test2));
 
   vector<string> offsets;
@@ -77,7 +81,6 @@ int main(int argc, char** argv) {
   char offset_buf[64];
 
   addr_type glowPointerCall = mem.find_pattern(glowPointerCall_data, glowPointerCall_pattern, clientRange);
-  cout << hex << "GlowPointerCall at: " << glowPointerCall << endl;
   addr_type glowFunctionCall = mem.getCallAddress((void*) glowPointerCall);
   unsigned int glowOffset;
 	mem.read((void*) (glowFunctionCall + 0x10), &glowOffset, sizeof(int));
@@ -88,7 +91,6 @@ int main(int argc, char** argv) {
   offsets.push_back(string(offset_buf));
 
   addr_type localPlayerFunction = mem.find_pattern(local_player_addr_data, local_player_addr_pattern, clientRange);
-  cout << hex << "LocalPlayerFunctionCall at: " << localPlayerFunction << endl;
   addr_type local_player_addr = mem.getCallAddress((void*) (localPlayerFunction + 0x7));
   addr_type local_player_offset = local_player_addr - clientRange.first;
   sprintf(offset_buf, "0x%lx", local_player_offset);
@@ -96,7 +98,6 @@ int main(int argc, char** argv) {
   offsets.push_back(string(offset_buf));
 
   addr_type attack_addr = mem.find_pattern(atk_mov_data, atk_mov_pattern, clientRange);
-  cout << hex << "attack_adr at: " << attack_addr << endl;
   addr_type atk_offset = attack_addr - clientRange.first;
   sprintf(offset_buf, "0x%lx", atk_offset);
   offset_names.push_back("attack_offset");
@@ -106,18 +107,21 @@ int main(int argc, char** argv) {
   addr_type map_name_addr = mem.getCallAddress((void*) (map_name_call + 0xB));
   // example: "maps/de_dust2.bsp"
   addr_type map_name_offset = map_name_addr - engineRange.first + 0x5; // add 5 because of "maps/"
-  cout << "map_name_offset: " << map_name_offset << endl;
   sprintf(offset_buf, "0x%lx", map_name_offset);
   offset_names.push_back("map_name_offset");
   offsets.push_back(string(offset_buf));
 
-  cout << hex << "GlowMan: " << glowManAddr << "  offset: " << glow_offset << endl;
-  cout << glowPointerCall << endl << glowFunctionCall << endl;
-  cout << "clientStateTest: " << clientState_test << endl;
-  cout << "test1: " << test1 << endl;
+  addr_type force_jump_call = mem.find_pattern(force_jump_data, force_jump_pattern, clientRange);
+  addr_type force_jump_addr = mem.getCallAddress((void*) (force_jump_call + 0x1A));
+  addr_type force_jump_offset = force_jump_addr - clientRange.first;
+  sprintf(offset_buf, "0x%lx", force_jump_offset);
+  offset_names.push_back("force_jump_offset");
+  offsets.push_back(string(offset_buf));
+
   // cout << "Test1: " << test1 << endl;
   // cout << "Test2: " << test2 << endl;
   // cout << viewAngels << endl;
   write_offsets(offset_names, offsets, "settings.cfg");
+  print_offsets(offset_names, offsets);
   write_settings("settings.cfg");
 }

@@ -11,10 +11,6 @@ struct Vector {
 	float z;
 };
 
-struct Color {
-	unsigned char _color[4];
-};
-
 struct Vector2D {
 	float x, y;
 };
@@ -49,21 +45,21 @@ struct EntityType {
 	float m_flGravity; // 0x10C
 	float m_flProxyRandomValue; // 0x110
 	int m_iEFlags; // 0x114
-	char __buf_0x11A[0x4];
-	unsigned char m_nWaterType; // 0x118
-	unsigned char m_bDormant; // 0x119
-	char __buf_0x11ssA[0xA]; // 0x11A
-	float m_fEffects; // 0x11C
-	int m_iTeamNum; // 0x120
-	int m_iPendingTeamNum; // 0x124
-	int m_iHealth; // 0x12C
-	unsigned long m_fFlags; // 0x130
-	char __buf_0x130[0x8]; // 0x134
+	char __buf_0x118[0x4]; // 0x118
+	unsigned char m_nWaterType; // 0x11C
+	unsigned char m_bDormant; // 0x11D
+	char __buf_0x11A[0xA]; // 0x11E
+	float m_fEffects; // 0x128
+	int m_iTeamNum; // 0x12C
+	int m_iPendingTeamNum; // 0x130
+	int m_iHealth; // 0x134
+	unsigned long m_fFlags; // 0x138
+	char __buf_0x130[0x8]; // 0x140
 	// Vector m_vecViewOffset; // 0x134
-	Vector m_vecVelocity; // 0x140
-	Vector m_vecBaseVelocity; // 0x14C
-	QAngle m_angNetworkAngles; // 0x158
-	Vector m_vecNetworkOrigin; // 0x164
+	Vector m_vecVelocity; // 0x148
+	Vector m_vecBaseVelocity; // 0x154
+	QAngle m_angNetworkAngles; // 0x160
+	Vector m_vecNetworkOrigin; // 0x16C
 };
 
 template<class T> class CUtlVector {

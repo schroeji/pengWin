@@ -18,21 +18,24 @@ private:
   addr_type local_player_offset;
   addr_type glow_offset;
   addr_type attack_offset;
+  addr_type force_jump_offset;
 
   //offsets to engine base
   addr_type map_name_offset;
 
   //offsets to localPlayer
-  addr_type crosshair_id_offset = 0xBBD8;
-  addr_type team_number_offset = 0x128;
+  addr_type crosshair_id_offset = 0xBBB8;
+  addr_type team_number_offset = 0x12C;
 
   void updateAddrs();
+  bool debug = false;
 
 public:
   addr_type local_player_addr;
   addr_type glow_addr;
   addr_type attack_addr;
   addr_type map_name_addr;
+  addr_type force_jump_addr;
 
   MemoryAccess(Settings*);
   pid_t getPid();

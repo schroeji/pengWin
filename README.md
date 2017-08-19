@@ -13,3 +13,4 @@ TODO:
 - Sound ESP
 - BunnyHop
 - Aimbot (evtl Hardware mouse: https://www.unknowncheats.me/forum/counterstrike-global-offensive/204642-tutorial-simulating-hardware-mouse-event-linux.html)
+- BlockBot

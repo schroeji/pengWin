@@ -37,7 +37,7 @@ void GameManager::grabPlayers(){
   }
   mem.updateLocalPlayerAddr();
   // cout << "got objects" << endl;
-  players.clear();
+  players.clear();              // memory leak because old players dont get destoyed
   local_player_index = -1;
   for (unsigned int i = 0; i < count; i++) {
     // cout << "reading obj: " << i <<endl;
@@ -59,7 +59,7 @@ vector<EntityType*>& GameManager::getPlayers() {
 
 void GameManager::printPlayers() {
   int i = 0;
-  cout << "----------Players------------" << endl;
+  cout << "---------Players---------" << endl;
   for (EntityType* player : players) {
     cout << dec << "Player: " << i << endl;
     printf("ID: %d\n", player->m_iEntityId);

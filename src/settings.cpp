@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <X11/keysymdef.h>
+#include <stdlib.h>
 
 using namespace std;
 Settings* Settings::instance = nullptr;
@@ -35,6 +36,7 @@ void Settings::load(const string& file) {
           cout << line << endl;
           continue;
         }
+        // offsets
         else if (splits[0] == "glow_offset")
           glow_offset = strtoul(splits[1].c_str(), NULL, 16);
         else if (splits[0] == "attack_offset")
@@ -43,6 +45,9 @@ void Settings::load(const string& file) {
           local_player_offset = strtoul(splits[1].c_str(), NULL, 16);
         else if (splits[0] == "map_name_offset")
           map_name_offset = strtoul(splits[1].c_str(), NULL, 16);
+        else if (splits[0] == "force_jump_offset")
+          force_jump_offset = strtoul(splits[1].c_str(), NULL, 16);
+        // settings
         else if (splits[0] == "main_loop_sleep")
           main_loop_sleep = strtol(splits[1].c_str(), NULL, 10);
         else if (splits[0] == "trigger_delay")
@@ -69,11 +74,14 @@ void Settings::print() {
   cout << hex << "glow offset: " << glow_offset << endl;
   cout << "attack offset: " << attack_offset << endl;
   cout << "local player offset: " << local_player_offset << endl;
+  cout << "map_name_offset: " << map_name_offset << endl;
+  cout << "force_jump_offset: " << force_jump_offset << endl;
 
   cout << "--------- Settings ---------" << endl;
   cout << dec << "main_loop_sleep: " << main_loop_sleep << endl;
-  cout << dec << "trigger_delay: " << trigger_delay << endl;
-  cout << dec << "trigger_use_random: " << trigger_use_random << endl;
-  cout << dec << "find_map: " << find_map << endl;
+  cout << "trigger_delay: " << trigger_delay << endl;
+  cout << "trigger_use_random: " << trigger_use_random << endl;
+  cout << "Trigger Key: " << XKeysymToString(trigger_key) << endl;
+  cout << "find_map: " << find_map << endl;
   cout << "------------------------" << endl;
 }
