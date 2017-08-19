@@ -103,15 +103,14 @@ void GameManager::printEntities() {
       // cout << "Team: T" << endl;
     printf("Origin x=%f y=%f z=%f\n", entity->m_vecOrigin.x, entity->m_vecOrigin.y, entity->m_vecOrigin.z);
     cout << "-----" << endl;
-    i++;
   }
 }
 
 void GameManager::printPlayerLocationsToFile(const string& filename) {
-  ofstream file;
-  file.open(filename);
   if (players.empty())
     return;
+  ofstream file;
+  file.open(filename);
   // print local player index into array[0,0]
   file << local_player_index << ",0,0,0,0,0" << endl;
   // Format: number,hp,team,x,y,z

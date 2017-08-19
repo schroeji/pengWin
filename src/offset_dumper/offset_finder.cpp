@@ -67,15 +67,6 @@ int main(int argc, char** argv) {
   const char force_jump_data[] = "\x44\x89\xe8\xc1\xe0\x1d\xc1\xf8\x1f\x83\xe8\x03\x45\x84\xe4\x74\x08\x21\xd0";
   const char force_jump_pattern[] = "xxxxxxxxxxxxxxxx?xx";
 
-
-  addr_type clientState_test = mem.find_pattern(clientState_data, clientState_pattern, engineRange);
-  // addr_type viewAngels = mem.find_pattern(viewAngles_data, viewAngles_pattern, engineRange);
-  // addr_type test = mem.find_pattern(glowObjManTest_data, glowObjManTest_pattern, clientRange);
-  unsigned long int test1, test2;
-  const char local_player_test[] = "\xA3\x00\x00\x00\x00\xC7\x05\x00\x00\x00\x00\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x59\xC3\x6A\x00";
-  const char local_player_test_pattern[] = "x????xx????????x????xxx?";
-  // mem.read((void*) (test + 0x1), &test2, sizeof(test2));
-
   vector<string> offsets;
   vector<string> offset_names;
   char offset_buf[64];

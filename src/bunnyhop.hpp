@@ -4,10 +4,11 @@
 
 class BunnyHopper {
 private:
+  GameManager& csgo;
   MemoryAccess& mem;
   void jump();
 
 public:
-  BunnyHopper(GameManager csgo);
+  BunnyHopper(GameManager& csgo);
   void jumpCheck();
 };

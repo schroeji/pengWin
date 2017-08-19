@@ -8,7 +8,8 @@
 
 using namespace std;
 
-BunnyHopper::BunnyHopper(GameManager csgo) :
+BunnyHopper::BunnyHopper(GameManager& csgo) :
+  csgo(csgo),
   mem(csgo.getMemoryAccess()){}
 
 void BunnyHopper::jump() {
@@ -20,5 +21,11 @@ void BunnyHopper::jump() {
 }
 
 void BunnyHopper::jumpCheck() {
-  jump();
+  EntityType* localPlayer = csgo.getLocalPlayer();
+  if (!localPlayer)
+    return;
+  unsigned int onGround = localPlayer->m_fFlags & 1;
+  if (onGround == 1) {
+    jump();
+  }
 }
