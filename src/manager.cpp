@@ -36,8 +36,9 @@ void GameManager::grabPlayers(){
     return;
   }
   mem.updateLocalPlayerAddr();
-  // cout << "got objects" << endl;
-  players.clear();              // memory leak because old players dont get destoyed
+  for (EntityType* player : players)
+    delete player;
+  players.clear();
   local_player_index = -1;
   for (unsigned int i = 0; i < count; i++) {
     // cout << "reading obj: " << i <<endl;
