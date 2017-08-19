@@ -80,6 +80,9 @@ int main(int argc, char** argv) {
   Trigger trigger(csgo);
   Aimer aimer(csgo);
   BunnyHopper bhopper(csgo);
+  if (use_bhop) {
+    boost::thread triggerThread(boost::bind(&BunnyHopper::jumpLoop, &bhopper));
+  }
   if (use_trigger) {
     boost::thread triggerThread(boost::bind(&Trigger::triggerLoop, &trigger));
   }
@@ -96,8 +99,6 @@ int main(int argc, char** argv) {
       vector<EntityType*> players = csgo.getPlayers();
       aimer.xSetAim(players[1]);
     }
-    if (use_bhop)
-      bhopper.jumpCheck();
     this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
   }
   return 0;
