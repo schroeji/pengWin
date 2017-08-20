@@ -36,7 +36,8 @@ void GameManager::grabPlayers(){
     return;
   }
   mem.updateLocalPlayerAddr();
-  // cout << "got objects" << endl;
+  for (EntityType* player : players)
+    delete player;
   players.clear();
   local_player_index = -1;
   for (unsigned int i = 0; i < count; i++) {
@@ -59,7 +60,7 @@ vector<EntityType*>& GameManager::getPlayers() {
 
 void GameManager::printPlayers() {
   int i = 0;
-  cout << "----------Players------------" << endl;
+  cout << "---------Players---------" << endl;
   for (EntityType* player : players) {
     cout << dec << "Player: " << i << endl;
     printf("ID: %d\n", player->m_iEntityId);
@@ -102,15 +103,14 @@ void GameManager::printEntities() {
       // cout << "Team: T" << endl;
     printf("Origin x=%f y=%f z=%f\n", entity->m_vecOrigin.x, entity->m_vecOrigin.y, entity->m_vecOrigin.z);
     cout << "-----" << endl;
-    i++;
   }
 }
 
 void GameManager::printPlayerLocationsToFile(const string& filename) {
-  ofstream file;
-  file.open(filename);
   if (players.empty())
     return;
+  ofstream file;
+  file.open(filename);
   // print local player index into array[0,0]
   file << local_player_index << ",0,0,0,0,0" << endl;
   // Format: number,hp,team,x,y,z

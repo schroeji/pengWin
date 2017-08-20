@@ -6,6 +6,7 @@
 #include <string>
 #include <string.h>
 #include <sys/uio.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -15,6 +16,8 @@ MemoryAccess::MemoryAccess(Settings* settings) : settings(settings) {
     attack_offset = settings->attack_offset;
     local_player_offset = settings->local_player_offset;
     map_name_offset = settings->map_name_offset;
+    force_jump_offset = settings->force_jump_offset;
+    debug = settings->debug;
   }
 }
 
@@ -26,7 +29,7 @@ void MemoryAccess::updateAddrs() {
   // cout << "local_player: " << local_player_addr << endl;
 
   glow_addr = client_range.first + glow_offset;
-  cout << hex << "glow_addr: " << glow_addr << endl;
+  if (debug) cout << hex << "glow_addr: " << glow_addr << endl;
 
   attack_addr_call_location = client_range.first + attack_offset;
   // cout << hex << "attack_addr_call_location: " << attack_addr_call_location << endl;
@@ -38,6 +41,7 @@ void MemoryAccess::updateAddrs() {
   // cout << hex << "attack_addr: " << attack_addr << endl;
 
   map_name_addr = engine_range.first + map_name_offset;
+  force_jump_addr = client_range.first + force_jump_offset;
 }
 
 pid_t MemoryAccess::getPid() {

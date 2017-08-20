@@ -48,9 +48,6 @@ void Trigger::triggerLoop() {
       triggerThread = boost::thread(boost::bind(&Trigger::triggerCheck, this));
       holding_hotkey = true;
       if (settings.debug) cout << "Trigger Hotkey pressed." << endl;
-    } else {
-      cout << "delete me" << endl;
-      cout << (event.xbutton.button == keycode) << endl;
     }
     while (holding_hotkey) {
       XNextEvent(display, &event);

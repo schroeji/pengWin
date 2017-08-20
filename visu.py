@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import matplotlib
 import numpy as np
 import sys
 import os
 import time
-
+matplotlib.rcParams['toolbar'] = 'None'
 fig, ax = plt.subplots()
 xdata, ydata = [], []
 ln = plt.scatter([], [], animated=True)
@@ -67,6 +68,9 @@ def blit_init():
   ax.imshow(img, extent=[ax.get_xlim()[0], ax.get_xlim()[1], ax.get_ylim()[0], ax.get_ylim()[1]])
   ax.set_xlim(xlims)
   ax.set_ylim(ylims)
+  ax.set_frame_on(False)
+  ax.axis('off')
+  fig.tight_layout(pad=0.01)
   return ln,
 
 # map_name = "de_dust2"
