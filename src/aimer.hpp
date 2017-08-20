@@ -15,4 +15,5 @@ public:
   Aimer(GameManager& csgo);
   void setAim(EntityType*);
   void xSetAim(EntityType*);
+  void moveAim(int, int);
 };

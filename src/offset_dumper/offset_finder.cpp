@@ -7,7 +7,7 @@
 #include <cstring>
 #include <fstream>
 #include <stdio.h>
-#include <dlfcn.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -33,17 +33,21 @@ void write_settings(const string& file_name) {
   file << "trigger_use_random=false" << endl;
   file << "# find your key with \"$ dumpkeys -l\"" << endl;
   file << "trigger_key=Caps_Lock" << endl;
-  file << "find_map=false" << endl;
+  file << "find_map=true" << endl;
   file << "debug=false" << endl;
   file.close();
 }
 
 int main(int argc, char** argv) {
+  if (getuid() != 0){
+    cout << "Not root" << endl;
+    return 0;
+  }
   MemoryAccess mem(nullptr);
   mem.getPid();
   Addr_Range clientRange = mem.getClientRange();
   Addr_Range engineRange = mem.getEngineRange();
-  cout << dec << "Client size: " << clientRange.second - clientRange.first << endl;
+  cout << hex << "Client size: " << clientRange.second - clientRange.first << endl;
   cout << "Engine size: " << engineRange.second - engineRange.first << endl;
   const char glowPointerCall_data[] = "\xE8\x00\x00\x00\x00\x48\x8b\x3d\x00\x00\x00\x00\xBE\x01\x00\x00\x00\xC7";
   const char glowPointerCall_pattern[] = "x????xxx????xxxxxx";
@@ -51,26 +55,12 @@ int main(int argc, char** argv) {
   const char local_player_addr_pattern[] = "xxxxxxxx????";
   const char atk_mov_data[] = "\x44\x89\xe8\x83\xe0\x01\xf7\xd8\x83\xe8\x03\x45\x84\xe4\x74\x00\x21\xd0";
   const char atk_mov_pattern[] = "xxxxxxxxxxxxxxx?xx";
-
   const char clientState_data[] = "\xA1\x00\x00\x00\x00\x33\xD2\x6A\x00\x6A\x00\x33\xC9\x89\xB0";
   const char clientState_pattern[] = "x????xxxxxxxxxx";
-
   const char map_name_data[] = "\xBA\x04\x01\x00\x00\x48\x0F\x45\xF7\x48\x8D\x3D\x1C\x1F\xE0\x00";
   const char map_name_pattern[] = "xxxxxxxxxxxx????";
 
-
-
   addr_type clientState_test = mem.find_pattern(clientState_data, clientState_pattern, engineRange);
-  // addr_type viewAngels = mem.find_pattern(viewAngles_data, viewAngles_pattern, engineRange);
-  // addr_type test = mem.find_pattern(glowObjManTest_data, glowObjManTest_pattern, clientRange);
-  unsigned long int test1, test2;
-  const char local_player_test[] = "\xA3\x00\x00\x00\x00\xC7\x05\x00\x00\x00\x00\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x59\xC3\x6A\x00";
-  const char local_player_test_pattern[] = "x????xx????????x????xxx?";
-  cout << "test2:" << test2 << endl;
-  unsigned int off;
-  mem.read((void*) (test1 + 0xC), &off, sizeof(test1));
-  cout << "off: " << off << endl;
-  // mem.read((void*) (test + 0x1), &test2, sizeof(test2));
 
   vector<string> offsets;
   vector<string> offset_names;

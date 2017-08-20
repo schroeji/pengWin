@@ -6,7 +6,6 @@ import os
 import time
 
 fig, ax = plt.subplots()
-fig.canvas.set_window_title('Radar')
 xdata, ydata = [], []
 ln = plt.scatter([], [], animated=True)
 # ln.set_offsets([[0.5], [0.4]])
@@ -76,7 +75,7 @@ def blit_init():
 # map_name = "de_cache"
 
 map_name = sys.argv[1]
-
+fig.canvas.set_window_title("Radar - {}".format(map_name)
 
 has_plotted = False
 while(not has_plotted):

@@ -86,8 +86,9 @@ int main(int argc, char** argv) {
     if (use_radar)
       csgo.printPlayerLocationsToFile("/tmp/locs.csv");
     if(use_aimbot) {
-      vector<EntityType*> players = csgo.getPlayers();
-      aimer.xSetAim(players[1]);
+      // vector<EntityType*> players = csgo.getPlayers();
+      // aimer.xSetAim(players[1]);
+      aimer.moveAim(50, 50);
     }
     this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
   }
