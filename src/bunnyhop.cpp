@@ -18,7 +18,7 @@ BunnyHopper::BunnyHopper(GameManager& csgo) : csgo(csgo),
                                              settings(Settings::getInstance()) {
   display = XOpenDisplay(NULL);
   rootWindow = DefaultRootWindow(display);
-  keycode = XKeysymToKeycode(display, XK_space);
+  keycode = XKeysymToKeycode(display, XK_Caps_Lock);
 }
 
 BunnyHopper::~BunnyHopper(){
@@ -50,6 +50,7 @@ void BunnyHopper::jumpLoop() {
   bool owner_events = false;
   XEvent event;
   if (settings.debug) cout << "Entered bhopLoop" << endl;
+  if (settings.debug) cout << "keycode:" << keycode << endl;
   XUngrabKey(display, keycode, modifiers, rootWindow);
   XGrabKey(display, keycode, modifiers, rootWindow, owner_events, pointer_mode,
            keyboard_mode);
