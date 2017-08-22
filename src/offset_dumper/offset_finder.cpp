@@ -7,7 +7,7 @@
 #include <cstring>
 #include <fstream>
 #include <stdio.h>
-#include <dlfcn.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -46,11 +46,15 @@ void write_settings(const string& file_name) {
 }
 
 int main(int argc, char** argv) {
+  if (getuid() != 0){
+    cout << "Not root" << endl;
+    return 0;
+  }
   MemoryAccess mem(nullptr);
   mem.getPid();
   Addr_Range clientRange = mem.getClientRange();
   Addr_Range engineRange = mem.getEngineRange();
-  cout << dec << "Client size: " << clientRange.second - clientRange.first << endl;
+  cout << hex << "Client size: " << clientRange.second - clientRange.first << endl;
   cout << "Engine size: " << engineRange.second - engineRange.first << endl;
   const char glowPointerCall_data[] = "\xE8\x00\x00\x00\x00\x48\x8b\x3d\x00\x00\x00\x00\xBE\x01\x00\x00\x00\xC7";
   const char glowPointerCall_pattern[] = "x????xxx????xxxxxx";
