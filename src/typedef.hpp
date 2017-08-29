@@ -123,3 +123,9 @@ inline float degree_to_radian(float x) {
 inline float radian_to_degree(float x) {
   return x/0.01745329;
 }
+
+struct player_struct {
+  addr_type addr;
+  long timestamp;
+  EntityType* player;
+};

@@ -79,7 +79,7 @@ def blit_init():
 # map_name = "de_cache"
 
 map_name = sys.argv[1]
-fig.canvas.set_window_title("Radar - {}".format(map_name)
+fig.canvas.set_window_title("Radar - {}".format(map_name))
 
 has_plotted = False
 while(not has_plotted):
