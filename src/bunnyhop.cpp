@@ -34,13 +34,19 @@ void BunnyHopper::jump() {
 }
 
 void BunnyHopper::jumpCheck() {
-  EntityType* localPlayer = csgo.getLocalPlayer();
-  if (!localPlayer)
-    return;
-  unsigned int onGround = localPlayer->m_fFlags & 1;
-  if (onGround == 1) {
-    jump();
+  while (holding_hotkey) {
+    EntityType* localPlayer = csgo.getLocalPlayer();
+    if (!localPlayer)
+      continue;
+    unsigned int onGround = localPlayer->m_fFlags & 1;
+    if (onGround == 1) {
+      // cout << "jump" << i << endl;
+      jump();
+    } else {
+      // cout << "air" << endl;
+    }
   }
+  // cout << "Exit" << endl;
 }
 
 void BunnyHopper::jumpLoop() {
@@ -82,5 +88,6 @@ void BunnyHopper::jumpLoop() {
         XFlush(display);
       }
     }
+    this_thread::sleep_for(chrono::milliseconds(2));
   }
 }
