@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <chrono>
+#include <thread>
 
 using namespace std;
 Aimer::Aimer(GameManager& csgo) : csgo(csgo),
@@ -55,83 +57,53 @@ void Aimer::moveAim(int dx, int dy) {
   fd = open("/dev/input/uinput", O_WRONLY | O_NONBLOCK);
   if(fd < 0)
     fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
-if(ioctl(fd, UI_SET_EVBIT, EV_KEY) < 0)
-        errexit("error: ioctl(fd, UI_SET_EVBIT, EV_KEY)");
-    if(ioctl(fd, UI_SET_KEYBIT, BTN_LEFT) < 0)
-        errexit("error: ioctl(fd, UI_SET_KEYBIT, BTN_LEFT)");
+  if(ioctl(fd, UI_SET_EVBIT, EV_KEY) < 0)
+    return;
+  if(ioctl(fd, UI_SET_KEYBIT, BTN_LEFT) < 0)
+    return;
+  if(ioctl(fd, UI_SET_EVBIT, EV_REL) < 0)
+    return;
+  if(ioctl(fd, UI_SET_RELBIT, REL_X) < 0)
+    return;
+  if(ioctl(fd, UI_SET_RELBIT, REL_Y) < 0)
+    return;
+  memset(&uidev, 0, sizeof(uidev));
+  snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "uinput-sample");
+  uidev.id.bustype = BUS_USB;
+  uidev.id.vendor  = 0x1;
+  uidev.id.product = 0x1;
+  uidev.id.version = 1;
 
-    if(ioctl(fd, UI_SET_EVBIT, EV_REL) < 0)
-        errexit("error: ioctl(fd, UI_SET_EVBIT, EV_REL)");
-    if(ioctl(fd, UI_SET_RELBIT, REL_X) < 0)
-        errexit("error: ioctl(fd, UI_SET_RELBIT, REL_X)");
-    if(ioctl(fd, UI_SET_RELBIT, REL_Y) < 0)
-        errexit("error: ioctl(fd, UI_SET_RELBIT, REL_Y)");
+  if(write(fd, &uidev, sizeof(uidev)) < 0)
+    return;
+  if(ioctl(fd, UI_DEV_CREATE) < 0)
+    return;
+  this_thread::sleep_for(chrono::milliseconds(1));
 
-    memset(&uidev, 0, sizeof(uidev));
-    snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "uinput-sample");
-    uidev.id.bustype = BUS_USB;
-    uidev.id.vendor  = 0x1;
-    uidev.id.product = 0x1;
-    uidev.id.version = 1;
+  struct input_event ev;
 
-    if(write(fd, &uidev, sizeof(uidev)) < 0)
-        errexit("error: write &uidev");
+  memset(&ev, 0, sizeof(struct input_event));
+  ev.type = EV_REL;
+  ev.code = REL_X;
+  ev.value = dx;
+  if(write(fd, &ev, sizeof(struct input_event)) < 0)
+    return;
 
-    if(ioctl(fd, UI_DEV_CREATE) < 0)
-        errexit("error: ioctl UI_DEV_CREATE");
+  memset(&ev, 0, sizeof(struct input_event));
+  ev.type = EV_REL;
+  ev.code = REL_Y;
+  ev.value = dy;
+  if(write(fd, &ev, sizeof(struct input_event)) < 0)
+    return;
 
-    sleep(1);
+  memset(&ev, 0, sizeof(struct input_event));
+  ev.type = EV_SYN;
+  if(write(fd, &ev, sizeof(struct input_event)) < 0)
+    return;
 
-    struct input_event ev;
-    int i, dx, dy;
-    for (i = 0; i < 20; i++)
-    {
-        switch(i % 4) {
-        case 0:
-            dx = 50;
-            dy = -50;
-            break;
-        case 1:
-            dx = 50;
-            dy = 50;
-            break;
-        case 2:
-            dx = -50;
-            dy = 50;
-            break;
-        case 3:
-            dx = -50;
-            dy = -50;
-            break;
-        }
-
-        memset(&ev, 0, sizeof(struct input_event));
-        ev.type = EV_REL;
-        ev.code = REL_X;
-        ev.value = dx;
-        if(write(fd, &ev, sizeof(struct input_event)) < 0)
-            errexit("error: write");
-
-        memset(&ev, 0, sizeof(struct input_event));
-        ev.type = EV_REL;
-        ev.code = REL_Y;
-        ev.value = dy;
-        if(write(fd, &ev, sizeof(struct input_event)) < 0)
-            errexit("error: write");
-
-        memset(&ev, 0, sizeof(struct input_event));
-        ev.type = EV_SYN;
-        if(write(fd, &ev, sizeof(struct input_event)) < 0)
-            errexit("error: write");
-
-        usleep(800000);
-    }
-
-    sleep(2);
-
-    if(ioctl(fd, UI_DEV_DESTROY) < 0)
-        errexit("error: ioctl UI_DEV_DESTROY");
-
-    close(fd);
+  this_thread::sleep_for(chrono::milliseconds(1));
+  if(ioctl(fd, UI_DEV_DESTROY) < 0)
+    return;
+  close(fd);
 
 }

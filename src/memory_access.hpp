@@ -24,8 +24,8 @@ private:
   addr_type map_name_offset;
 
   //offsets to localPlayer
-  // addr_type crosshair_id_offset = 0xBBB8;
-  addr_type crosshair_id_offset = 0xB294;
+  addr_type crosshair_id_offset = 0xBBB8;
+  // addr_type crosshair_id_offset = 0xB294;
   addr_type team_number_offset = 0x12C;
 
   void updateAddrs();
