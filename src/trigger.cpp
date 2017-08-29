@@ -81,6 +81,7 @@ void Trigger::triggerCheck() {
       continue;
     Team ownTeam = mem.getTeam();
     unsigned int crosshairTarget = mem.getCrosshairTarget();
+    if (settings.debug) cout << "crosshairTarget: " << crosshairTarget << endl;
     if (!crosshairTarget)
       continue;
 
