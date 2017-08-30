@@ -75,7 +75,6 @@ void GameManager::printPlayers() {
       cout << "Team: T" << endl;
     printf("Origin x=%f y=%f z=%f\n", player->m_vecOrigin.x, player->m_vecOrigin.y, player->m_vecOrigin.z);
     printf("Angle: x=%f y=%f z=%f\n", player->m_angRotation.x, player->m_angRotation.y, player->m_angRotation.z);
-    printf("dormant: %x\n", player->m_bDormant);
     // printf("dormant2: %x\n", player->__buf_0x11E[3]);
     cout << "-----" << endl;
     i++;
