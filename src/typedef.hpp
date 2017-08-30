@@ -47,8 +47,9 @@ struct EntityType {
 	int m_iEFlags; // 0x114
 	char __buf_0x118[0x4]; // 0x118
 	unsigned char m_nWaterType; // 0x11C
-	unsigned char m_bDormant; // 0x11D
-	char __buf_0x11E[0xA]; // 0x11E
+	char __buf_0x11D[0x4]; // 0x11D
+  unsigned char m_bDormant; // 0x121
+  char __buf_0x122[6]; // 0x122
 	float m_fEffects; // 0x128
 	int m_iTeamNum; // 0x12C
 	int m_iPendingTeamNum; // 0x130

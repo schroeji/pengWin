@@ -42,12 +42,16 @@ void GameManager::grabPlayers(){
   local_player_index = -1;
   for (unsigned int i = 0; i < count; i++) {
     // cout << "reading obj: " << i <<endl;
+    if (objects[i].m_pEntity == 0)
+      continue;
+
     EntityType* player = new EntityType;
     mem.read(objects[i].m_pEntity, player, sizeof(EntityType));
-    if ((player->m_iTeamNum == Team::CT || player->m_iTeamNum == Team::T) && player->m_iHealth > 0) {
+    if ((player->m_iTeamNum == Team::CT || player->m_iTeamNum == Team::T) && player->m_iHealth > 0 && !player->m_bDormant) {
+      // cout << dec << "player: " << players.size() << " addr: " << objects[i].m_pEntity << endl;
       players.push_back(player);
       if (objects[i].m_pEntity == (void*) mem.local_player_addr)
-        local_player_index = i;
+        local_player_index = players.size() - 1;
     }
     else
       delete player;
@@ -71,6 +75,8 @@ void GameManager::printPlayers() {
       cout << "Team: T" << endl;
     printf("Origin x=%f y=%f z=%f\n", player->m_vecOrigin.x, player->m_vecOrigin.y, player->m_vecOrigin.z);
     printf("Angle: x=%f y=%f z=%f\n", player->m_angRotation.x, player->m_angRotation.y, player->m_angRotation.z);
+    printf("dormant: %x\n", player->m_bDormant);
+    // printf("dormant2: %x\n", player->__buf_0x11E[3]);
     cout << "-----" << endl;
     i++;
   }

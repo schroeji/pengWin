@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
   while (true) {
     csgo.grabPlayers();
     if (debug) {
-      // csgo.printPlayers();
+      csgo.printPlayers();
       // csgo.printEntities();
     }
     if (use_radar)
