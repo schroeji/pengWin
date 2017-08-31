@@ -7,8 +7,6 @@
 #include <string.h>
 #include <sys/uio.h>
 #include <stdlib.h>
-#include <chrono>
-#include <thread>
 
 using namespace std;
 
@@ -43,25 +41,16 @@ void MemoryAccess::updateAddrs() {
 }
 
 pid_t MemoryAccess::getPid() {
+  pid = 0;
   FILE* in;
   char buf[128];
   string cmd = "pidof -s " + GAME_NAME;
   // when the pid has been found it might take some additional time
   // until all modules are laoded
-  bool extra_wait = false;
   in = popen(cmd.c_str(), "r");
-  while ( !(in && fgets(buf, 128, in)) ) {
-    in = popen(cmd.c_str(), "r");
-    if (settings->debug) cout << "WARNING: No PID found"<< endl;
-    extra_wait = true;
-    this_thread::sleep_for(chrono::milliseconds(3000));
-  }
+  fgets(buf, 128, in);
   pclose(in);
   pid = strtoul(buf, NULL, 10);
-  if (extra_wait) {
-    if (settings->debug) cout << "Game started waiting 15 seconds..."<< endl;
-    this_thread::sleep_for(chrono::milliseconds(15000));
-  }
   return pid;
 }
 
@@ -185,6 +174,6 @@ string MemoryAccess::getMapName() {
 }
 
 void MemoryAccess::updateLocalPlayerAddr() {
-  if(!read((void*) local_player_addr_location, &local_player_addr, sizeof(local_player_addr)))
-    cout << "WARNING: could not get localplayer" << endl;
+  if (!read((void*) local_player_addr_location, &local_player_addr, sizeof(local_player_addr)))
+    if (settings->debug) cout << "WARNING: could not get localplayer" << endl;
 }

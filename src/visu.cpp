@@ -14,3 +14,9 @@ void Visu::start(const string& map_name) {
   handle = popen(cmd.c_str(), "w");
   // pclose(in);
 }
+
+void Visu::stop(){
+  fputs("quit\n", handle);
+  fflush(handle);
+  pclose(handle);
+}

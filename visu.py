@@ -5,6 +5,8 @@ import numpy as np
 import sys
 import os
 import time
+import _thread
+
 matplotlib.rcParams['toolbar'] = 'None'
 fig, ax = plt.subplots()
 xdata, ydata = [], []
@@ -73,6 +75,13 @@ def blit_init():
   fig.tight_layout(pad=0.01)
   return ln,
 
+def catch_term_sig():
+  while (True):
+    inp = input()
+    if (inp == "quit"):
+      plt.close()
+      break
+
 # map_name = "de_dust2"
 # map_name = "de_inferno"
 # map_name = "de_mirage"
@@ -82,11 +91,13 @@ map_name = sys.argv[1]
 fig.canvas.set_window_title("Radar - {}".format(map_name))
 
 has_plotted = False
+_thread.start_new_thread(catch_term_sig, ())
+
 while(not has_plotted):
+  time.sleep(1)
   if (os.path.isfile(location_file)):
     if (os.path.getsize(location_file) > 0):
       has_plotted = True
       img = plt.imread("overviews/{}_radar.jpg".format(map_name))
       ani = animation.FuncAnimation(fig, getData, init_func=blit_init, interval=200, blit=True)
       plt.show()
-  time.sleep(1)

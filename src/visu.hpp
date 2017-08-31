@@ -11,4 +11,5 @@ public:
   Visu();
   ~Visu();
   void start(const std::string&);
+  void stop();
 };

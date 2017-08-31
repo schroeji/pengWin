@@ -5,12 +5,20 @@
 #include <fstream>
 #include <string>
 #include <stdlib.h>
-
+#include <chrono>
+#include <thread>
 using namespace std;
 
 GameManager::GameManager(MemoryAccess& mem) : mem(mem) {
-  if (!mem.getPid())
-    exit(0);
+  bool fresh_launch = false;
+  while (!mem.getPid()) {  // wait until game has launched
+    if (!fresh_launch)
+      cout << "Waiting for game to launch..." << endl;
+    fresh_launch = true;
+    this_thread::sleep_for(chrono::milliseconds(1000));
+  }
+  if(fresh_launch)              // additional wait when game just launched
+    this_thread::sleep_for(chrono::milliseconds(15000));
   if (!mem.getClientRange().first) {
     cout << "Could not find Client Base" << endl;
     exit(0);

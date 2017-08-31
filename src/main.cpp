@@ -67,8 +67,13 @@ int main(int argc, char** argv) {
 
   while (csgo.gameRunning()) {
     if (debug) cout << "Waiting until connected..." << endl;
-    while (!csgo.isOnServer())
+    while (!csgo.isOnServer()) {
+      if (!csgo.gameRunning())
+        break;
       this_thread::sleep_for(chrono::milliseconds(3000));
+    }
+    if (!csgo.gameRunning())
+      break;
 
     if (debug) cout << "Connected to a server..." << endl;
 
@@ -110,6 +115,7 @@ int main(int argc, char** argv) {
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     }
+    visu.stop();
     if (debug) cout << "Not on a server. Entering sleep mode..." << endl;
   }
 
