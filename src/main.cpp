@@ -59,48 +59,60 @@ int main(int argc, char** argv) {
   MemoryAccess mem(&settings);
   GameManager csgo = GameManager(mem);
 
-  if (use_radar) {
-    string map_name = "";
-    if (settings.find_map) {
-      if (debug) cout << "Scanning for map..." << endl;
-      while (map_name == "") {
-        map_name = mem.getMapName();
-        this_thread::sleep_for(chrono::milliseconds(300));
-      }
-    } else {
-      cout << "Map detection deactivated. Please choose map:" << endl;
-      cin >> map_name;
-    }
-    cout << "Found Map: " << map_name << endl;
-    Visu visu(map_name);
-    visu.start();
-  }
-
 
   Trigger trigger(csgo);
   Aimer aimer(csgo);
   BunnyHopper bhopper(csgo);
-  if (use_bhop) {
-    boost::thread triggerThread(boost::bind(&BunnyHopper::jumpLoop, &bhopper));
-  }
-  if (use_trigger) {
-    boost::thread triggerThread(boost::bind(&Trigger::triggerLoop, &trigger));
+  Visu visu;
+
+  while (csgo.gameRunning()) {
+    if (debug) cout << "Waiting until connected..." << endl;
+    while (!csgo.isOnServer())
+      this_thread::sleep_for(chrono::milliseconds(3000));
+
+    if (debug) cout << "Connected to a server..." << endl;
+
+    if (use_radar) {
+      string map_name = "";
+      if (settings.find_map) {
+        if (debug) cout << "Scanning for map..." << endl;
+        while (map_name == "") {
+          map_name = mem.getMapName();
+          this_thread::sleep_for(chrono::milliseconds(1000));
+        }
+      } else {
+        cout << "Map detection deactivated. Please choose map:" << endl;
+        cin >> map_name;
+      }
+      cout << "Found Map: " << map_name << endl;
+      visu.start(map_name);
+    }
+
+    if (use_bhop)
+      boost::thread triggerThread(boost::bind(&BunnyHopper::jumpLoop, &bhopper));
+
+    if (use_trigger)
+      boost::thread triggerThread(boost::bind(&Trigger::triggerLoop, &trigger));
+
+    // main loop
+    while (csgo.isOnServer()) {
+      csgo.grabPlayers();
+      if (debug) {
+        csgo.printPlayers();
+        // csgo.printEntities();
+      }
+      if (use_radar)
+        csgo.printPlayerLocationsToFile("/tmp/locs.csv");
+      if (use_aimbot) {
+        vector<EntityType*> players = csgo.getPlayers();
+        aimer.xSetAim(players[1]);
+        // aimer.moveAim(50, 50);
+      }
+      this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
+    }
+    if (debug) cout << "Not on a server. Entering sleep mode..." << endl;
   }
 
-  while (true) {
-    csgo.grabPlayers();
-    if (debug) {
-      csgo.printPlayers();
-      // csgo.printEntities();
-    }
-    if (use_radar)
-      csgo.printPlayerLocationsToFile("/tmp/locs.csv");
-    if(use_aimbot) {
-      vector<EntityType*> players = csgo.getPlayers();
-      aimer.xSetAim(players[1]);
-      // aimer.moveAim(50, 50);
-    }
-    this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
-  }
+  if (debug) cout << "Game closed. Terminating..." << endl;
   return 0;
 }

@@ -91,8 +91,9 @@ void Aimer::setAim(EntityType* enemy) {
 
 // needs m_rawinput 0
 void Aimer::xSetAim(EntityType* enemy) {
-  // EntityType* local_player = csgo.getLocalPlayer();
-  EntityType* local_player = csgo.getPlayers()[0];
+  if (enemy == nullptr)
+    return;
+  EntityType* local_player = csgo.getLocalPlayer();
   Vector player_pos = local_player->m_vecOrigin;
   Vector enemy_pos = enemy->m_vecOrigin;
   Vector dist = getDist(&player_pos, &enemy_pos);

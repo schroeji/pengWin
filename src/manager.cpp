@@ -35,7 +35,6 @@ void GameManager::grabPlayers(){
     cout << "Could not get objects" << endl;
     return;
   }
-  mem.updateLocalPlayerAddr();
   for (EntityType* player : players)
     delete player;
   players.clear();
@@ -139,4 +138,13 @@ EntityType* GameManager::getLocalPlayer() {
     return players[local_player_index];
   else
     return nullptr;
+}
+
+bool GameManager::gameRunning() {
+  return mem.getPid() > 0;
+}
+
+bool GameManager::isOnServer() {
+  mem.updateLocalPlayerAddr();
+  return mem.local_player_addr > 0;
 }

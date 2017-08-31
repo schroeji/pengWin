@@ -7,6 +7,8 @@
 #include <string.h>
 #include <sys/uio.h>
 #include <stdlib.h>
+#include <chrono>
+#include <thread>
 
 using namespace std;
 
@@ -23,22 +25,18 @@ MemoryAccess::MemoryAccess(Settings* settings) : settings(settings) {
 
 void MemoryAccess::updateAddrs() {
   local_player_addr_location = client_range.first + local_player_offset;
-  // cout << hex << "local_player_addr: " << local_player_addr << endl;
   if(!read((void*) local_player_addr_location, &local_player_addr, sizeof(local_player_addr)))
     cout << "WARNING: could not get local_player" << endl;
-  // cout << "local_player: " << local_player_addr << endl;
 
   glow_addr = client_range.first + glow_offset;
   if (debug) cout << hex << "glow_addr: " << glow_addr << endl;
 
   attack_addr_call_location = client_range.first + attack_offset;
-  // cout << hex << "attack_addr_call_location: " << attack_addr_call_location << endl;
   if (settings != nullptr) {
     attack_addr = getCallAddress((void*) attack_addr_call_location);
     if(!attack_addr)
       cout << "WARNING: could not get attack_addr" << endl;
   }
-  // cout << hex << "attack_addr: " << attack_addr << endl;
 
   map_name_addr = engine_range.first + map_name_offset;
   force_jump_addr = client_range.first + force_jump_offset;
@@ -48,11 +46,22 @@ pid_t MemoryAccess::getPid() {
   FILE* in;
   char buf[128];
   string cmd = "pidof -s " + GAME_NAME;
+  // when the pid has been found it might take some additional time
+  // until all modules are laoded
+  bool extra_wait = false;
   in = popen(cmd.c_str(), "r");
-  if ( !(in && fgets(buf, 128, in)) )
-    cout << "No PID found"<< endl;
+  while ( !(in && fgets(buf, 128, in)) ) {
+    in = popen(cmd.c_str(), "r");
+    if (settings->debug) cout << "WARNING: No PID found"<< endl;
+    extra_wait = true;
+    this_thread::sleep_for(chrono::milliseconds(3000));
+  }
   pclose(in);
   pid = strtoul(buf, NULL, 10);
+  if (extra_wait) {
+    if (settings->debug) cout << "Game started waiting 15 seconds..."<< endl;
+    this_thread::sleep_for(chrono::milliseconds(15000));
+  }
   return pid;
 }
 
@@ -75,8 +84,10 @@ Addr_Range MemoryAccess::getModule(const string& modname) {
   FILE* in;
   char buf[512];
   in = popen(cmd.c_str(), "r");
-  if ( !(in && fgets(buf, sizeof(buf), in)))
-    cout << "Could not open module: " << modname << endl;
+  if ( !(in && fgets(buf, sizeof(buf), in))) {
+    cout << "WARNING: Could not open module: " << modname << endl;
+    return Addr_Range(0, 0);
+  }
   pclose(in);
   string line(buf);
   vector<string> splits = split_string(line, " ");

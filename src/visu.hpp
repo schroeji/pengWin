@@ -1,11 +1,14 @@
 #include "typedef.hpp"
+
 #include <vector>
 #include <string>
+#include <iostream>
+
 class Visu {
 private:
-  const std::string& map_name;
+  FILE* handle;
 public:
-  Visu(const std::string&);
+  Visu();
   ~Visu();
-  void start();
+  void start(const std::string&);
 };

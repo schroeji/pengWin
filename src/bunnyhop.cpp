@@ -61,7 +61,7 @@ void BunnyHopper::jumpLoop() {
   XGrabKey(display, keycode, modifiers, rootWindow, owner_events, pointer_mode,
            keyboard_mode);
   XSelectInput(display, rootWindow, KeyPressMask);
-  while (true) {
+  while (csgo.isOnServer()) {
     XNextEvent(display, &event);
     if (event.type == KeyPress) {
       jumpThread = boost::thread(boost::bind(&BunnyHopper::jumpCheck, this));
@@ -90,4 +90,5 @@ void BunnyHopper::jumpLoop() {
     }
     this_thread::sleep_for(chrono::milliseconds(2));
   }
+  XUngrabKey(display, keycode, modifiers, rootWindow);
 }

@@ -15,6 +15,8 @@ public:
   MemoryAccess& getMemoryAccess();
   std::vector<EntityType*>& getPlayers();
   EntityType* getLocalPlayer();
+  bool gameRunning();
+  bool isOnServer();
 
 private:
   MemoryAccess& mem;

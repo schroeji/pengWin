@@ -42,7 +42,7 @@ void Trigger::triggerLoop() {
   XGrabKey(display, keycode, modifiers, rootWindow, owner_events, pointer_mode,
            keyboard_mode);
   XSelectInput(display, rootWindow, KeyPressMask);
-  while (true) {
+  while (csgo.isOnServer()) {
     XNextEvent(display, &event);
     if (event.type == KeyPress) {
       triggerThread = boost::thread(boost::bind(&Trigger::triggerCheck, this));
