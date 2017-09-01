@@ -9,6 +9,9 @@ struct Vector {
 	float x;
 	float y;
 	float z;
+  inline Vector operator+(Vector a) {
+    return {a.x + x, a.y + y, a.z + z};
+  }
 };
 
 struct Vector2D {

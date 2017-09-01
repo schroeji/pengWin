@@ -97,20 +97,26 @@ void Aimer::xSetAim(EntityType* enemy) {
   Vector player_pos = local_player->m_vecOrigin;
   Vector enemy_pos = enemy->m_vecOrigin;
   Vector dist = getDist(&player_pos, &enemy_pos);
+  if (dist.x == 0 && dist.y ==0 && dist.z ==0)
+    return;
+
   printf("dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
   normalize_vector(&dist);
   printf("normalized dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
   QAngle currAngle = local_player->m_angNetworkAngles;
-  float radians = degree_to_radian(currAngle.y);
-  float y = cos(radians);
-  // Vector current_view = {0, y, sqrt(1 - y*y)};
-  // Vector current_view = {0, sqrt(1 - y*y), y};
-  float x = radians > 0 ? sqrt(1 - y*y) : -sqrt(1 - y*y);
-  Vector current_view = {x, 0, y};
+  printf("curr angle: %f, %f, %f\n", currAngle.x, currAngle.y, currAngle.z);
+  float radians_x = degree_to_radian(-currAngle.x);
+  float radians_y = degree_to_radian(currAngle.y);
+  float v1 = cos(radians_x) * sin(radians_y);
+  float v2 = sin(radians_x);
+  float v3 = cos(radians_x) * cos(radians_y);
+  Vector current_view = {v1, v2, v3};
   printf("view: %f, %f, %f\n", current_view.x, current_view.y, current_view.z);
   float missing_angle = acos(scalar_prod(&dist, &current_view));
   float orientation = 0;
+  // determinante gives the orientation of the two vectors
   float det = current_view.x * dist.z - current_view.z * dist.x;
+
   if (det > 0) {
     orientation = 1;
   } else if (det < 0) {
@@ -119,8 +125,8 @@ void Aimer::xSetAim(EntityType* enemy) {
     orientation = 0;
   }
   missing_angle = radian_to_degree(missing_angle);
-  int moveAngle = static_cast<int>(orientation * (missing_angle*10));
-  moveAim(moveAngle, 0);
+  int moveAngle = static_cast<int>(orientation * (missing_angle*5));
+  // moveAim(moveAngle, 0);
   cout << "missing angle: " << missing_angle << endl;
   cout << dec << "move angle: " << moveAngle << endl;
   cout << "orient:" << orientation << endl;
