@@ -105,31 +105,58 @@ void Aimer::xSetAim(EntityType* enemy) {
   printf("normalized dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
   QAngle currAngle = local_player->m_angNetworkAngles;
   printf("curr angle: %f, %f, %f\n", currAngle.x, currAngle.y, currAngle.z);
-  float radians_x = degree_to_radian(-currAngle.x);
-  float radians_y = degree_to_radian(currAngle.y);
+  float radians_x = degree_to_radian(-currAngle.x); // pitch
+  float radians_y = degree_to_radian(currAngle.y);  // yaw
   float v1 = cos(radians_x) * sin(radians_y);
   float v2 = sin(radians_x);
   float v3 = cos(radians_x) * cos(radians_y);
   Vector current_view = {v1, v2, v3};
   printf("view: %f, %f, %f\n", current_view.x, current_view.y, current_view.z);
-  float missing_angle = acos(scalar_prod(&dist, &current_view));
-  float orientation = 0;
-  // determinante gives the orientation of the two vectors
-  float det = current_view.x * dist.z - current_view.z * dist.x;
+  Vector2D view_x_z_projection = {v1, v3};
+  Vector2D view_y_z_projection = {v2, v3};
+  Vector2D dist_x_z_projection = {dist.x, dist.z};
+  Vector2D dist_y_z_projection = {dist.y, dist.z};
+  normalize_vector(&view_x_z_projection);
+  normalize_vector(&view_y_z_projection);
+  normalize_vector(&dist_x_z_projection);
+  normalize_vector(&dist_y_z_projection);
 
-  if (det > 0) {
-    orientation = 1;
-  } else if (det < 0) {
-    orientation = -1;
+  float missing_angle_x = view_x_z_projection * dist_x_z_projection;
+  // missing_angle_x /= len(view_x_z_projection) * len(dist_x_z_projection);
+  float missing_angle_y = view_y_z_projection * dist_y_z_projection;
+  // missing_angle_y /= len(view_y_z_projection) * len(dist_y_z_projection);
+  missing_angle_x = acos(missing_angle_x);
+  missing_angle_y = acos(missing_angle_y);
+  missing_angle_x = radian_to_degree(missing_angle_x);
+  missing_angle_y = radian_to_degree(missing_angle_y);
+  // determinante gives the orientation of the two vectors
+  float det_x = current_view.x * dist.z - current_view.z * dist.x;
+  float det_y  = current_view.x * dist.y - current_view.y * dist.x;
+  float orientation_x = 0;
+  if (det_x > 0) {
+    orientation_x = 1;
+  } else if (det_x < 0) {
+    orientation_x = -1;
   } else {
-    orientation = 0;
+    orientation_x = 0;
   }
-  missing_angle = radian_to_degree(missing_angle);
-  int moveAngle = static_cast<int>(orientation * (missing_angle*5));
-  // moveAim(moveAngle, 0);
-  cout << "missing angle: " << missing_angle << endl;
-  cout << dec << "move angle: " << moveAngle << endl;
-  cout << "orient:" << orientation << endl;
+  float orientation_y = 0;
+  if (det_y > 0) {
+    orientation_y = -1;
+  } else if (det_y < 0) {
+    orientation_y = 1;
+  } else {
+    orientation_y = 0;
+  }
+  int moveAngle_x = static_cast<int>(orientation_x * (missing_angle_x*2));
+  int moveAngle_y = static_cast<int>(orientation_y * (missing_angle_y*2));
+  moveAim(moveAngle_x, moveAngle_y);
+  cout << "missing angle x: " << missing_angle_x << endl;
+  cout << "missing angle y: " << missing_angle_y << endl;
+  cout << dec << "move angle x: " << moveAngle_x << endl;
+  cout << dec << "move angle y: " << moveAngle_y << endl;
+  cout << "orient_x:" << orientation_x << endl;
+  cout << "orient_y:" << orientation_y << endl;
 }
 
 void Aimer::moveAim(int dx, int dy) {

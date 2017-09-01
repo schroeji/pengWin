@@ -4,6 +4,18 @@
 #include <stdint.h>
 #include <vector>
 #include <string>
+#include <math.h>
+
+struct Vector2D {
+  float x;
+  float y;
+  inline Vector2D operator+(Vector2D a) {
+    return {a.x + x, a.y + y};
+  }
+  inline float operator*(Vector2D a) {
+    return a.x * x + a.y * y;
+  }
+};
 
 struct Vector {
 	float x;
@@ -12,10 +24,9 @@ struct Vector {
   inline Vector operator+(Vector a) {
     return {a.x + x, a.y + y, a.z + z};
   }
-};
-
-struct Vector2D {
-	float x, y;
+  inline float operator*(Vector a) {
+    return a.x * x + a.y * y + a.z * z;
+  }
 };
 
 struct QAngle {
@@ -118,14 +129,24 @@ typedef unsigned long int addr_type;
 std::vector<std::string> split_string(const std::string&, const std::string&);
 
 void normalize_vector(Vector*);
+void normalize_vector(Vector2D*);
 Vector getDist(Vector*, Vector*);
-float scalar_prod(Vector*, Vector*);
+inline float scalar_prod(Vector*, Vector*);
+inline float scalar_prod(Vector2D*, Vector2D*);
 
 inline float degree_to_radian(float x) {
   return x*0.01745329;
 }
 inline float radian_to_degree(float x) {
   return x/0.01745329;
+}
+
+inline float len(Vector2D vec) {
+  return sqrt(vec.x * vec.x + vec.y * vec.y);
+}
+
+inline float len(Vector vec) {
+  return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
 }
 
 struct player_struct {

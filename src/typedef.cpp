@@ -26,11 +26,16 @@ std::vector<std::string> split_string(const std::string& split_str, const std::s
 }
 
 void normalize_vector(Vector* vec) {
-  float squared_sum = vec->x * vec->x + vec->y * vec->y + vec->z * vec->z;
-  float root = sqrt(squared_sum);
-  vec->x /= root;
-  vec->y /= root;
-  vec->z /= root;
+  float length = len(*vec);
+  vec->x /= length;
+  vec->y /= length;
+  vec->z /= length;
+}
+
+void normalize_vector(Vector2D* vec) {
+  float length = len(*vec);
+  vec->x /= length;
+  vec->y /= length;
 }
 
 Vector getDist(Vector* a, Vector* b) {
@@ -39,4 +44,8 @@ Vector getDist(Vector* a, Vector* b) {
 
 float scalar_prod(Vector* a, Vector* b) {
   return (a->x * b->x) + (a->y * b->y) + (a->z * b->z);
+}
+
+float scalar_prod(Vector2D* a, Vector2D* b) {
+  return (a->x * b->x) + (a->y * b->y);
 }
