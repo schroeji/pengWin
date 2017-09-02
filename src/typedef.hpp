@@ -131,8 +131,8 @@ std::vector<std::string> split_string(const std::string&, const std::string&);
 void normalize_vector(Vector*);
 void normalize_vector(Vector2D*);
 Vector getDist(Vector*, Vector*);
-inline float scalar_prod(Vector*, Vector*);
-inline float scalar_prod(Vector2D*, Vector2D*);
+float scalar_prod(Vector*, Vector*);
+float scalar_prod(Vector2D*, Vector2D*);
 
 inline float degree_to_radian(float x) {
   return x*0.01745329;

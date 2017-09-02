@@ -123,7 +123,11 @@ void Aimer::xSetAim(EntityType* enemy) {
 
   float missing_angle_x = view_x_z_projection * dist_x_z_projection;
   // missing_angle_x /= len(view_x_z_projection) * len(dist_x_z_projection);
-  float missing_angle_y = view_y_z_projection * dist_y_z_projection;
+  // float missing_angle_y = view_y_z_projection * dist_y_z_projection;
+  Vector tmp = {dist.x, current_view.y, dist.z};
+  normalize_vector(&tmp);
+  printf("tmp: %f, %f, %f\n", tmp.x, tmp.y, tmp.z);
+  float missing_angle_y = tmp * dist;
   // missing_angle_y /= len(view_y_z_projection) * len(dist_y_z_projection);
   missing_angle_x = acos(missing_angle_x);
   missing_angle_y = acos(missing_angle_y);
@@ -131,7 +135,6 @@ void Aimer::xSetAim(EntityType* enemy) {
   missing_angle_y = radian_to_degree(missing_angle_y);
   // determinante gives the orientation of the two vectors
   float det_x = current_view.x * dist.z - current_view.z * dist.x;
-  float det_y  = current_view.x * dist.y - current_view.y * dist.x;
   float orientation_x = 0;
   if (det_x > 0) {
     orientation_x = 1;
@@ -141,15 +144,15 @@ void Aimer::xSetAim(EntityType* enemy) {
     orientation_x = 0;
   }
   float orientation_y = 0;
-  if (det_y > 0) {
-    orientation_y = -1;
-  } else if (det_y < 0) {
+  if (tmp.y > dist.y) {
     orientation_y = 1;
+  } else if (tmp.y < dist.y) {
+    orientation_y = -1;
   } else {
     orientation_y = 0;
   }
-  int moveAngle_x = static_cast<int>(orientation_x * (missing_angle_x*2));
-  int moveAngle_y = static_cast<int>(orientation_y * (missing_angle_y*2));
+  int moveAngle_x = static_cast<int>(orientation_x * missing_angle_x * angle_multiplier_x * inverse_sens);
+  int moveAngle_y = static_cast<int>(orientation_y * missing_angle_y * angle_multiplier_y * inverse_sens);
   moveAim(moveAngle_x, moveAngle_y);
   cout << "missing angle x: " << missing_angle_x << endl;
   cout << "missing angle y: " << missing_angle_y << endl;
