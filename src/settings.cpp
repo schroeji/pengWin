@@ -63,6 +63,8 @@ void Settings::load(const string& file) {
           find_map = (splits[1] == "true");
         else if (splits[0] == "debug")
           debug = (splits[1] == "true");
+        else if (splits[0] == "aim_fov")
+          aim_fov = degree_to_radian(strtof(splits[1].c_str(), NULL));
       }
     }
   }

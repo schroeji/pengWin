@@ -40,6 +40,7 @@ void write_settings(const string& file_name) {
   file << "trigger_use_random=false" << endl;
   file << "# find your key with \"$ dumpkeys -l\"" << endl;
   file << "trigger_key=Caps_Lock" << endl;
+  file << "aim_fov=15.0" << endl;
   file << "find_map=true" << endl;
   file << "debug=false" << endl;
   file.close();

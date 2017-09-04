@@ -29,6 +29,9 @@ public:
   //radar settings
   bool find_map = false;
 
+  //aimbot settings
+  float aim_fov;
+
   Settings(const string&);
   static Settings getInstance();
   void load(const string&);

@@ -91,8 +91,10 @@ void Aimer::setAim(EntityType* enemy) {
 
 // needs m_rawinput 0
 void Aimer::xSetAim(EntityType* enemy) {
+  enemy = closestTargetInFov();
   if (enemy == nullptr)
     return;
+  cout << "enemy in fov" << endl;
   EntityType* local_player = csgo.getLocalPlayer();
   Vector player_pos = local_player->m_vecOrigin;
   Vector enemy_pos = enemy->m_vecOrigin;
@@ -201,11 +203,17 @@ EntityType* Aimer::closestTargetInFov() {
   Vector view = getView();
   vector<EntityType*> players = csgo.getPlayers();
   EntityType* closestPlayer = nullptr;
-  float closestAngle = fov;
+  float closestAngle = settings.aim_fov;
   for (EntityType* player : players) {
-    Vector dist = getDist(&local_player->m_vecAbsOrigin, &player->m_vecAbsOrigin);
-    float angle = dist * view;
-    if (angle > fov)
+    if (player == local_player)
+      continue;
+    Vector dist = getDist(&local_player->m_vecOrigin, &player->m_vecOrigin);
+    normalize_vector(&dist);
+    float angle = acos(dist * view);
+    printf("dist: %f, %f,  %f\n", dist.x, dist.y, dist.z);
+    printf("view: %f, %f, %f\n", view.x, view.y, view.z);
+    printf("angle: %f, %f, %f\n", angle, radian_to_degree(angle), settings.aim_fov);
+    if (angle > settings.aim_fov)
       continue;
     if (closestPlayer == nullptr) {
       closestPlayer = player;
