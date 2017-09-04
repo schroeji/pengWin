@@ -99,21 +99,13 @@ void Aimer::xSetAim(EntityType* enemy) {
   Vector dist = getDist(&player_pos, &enemy_pos);
   if (dist.x == 0 && dist.y ==0 && dist.z ==0)
     return;
-
+  Vector current_view = getView();
   printf("dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
   normalize_vector(&dist);
   printf("normalized dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
-  QAngle currAngle = local_player->m_angNetworkAngles;
-  printf("curr angle: %f, %f, %f\n", currAngle.x, currAngle.y, currAngle.z);
-  float radians_x = degree_to_radian(-currAngle.x); // pitch
-  float radians_y = degree_to_radian(currAngle.y);  // yaw
-  float v1 = cos(radians_x) * sin(radians_y);
-  float v2 = sin(radians_x);
-  float v3 = cos(radians_x) * cos(radians_y);
-  Vector current_view = {v1, v2, v3};
   printf("view: %f, %f, %f\n", current_view.x, current_view.y, current_view.z);
-  Vector2D view_x_z_projection = {v1, v3};
-  Vector2D view_y_z_projection = {v2, v3};
+  Vector2D view_x_z_projection = {current_view.x, current_view.z};
+  Vector2D view_y_z_projection = {current_view.y, current_view.z};
   Vector2D dist_x_z_projection = {dist.x, dist.z};
   Vector2D dist_y_z_projection = {dist.y, dist.z};
   normalize_vector(&view_x_z_projection);
@@ -122,12 +114,14 @@ void Aimer::xSetAim(EntityType* enemy) {
   normalize_vector(&dist_y_z_projection);
 
   float missing_angle_x = view_x_z_projection * dist_x_z_projection;
+  missing_angle_x = min(1.f, max(-1.f , missing_angle_x));
   // missing_angle_x /= len(view_x_z_projection) * len(dist_x_z_projection);
   // float missing_angle_y = view_y_z_projection * dist_y_z_projection;
   Vector tmp = {dist.x, current_view.y, dist.z};
   normalize_vector(&tmp);
   printf("tmp: %f, %f, %f\n", tmp.x, tmp.y, tmp.z);
   float missing_angle_y = tmp * dist;
+  missing_angle_y = min(1.f, max(-1.f , missing_angle_y));
   // missing_angle_y /= len(view_y_z_projection) * len(dist_y_z_projection);
   missing_angle_x = acos(missing_angle_x);
   missing_angle_y = acos(missing_angle_y);
@@ -151,6 +145,7 @@ void Aimer::xSetAim(EntityType* enemy) {
   } else {
     orientation_y = 0;
   }
+  // missing_angle_y *= missing_angle_y;
   int moveAngle_x = static_cast<int>(orientation_x * missing_angle_x * angle_multiplier_x * inverse_sens);
   int moveAngle_y = static_cast<int>(orientation_y * missing_angle_y * angle_multiplier_y * inverse_sens);
   moveAim(moveAngle_x, moveAngle_y);
@@ -187,4 +182,39 @@ void Aimer::moveAim(int dx, int dy) {
     cout << "ERROR: could not write mouse movement" << endl;
     return;
   }
+}
+
+Vector Aimer::getView() {
+  EntityType* local_player = csgo.getLocalPlayer();
+  QAngle currAngle = local_player->m_angNetworkAngles;
+  float radians_x = degree_to_radian(-currAngle.x); // pitch
+  float radians_y = degree_to_radian(currAngle.y);  // yaw
+  float v1 = cos(radians_x) * sin(radians_y);
+  float v2 = sin(radians_x);
+  float v3 = cos(radians_x) * cos(radians_y);
+  // is normalized because sin*sin + cos*cos = 1
+  return {v1, v2, v3};
+}
+
+EntityType* Aimer::closestTargetInFov() {
+  EntityType* local_player = csgo.getLocalPlayer();
+  Vector view = getView();
+  vector<EntityType*> players = csgo.getPlayers();
+  EntityType* closestPlayer = nullptr;
+  float closestAngle = fov;
+  for (EntityType* player : players) {
+    Vector dist = getDist(&local_player->m_vecAbsOrigin, &player->m_vecAbsOrigin);
+    float angle = dist * view;
+    if (angle > fov)
+      continue;
+    if (closestPlayer == nullptr) {
+      closestPlayer = player;
+      closestAngle = angle;
+    }
+    else if (closestAngle > angle) {
+      closestPlayer = player;
+      closestAngle = angle;
+    }
+  }
+  return closestPlayer;
 }
