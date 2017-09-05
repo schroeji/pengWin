@@ -147,7 +147,7 @@ EntityType* GameManager::getLocalPlayer() {
   if(!players.empty() && local_player_index != -1)
     return players[local_player_index];
   else
-    return nullptr;
+    throw "No local player";
 }
 
 bool GameManager::gameRunning() {
