@@ -96,6 +96,8 @@ void Aimer::xSetAim(EntityType* enemy) {
     return;
   cout << "enemy in fov" << endl;
   EntityType* local_player = csgo.getLocalPlayer();
+  if (!local_player)
+    return;
   Vector player_pos = {local_player->m_vecOrigin.x, local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y, local_player->m_vecOrigin.z};
   printf("network origin: %f, %f, %f\n", local_player->m_vecNetworkOrigin.x,  local_player->m_vecNetworkOrigin.y, local_player->m_vecNetworkOrigin.z);
   // Vector enemy_pos = enemy->m_vecOrigin;
@@ -190,6 +192,8 @@ void Aimer::moveAim(int dx, int dy) {
 
 Vector Aimer::getView() {
   EntityType* local_player = csgo.getLocalPlayer();
+  if (!local_player)
+    return {0, 0, 0};
   QAngle currAngle = local_player->m_angNetworkAngles;
   float radians_x = degree_to_radian(-currAngle.x); // pitch
   float radians_y = degree_to_radian(currAngle.y);  // yaw
@@ -202,10 +206,14 @@ Vector Aimer::getView() {
 
 EntityType* Aimer::closestTargetInFov() {
   EntityType* local_player = csgo.getLocalPlayer();
+  if (!local_player)
+    return nullptr;
   Vector player_pos = {local_player->m_vecOrigin.x,
                        local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
                        local_player->m_vecOrigin.z};
   Vector view = getView();
+  if (view.x == 0 && view.y == 0 && view.z == 0)
+    return nullptr;
   vector<EntityType*> players = csgo.getPlayers();
   EntityType* closestPlayer = nullptr;
   float closestAngle = settings.aim_fov;
@@ -213,8 +221,9 @@ EntityType* Aimer::closestTargetInFov() {
   for (EntityType* enemy : players) {
     if (enemy == local_player || enemy->m_iTeamNum == team)
       continue;
-
-    Vector dist = getDist(&player_pos, &enemy->m_vecOrigin);
+    addr_type enemy_addr = csgo.getPlayerAddr(enemy);
+    Vector enemy_pos = mem.getBone(enemy_addr, 0x8);
+    Vector dist = getDist(&player_pos, &enemy_pos);
     normalize_vector(&dist);
     float angle = acos(dist * view);
     printf("dist: %f, %f,  %f\n", dist.x, dist.y, dist.z);
