@@ -27,6 +27,7 @@ private:
   addr_type crosshair_id_offset = 0xBBB8;
   // addr_type crosshair_id_offset = 0xB294;
   addr_type team_number_offset = 0x12C;
+  addr_type bone_matrix_offset = 0x2C70;
 
   void updateAddrs();
   bool debug = false;
@@ -51,4 +52,5 @@ public:
   std::string getMapName();
   addr_type find_pattern(const char*, const char*, Addr_Range);
   void updateLocalPlayerAddr();
+  Vector getBone(addr_type, unsigned int);
 };

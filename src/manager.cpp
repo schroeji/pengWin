@@ -46,6 +46,7 @@ void GameManager::grabPlayers(){
   for (EntityType* player : players)
     delete player;
   players.clear();
+  player_addrs.clear();
   local_player_index = -1;
   for (unsigned int i = 0; i < count; i++) {
     // cout << "reading obj: " << i <<endl;
@@ -57,6 +58,7 @@ void GameManager::grabPlayers(){
     if ((player->m_iTeamNum == Team::CT || player->m_iTeamNum == Team::T) && player->m_iHealth > 0 && !player->m_bDormant) {
       // cout << dec << "player: " << players.size() << " addr: " << objects[i].m_pEntity << endl;
       players.push_back(player);
+      player_addrs.push_back((addr_type) objects[i].m_pEntity);
       if (objects[i].m_pEntity == (void*) mem.local_player_addr)
         local_player_index = players.size() - 1;
     }
@@ -82,7 +84,7 @@ void GameManager::printPlayers() {
       cout << "Team: T" << endl;
     printf("Origin x=%f y=%f z=%f\n", player->m_vecOrigin.x, player->m_vecOrigin.y, player->m_vecOrigin.z);
     printf("Angle: x=%4.16lf y=%4.16lf z=%f\n", player->m_angNetworkAngles.x, player->m_angNetworkAngles.y, player->m_angNetworkAngles.z);
-    // printf("dormant2: %x\n", player->__buf_0x11E[3]);
+    printf("view offset: %f, %f, %f\n", player->m_vecViewOffset.x,  player->m_vecViewOffset.y, player->m_vecViewOffset.z);
     cout << "-----" << endl;
     i++;
   }
@@ -155,4 +157,12 @@ bool GameManager::gameRunning() {
 bool GameManager::isOnServer() {
   mem.updateLocalPlayerAddr();
   return mem.local_player_addr > 0;
+}
+
+addr_type GameManager::getPlayerAddr(EntityType* player) {
+  for (unsigned int i = 0; i < players.size(); i++) {
+    if (player == players[i])
+      return player_addrs[i];
+  }
+  return 0;
 }

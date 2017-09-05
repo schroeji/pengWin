@@ -10,6 +10,5 @@ Current Features:
 
 TODO:
 - Sound ESP
-- BunnyHop
-- Aimbot
+- Aimbot (use BoneMatrix) + Aimkey
 - BlockBot

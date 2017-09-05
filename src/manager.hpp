@@ -17,11 +17,13 @@ public:
   EntityType* getLocalPlayer();
   bool gameRunning();
   bool isOnServer();
+  addr_type getPlayerAddr(EntityType*);
 
 private:
   MemoryAccess& mem;
   ObjectManager manager;
   std::vector<EntityType*> players;
+  std::vector<addr_type> player_addrs;
   // number of the local_player in players
   int local_player_index = -1;
 };

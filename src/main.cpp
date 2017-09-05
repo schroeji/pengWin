@@ -104,6 +104,7 @@ int main(int argc, char** argv) {
       csgo.grabPlayers();
       if (debug) {
         csgo.printPlayers();
+        // mem.getBone(csgo.getPlayerAddr(1), 0x8);
         // csgo.printEntities();
       }
       if (use_radar)

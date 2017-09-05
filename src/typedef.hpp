@@ -27,6 +27,9 @@ struct Vector {
   inline float operator*(Vector a) {
     return a.x * x + a.y * y + a.z * z;
   }
+  inline Vector operator-(Vector a) {
+    return {x - a.x, y - a.y, z - a.z};
+  }
 };
 
 struct QAngle {
@@ -69,9 +72,9 @@ struct EntityType {
 	int m_iPendingTeamNum; // 0x130
 	int m_iHealth; // 0x134
 	unsigned long m_fFlags; // 0x138
-	char __buf_0x140[0x8]; // 0x140
-	// Vector m_vecViewOffset; // 0x134
-	Vector m_vecVelocity; // 0x148
+	Vector m_vecViewOffset; // 0x13C
+  char __buf[0x8];
+	// Vector m_vecVelocity; // 0x148
 	Vector m_vecBaseVelocity; // 0x154
 	QAngle m_angNetworkAngles; // 0x160
 	Vector m_vecNetworkOrigin; // 0x16C
@@ -105,6 +108,15 @@ struct ObjectType {
   static const int END_OF_FREE_LIST = -1;
   static const int ENTRY_IN_USE = -2;
 }; // sizeof() == 0x34
+
+struct BoneInfo {
+	char __pad0x0[0xA];
+	float x;
+	char __pad0x10[0xA];
+	float y;
+	char __pad0x20[0xA];
+	float z;
+};
 
 enum Team {
   CT = 3,
@@ -148,9 +160,3 @@ inline float len(Vector2D vec) {
 inline float len(Vector vec) {
   return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
 }
-
-struct player_struct {
-  addr_type addr;
-  long timestamp;
-  EntityType* player;
-};

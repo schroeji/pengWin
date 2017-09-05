@@ -96,8 +96,10 @@ void Aimer::xSetAim(EntityType* enemy) {
     return;
   cout << "enemy in fov" << endl;
   EntityType* local_player = csgo.getLocalPlayer();
-  Vector player_pos = local_player->m_vecOrigin;
-  Vector enemy_pos = enemy->m_vecOrigin;
+  Vector player_pos = {local_player->m_vecOrigin.x, local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y, local_player->m_vecOrigin.z};
+  printf("network origin: %f, %f, %f\n", local_player->m_vecNetworkOrigin.x,  local_player->m_vecNetworkOrigin.y, local_player->m_vecNetworkOrigin.z);
+  // Vector enemy_pos = enemy->m_vecOrigin;
+  Vector enemy_pos = mem.getBone(csgo.getPlayerAddr(enemy), 0x8);
   Vector dist = getDist(&player_pos, &enemy_pos);
   if (dist.x == 0 && dist.y ==0 && dist.z ==0)
     return;
@@ -200,14 +202,19 @@ Vector Aimer::getView() {
 
 EntityType* Aimer::closestTargetInFov() {
   EntityType* local_player = csgo.getLocalPlayer();
+  Vector player_pos = {local_player->m_vecOrigin.x,
+                       local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
+                       local_player->m_vecOrigin.z};
   Vector view = getView();
   vector<EntityType*> players = csgo.getPlayers();
   EntityType* closestPlayer = nullptr;
   float closestAngle = settings.aim_fov;
-  for (EntityType* player : players) {
-    if (player == local_player)
+  Team team = mem.getTeam();
+  for (EntityType* enemy : players) {
+    if (enemy == local_player || enemy->m_iTeamNum == team)
       continue;
-    Vector dist = getDist(&local_player->m_vecOrigin, &player->m_vecOrigin);
+
+    Vector dist = getDist(&player_pos, &enemy->m_vecOrigin);
     normalize_vector(&dist);
     float angle = acos(dist * view);
     printf("dist: %f, %f,  %f\n", dist.x, dist.y, dist.z);
@@ -216,11 +223,11 @@ EntityType* Aimer::closestTargetInFov() {
     if (angle > settings.aim_fov)
       continue;
     if (closestPlayer == nullptr) {
-      closestPlayer = player;
+      closestPlayer = enemy;
       closestAngle = angle;
     }
     else if (closestAngle > angle) {
-      closestPlayer = player;
+      closestPlayer = enemy;
       closestAngle = angle;
     }
   }

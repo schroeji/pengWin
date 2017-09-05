@@ -177,3 +177,16 @@ void MemoryAccess::updateLocalPlayerAddr() {
   if (!read((void*) local_player_addr_location, &local_player_addr, sizeof(local_player_addr)))
     if (settings->debug) cout << "WARNING: could not get localplayer" << endl;
 }
+
+Vector MemoryAccess::getBone(addr_type player, unsigned int boneid) {
+  if(player == 0)
+    return {0,0,0};
+  addr_type boneMatrix_addr;
+  read((void*) (player + bone_matrix_offset), &boneMatrix_addr, sizeof(boneMatrix_addr));
+  cout << hex << "BoneMatrix_addr:" << boneMatrix_addr << endl;
+  BoneInfo bone;
+  read((void*) (boneMatrix_addr + 0x30 * boneid), &bone, sizeof(bone));
+  // bone location vectors have a different order than m_vecOrigin
+  printf("bone: %f, %f, %f\n", bone.y, bone.z, bone.x);
+  return {bone.y, bone.z, bone.x};
+}
