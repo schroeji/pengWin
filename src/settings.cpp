@@ -24,9 +24,8 @@ void Settings::load(const string& file) {
   vector<string> splits;
   if (settings_file.is_open()) {
     while (getline(settings_file, line)) {
-      // remove comments
+      // remove comments in file
       splits = split_string(line, "#");
-      //
       if (splits[0] == "")
         continue;
       else {
@@ -58,13 +57,22 @@ void Settings::load(const string& file) {
           trigger_key = XStringToKeysym(splits[1].c_str());
           if (!trigger_key)
             cout << "WARNING: invalid trigger_key" << endl;
-        }
-        else if (splits[0] == "find_map")
+        } else if (splits[0] == "find_map")
           find_map = (splits[1] == "true");
         else if (splits[0] == "debug")
           debug = (splits[1] == "true");
         else if (splits[0] == "aim_fov")
           aim_fov = degree_to_radian(strtof(splits[1].c_str(), NULL));
+        else if (splits[0] == "bhop_key") {
+          bhop_key = XStringToKeysym(splits[1].c_str());
+          if (!bhop_key)
+            cout << "WARNING: invalid bhop_key" << endl;
+        } else if (splits[0] == "aim_key") {
+          aim_key = XStringToKeysym(splits[1].c_str());
+          if (!aim_key)
+            cout << "WARNING: invalid aim_key" << endl;
+        } else if (splits[0] == "aim_sleep")
+          aim_sleep = strtol(splits[1].c_str(), NULL, 10);
       }
     }
   }
@@ -84,6 +92,10 @@ void Settings::print() {
   cout << "trigger_delay: " << trigger_delay << endl;
   cout << "trigger_use_random: " << trigger_use_random << endl;
   cout << "Trigger Key: " << XKeysymToString(trigger_key) << endl;
+  cout << "Bhop Key: " << XKeysymToString(bhop_key) << endl;
+  cout << "Aim Key: " << XKeysymToString(aim_key) << endl;
+  cout << "Aimbot FOV: " << radian_to_degree(aim_fov) << endl;
+  cout << "aim_sleep: " << aim_sleep << endl;
   cout << "find_map: " << find_map << endl;
   cout << "------------------------" << endl;
 }

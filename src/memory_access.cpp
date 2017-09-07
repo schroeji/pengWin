@@ -151,20 +151,21 @@ addr_type MemoryAccess::getCallAddress(void* addr) {
 unsigned int MemoryAccess::getCrosshairTarget() {
   unsigned int ret;
   if(!read((void*) (local_player_addr + crosshair_id_offset), &ret, sizeof(ret)))
-    cout << "WARNING: could not get crosshairTarget" << endl;
+    throw runtime_error("Could not get CrosshairTarget.");
   return ret;
 }
 
 Team MemoryAccess::getTeam() {
   unsigned int team;
   if(!read((void*) (local_player_addr + team_number_offset), &team, sizeof(team)))
-    cout << "WARNING: could not get Team" << endl;
+    throw runtime_error("Could not get Team.");
   return (Team) team;
 }
 
 string MemoryAccess::getMapName() {
   char MapName[32];
-  read((void*)(map_name_addr), &MapName, sizeof(MapName));
+  if (!read((void*)(map_name_addr), &MapName, sizeof(MapName)))
+    throw runtime_error("Could not get MapName.");
   // mem.read((void*)(Address + OFFSET_MAPNAME), &MapName, sizeof(MapName));
   string map_path(MapName);
   // vector<string> no_path = split_string(map_path, "/");
@@ -182,11 +183,13 @@ Vector MemoryAccess::getBone(addr_type player, unsigned int boneid) {
   if(player == 0)
     return {0,0,0};
   addr_type boneMatrix_addr;
-  read((void*) (player + bone_matrix_offset), &boneMatrix_addr, sizeof(boneMatrix_addr));
-  cout << hex << "BoneMatrix_addr:" << boneMatrix_addr << endl;
+
+  if (!read((void*) (player + bone_matrix_offset), &boneMatrix_addr, sizeof(boneMatrix_addr)))
+    throw runtime_error("Could not get BoneMatrix.");
   BoneInfo bone;
-  read((void*) (boneMatrix_addr + 0x30 * boneid), &bone, sizeof(bone));
+  if (!read((void*) (boneMatrix_addr + 0x30 * boneid), &bone, sizeof(bone)))
+    throw runtime_error("Could not get BoneInfo.");
   // bone location vectors have a different order than m_vecOrigin
-  printf("bone: %f, %f, %f\n", bone.y, bone.z, bone.x);
+  // printf("bone: %f, %f, %f\n", bone.y, bone.z, bone.x);
   return {bone.y, bone.z, bone.x};
 }

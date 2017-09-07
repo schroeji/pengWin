@@ -21,8 +21,7 @@ private:
 public:
   Aimer(GameManager& csgo);
   ~Aimer();
-  void setAim(EntityType*);
-  void xSetAim(Vector);
-  void moveAim(int, int);
-  void aimLoop();
+  MouseMovement calcMouseMovement(Vector, Vector);
+  void moveAim(MouseMovement);
+  void aimCheck();
 };

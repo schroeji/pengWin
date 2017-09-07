@@ -4,7 +4,6 @@
 #include "clicker.hpp"
 #include "settings.hpp"
 
-
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <linux/input.h>
@@ -19,6 +18,7 @@
 #include <fcntl.h>
 #include <chrono>
 #include <thread>
+#include <stdexcept>
 
 using namespace std;
 Aimer::Aimer(GameManager& csgo) : csgo(csgo),
@@ -86,36 +86,45 @@ Aimer::~Aimer() {
   close(uinput);
 }
 
-void Aimer::setAim(EntityType* enemy) {
-}
-
-void Aimer::aimLoop() {
+void Aimer::aimCheck() {
   EntityType* local_player;
   EntityType* enemy;
+  Vector target_pos;
+  Vector view;
   try {
     local_player = csgo.getLocalPlayer();
     enemy = closestTargetInFov();
-  } catch(exception e) {
+    view = getView();
+    target_pos = mem.getBone(csgo.getPlayerAddr(enemy), 0x8);
+  } catch(runtime_error e) {
+    if (settings.debug) cout << "EXCEPTION:" << e.what() << endl;
+    this_thread::sleep_for(chrono::milliseconds(settings.aim_sleep));
     return;
   }
   Vector player_pos = {local_player->m_vecOrigin.x,
                        local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
                        local_player->m_vecOrigin.z};
-  Vector target_pos = mem.getBone(csgo.getPlayerAddr(enemy), 0x8);
   Vector dist = getDist(&player_pos, &target_pos);
-  if (settings.debug) printf("dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
+  if (settings.debug) printf("deb dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
   if (dist.x == 0 && dist.y == 0 && dist.z == 0)
     return;
-  xSetAim(dist);
-}
-
-void Aimer::xSetAim(Vector dist) {
-  Vector view;
-  try {
-    view = getView();
-  } catch (exception e) {
+  MouseMovement move = calcMouseMovement(view, dist);
+  if (settings.debug) cout << dec << "move angle x: " << move.x << endl;
+  if (settings.debug) cout << dec << "move angle y: " << move.y << endl;
+  if (move.x == 0 && move.y == 0) {
+    this_thread::sleep_for(chrono::milliseconds(settings.aim_sleep));
     return;
   }
+  try {
+    moveAim(move);
+  } catch(runtime_error e) {
+    if (settings.debug) cout << "EXCEPTION:" << e.what() << endl;
+  }
+  this_thread::sleep_for(chrono::milliseconds(settings.aim_sleep));
+}
+
+MouseMovement Aimer::calcMouseMovement(Vector view, Vector dist) {
+  normalize_vector(&view);
   normalize_vector(&dist);
   if (settings.debug) printf("view: %f, %f, %f\n", view.x, view.y, view.z);
   Vector2D view_x_z_projection = {view.x, view.z};
@@ -162,45 +171,37 @@ void Aimer::xSetAim(Vector dist) {
   }
   int moveAngle_x = static_cast<int>(orientation_x * missing_angle_x * angle_multiplier_x * inverse_sens);
   int moveAngle_y = static_cast<int>(orientation_y * missing_angle_y * angle_multiplier_y * inverse_sens);
-  moveAim(moveAngle_x, moveAngle_y);
-  // cout << "missing angle x: " << missing_angle_x << endl;
-  // cout << "missing angle y: " << missing_angle_y << endl;
-  if (settings.debug) cout << dec << "move angle x: " << moveAngle_x << endl;
-  if (settings.debug) cout << dec << "move angle y: " << moveAngle_y << endl;
+  return {moveAngle_x, moveAngle_y};
 }
 
-void Aimer::moveAim(int dx, int dy) {
+void Aimer::moveAim(MouseMovement move) {
+  int dx = move.x;
+  int dy = move.y;
   struct input_event ev;
   memset(&ev, 0, sizeof(struct input_event));
   ev.type = EV_REL;
   ev.code = REL_X;
   ev.value = dx;
-  if(write(uinput, &ev, sizeof(struct input_event)) < 0) {
-    cout << "ERROR: could not write mouse movement" << endl;
-    return;
-  }
+  if(write(uinput, &ev, sizeof(struct input_event)) < 0)
+    throw runtime_error("Could not write mouse movement.");
   memset(&ev, 0, sizeof(struct input_event));
   ev.type = EV_REL;
   ev.code = REL_Y;
   ev.value = dy;
-  if(write(uinput, &ev, sizeof(struct input_event)) < 0){
-    cout << "ERROR: could not write mouse movement" << endl;
-    return;
-  }
+  if(write(uinput, &ev, sizeof(struct input_event)) < 0)
+    throw runtime_error("Could not write mouse movement.");
 
   memset(&ev, 0, sizeof(struct input_event));
   ev.type = EV_SYN;
-  if(write(uinput, &ev, sizeof(struct input_event)) < 0) {
-    cout << "ERROR: could not write mouse movement" << endl;
-    return;
-  }
+  if(write(uinput, &ev, sizeof(struct input_event)) < 0)
+    throw runtime_error("Could not write mouse movement.");
 }
 
 Vector Aimer::getView() {
   EntityType* local_player;
   try {
     local_player = csgo.getLocalPlayer();
-  } catch (exception e) {
+  } catch (runtime_error e) {
     throw e;
   }
   QAngle currAngle = local_player->m_angNetworkAngles;
@@ -223,10 +224,12 @@ EntityType* Aimer::closestTargetInFov() {
   Vector view;
   try {
     view = getView();
-  } catch (exception e) {
+  } catch (runtime_error e) {
     throw e;
   }
   vector<EntityType*> players = csgo.getPlayers();
+  if (players.size() < 2)
+    throw runtime_error("Only one player.");
   EntityType* closestPlayer = nullptr;
   float closestAngle = settings.aim_fov;
   Team team = mem.getTeam();
@@ -238,9 +241,9 @@ EntityType* Aimer::closestTargetInFov() {
     Vector dist = getDist(&player_pos, &enemy_pos);
     normalize_vector(&dist);
     float angle = acos(dist * view);
-    printf("dist: %f, %f,  %f\n", dist.x, dist.y, dist.z);
-    printf("view: %f, %f, %f\n", view.x, view.y, view.z);
-    printf("angle: %f, %f, %f\n", angle, radian_to_degree(angle), settings.aim_fov);
+    // printf("dist: %f, %f,  %f\n", dist.x, dist.y, dist.z);
+    // printf("view: %f, %f, %f\n", view.x, view.y, view.z);
+    // printf("angle: %f, %f, %f\n", angle, radian_to_degree(angle), settings.aim_fov);
     if (angle > settings.aim_fov)
       continue;
     if (closestPlayer == nullptr) {
@@ -253,6 +256,6 @@ EntityType* Aimer::closestTargetInFov() {
     }
   }
   if (closestPlayer == nullptr)
-    throw "No player in FOV";
+    throw runtime_error("No player in FOV");
   return closestPlayer;
 }

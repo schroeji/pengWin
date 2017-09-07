@@ -26,11 +26,16 @@ public:
   bool trigger_use_random = false;
   KeySym trigger_key;
 
+  //bhop settings
+  KeySym bhop_key;
+
   //radar settings
   bool find_map = false;
 
   //aimbot settings
   float aim_fov;
+  long int aim_sleep;
+  KeySym aim_key;
 
   Settings(const string&);
   static Settings getInstance();

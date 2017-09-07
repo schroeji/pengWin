@@ -123,6 +123,11 @@ enum Team {
   T = 2
 };
 
+struct MouseMovement {
+  int x;
+  int y;
+};
+
 class ObjectManager
 {
 public:

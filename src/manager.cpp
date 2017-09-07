@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <chrono>
 #include <thread>
+#include <stdexcept>
+
 using namespace std;
 
 GameManager::GameManager(MemoryAccess& mem) : mem(mem) {
@@ -147,7 +149,7 @@ EntityType* GameManager::getLocalPlayer() {
   if(!players.empty() && local_player_index != -1)
     return players[local_player_index];
   else
-    throw "No local player";
+    throw runtime_error("No local player");
 }
 
 bool GameManager::gameRunning() {

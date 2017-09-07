@@ -6,6 +6,7 @@
 #include "aimer.hpp"
 #include "settings.hpp"
 #include "bunnyhop.hpp"
+#include "hotkey.hpp"
 
 #include <stdio.h>
 #include <string.h>
@@ -64,6 +65,7 @@ int main(int argc, char** argv) {
   Aimer aimer(csgo);
   BunnyHopper bhopper(csgo);
   Visu visu;
+  HotkeyManager hotkeyMan(csgo);
 
   while (csgo.gameRunning()) {
     if (debug) cout << "Waiting until connected..." << endl;
@@ -93,30 +95,33 @@ int main(int argc, char** argv) {
       visu.start(map_name);
     }
 
-    if (use_bhop)
-      boost::thread triggerThread(boost::bind(&BunnyHopper::jumpLoop, &bhopper));
-
-    if (use_trigger)
-      boost::thread triggerThread(boost::bind(&Trigger::triggerLoop, &trigger));
+    if (use_bhop) {
+      boost::function<void()> bhopFunc = boost::bind(&BunnyHopper::jumpCheck, &bhopper);
+      hotkeyMan.bind(settings.bhop_key, bhopFunc);
+    }
+    if (use_trigger){
+      boost::function<void()> triggerFunc = boost::bind(&Trigger::triggerCheck, &trigger);
+      hotkeyMan.bind(settings.trigger_key, triggerFunc);
+    }
+    if (use_aimbot) {
+      boost::function<void()> aimFunc = boost::bind(&Aimer::aimCheck, &aimer);
+      hotkeyMan.bind(settings.aim_key, aimFunc);
+    }
+    hotkeyMan.startListen();
 
     // main loop
     while (csgo.isOnServer()) {
       csgo.grabPlayers();
       if (debug) {
-        csgo.printPlayers();
+        // csgo.printPlayers();
         // mem.getBone(csgo.getPlayerAddr(1), 0x8);
         // csgo.printEntities();
       }
       if (use_radar)
         csgo.printPlayerLocationsToFile("/tmp/locs.csv");
-      if (use_aimbot) {
-        vector<EntityType*> players = csgo.getPlayers();
-        aimer.xSetAim(players[1]);
-        // aimer.moveAim(0, 1);
-      }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     }
-    visu.stop();
+    if (use_radar) visu.stop();
     if (debug) cout << "Not on a server. Entering sleep mode..." << endl;
   }
 
