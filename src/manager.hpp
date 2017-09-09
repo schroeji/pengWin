@@ -22,6 +22,7 @@ public:
   bool isScoped();
   Team getTeam();
   unsigned int getCrosshairTarget();
+  QAngle getAimPunch();
 
 private:
   MemoryAccess& mem;

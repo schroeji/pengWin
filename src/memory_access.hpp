@@ -38,6 +38,11 @@ public:
   addr_type m_iTeamNum = 0x12C;
   addr_type m_dwBoneMatrix = 0x2C70;
   addr_type m_bIsScoped = 0x4144;
+  addr_type m_Local = 0x36f0;
+
+  //ofsets to player+ m_Local
+  addr_type m_viewPunchAngle = 0x68;
+  addr_type m_aimPunchAngle = 0x74;
 
   MemoryAccess(Settings*);
   pid_t getPid();

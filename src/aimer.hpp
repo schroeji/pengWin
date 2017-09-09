@@ -18,11 +18,12 @@ private:
   Vector getView();
   Vector predictPositionOffset(EntityType*);
   EntityType* closestTargetInFov();
+  MouseMovement calcRecoil();
+  MouseMovement calcMouseMovement(Vector, Vector);
 
 public:
   Aimer(GameManager& csgo);
   ~Aimer();
-  MouseMovement calcMouseMovement(Vector, Vector);
-  void moveAim(MouseMovement);
   void aimCheck();
+  void moveAim(MouseMovement);
 };

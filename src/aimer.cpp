@@ -271,3 +271,14 @@ Vector Aimer::predictPositionOffset(EntityType* player) {
   float t = (float) settings.main_loop_sleep / 1000.0;
   return vel * t;
 }
+
+MouseMovement Aimer::calcRecoil() {
+
+  EntityType* local_player;
+  try {
+    local_player = csgo.getLocalPlayer();
+  } catch(runtime_error e){
+    return {0, 0};
+  }
+
+}

@@ -69,8 +69,8 @@ void GameManager::grabPlayers(){
   vector<EntityType*> old_players = players;
   players = new_players;
   player_addrs = new_player_addrs;
-  for (EntityType* player : old_players)
-    delete player;
+  // for (EntityType* player : old_players)
+  //   delete player;
 }
 
 vector<EntityType*>& GameManager::getPlayers() {
@@ -93,6 +93,7 @@ void GameManager::printPlayers() {
     printf("Angle: x=%4.16lf y=%4.16lf z=%f\n", player->m_angNetworkAngles.x, player->m_angNetworkAngles.y, player->m_angNetworkAngles.z);
     printf("view offset: %f, %f\n", player->m_vecViewOffset.x,  player->m_vecViewOffset.y);
     printf("Velocity: %f, %f, %f\n", player->m_vecVelocity.x,  player->m_vecVelocity.y, player->m_vecVelocity.z);
+    printf("Aimpunch: %f, %f, %f\n", getAimPunch().x,  getAimPunch().y, getAimPunch().z);
     cout << "-----" << endl;
     i++;
   }
@@ -206,4 +207,11 @@ unsigned int GameManager::getCrosshairTarget() {
   if(!mem.read((void*) (mem.local_player_addr + mem.m_iCrosshairIndex), &ret, sizeof(ret)))
     throw runtime_error("Could not get CrosshairTarget.");
   return ret;
+}
+
+QAngle GameManager::getAimPunch() {
+  QAngle ang;
+  if(!mem.read((void*) (mem.local_player_addr + mem.m_Local + mem.m_aimPunchAngle), &ang, sizeof(ang)))
+    throw runtime_error("Could not get CrosshairTarget.");
+  return ang;
 }
