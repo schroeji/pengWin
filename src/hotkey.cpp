@@ -8,8 +8,15 @@
 #include <functional>
 
 using namespace std;
+
+int x_error_handler(Display* d, XErrorEvent* e) {
+  // throw runtime_error("X Error");
+  return 0;
+}
+
 HotkeyManager::HotkeyManager(GameManager csgo) : csgo(csgo),
                                                  settings(Settings::getInstance()) {
+  XSetErrorHandler(x_error_handler); //
   display = XOpenDisplay(NULL);
   rootWindow = DefaultRootWindow(display);
 }
@@ -31,14 +38,24 @@ void HotkeyManager::startListen() {
 }
 
 void HotkeyManager::keyPressListen() {
-  unsigned int modifiers = AnyModifier;
+  unsigned int modifiers;
   int pointer_mode = GrabModeAsync;
   int keyboard_mode = GrabModeAsync;
   bool owner_events = false;
   XEvent event;
 
   for (map<unsigned int, boost::function<void()>>::iterator it = bindings.begin(); it != bindings.end(); it++) {
+    modifiers = AnyModifier;
     XUngrabKey(display, it->first, modifiers, rootWindow);
+    // grab with anymodifer (fails for space)
+    XGrabKey(display, it->first, modifiers, rootWindow, owner_events, pointer_mode,
+             keyboard_mode);
+    // grab with caps_lock
+    modifiers = LockMask;
+    XGrabKey(display, it->first, modifiers, rootWindow, owner_events, pointer_mode,
+             keyboard_mode);
+    // grab without modifier
+    modifiers = 0;
     XGrabKey(display, it->first, modifiers, rootWindow, owner_events, pointer_mode,
              keyboard_mode);
   }

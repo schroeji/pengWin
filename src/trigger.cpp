@@ -26,17 +26,17 @@ Trigger::Trigger(GameManager& csgo) : csgo(csgo),
 Trigger::~Trigger() {}
 
 void Trigger::triggerCheck() {
-  vector<EntityType*>& players = csgo.getPlayers();
-  if (players.size() < 2)
-    return;
-  Team ownTeam = mem.getTeam();
-  unsigned int crosshairTarget = mem.getCrosshairTarget();
+  Team ownTeam = csgo.getTeam();
+  unsigned int crosshairTarget = csgo.getCrosshairTarget();
   // if (settings.debug) cout << "crosshairTarget: " << crosshairTarget << endl;
   if (!crosshairTarget)
     return;
 
   normal_distribution<double> distrib((double) settings.trigger_delay, (double) settings.trigger_delay / 2);
   std::default_random_engine gen;
+  vector<EntityType*>& players = csgo.getPlayers();
+  if (players.size() < 2)
+    return;
   for (EntityType* player : players) {
     if (player->m_iEntityId == crosshairTarget && player->m_iTeamNum != ownTeam){
       if (settings.trigger_use_random) {

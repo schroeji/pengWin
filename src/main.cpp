@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
       if (settings.find_map) {
         if (debug) cout << "Scanning for map..." << endl;
         while (map_name == "") {
-          map_name = mem.getMapName();
+          map_name = csgo.getMapName();
           this_thread::sleep_for(chrono::milliseconds(1000));
         }
       } else {
@@ -114,8 +114,6 @@ int main(int argc, char** argv) {
       csgo.grabPlayers();
       if (debug) {
         // csgo.printPlayers();
-        // mem.getBone(csgo.getPlayerAddr(1), 0x8);
-        // csgo.printEntities();
       }
       if (use_radar)
         csgo.printPlayerLocationsToFile("/tmp/locs.csv");

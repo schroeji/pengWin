@@ -36,6 +36,7 @@ public:
   float aim_fov;
   long int aim_sleep;
   KeySym aim_key;
+  float smoothing_factor = 0.2;
 
   Settings(const string&);
   static Settings getInstance();

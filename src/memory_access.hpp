@@ -23,12 +23,6 @@ private:
   //offsets to engine base
   addr_type map_name_offset;
 
-  //offsets to localPlayer
-  addr_type crosshair_id_offset = 0xBBB8;
-  // addr_type crosshair_id_offset = 0xB294;
-  addr_type team_number_offset = 0x12C;
-  addr_type bone_matrix_offset = 0x2C70;
-
   void updateAddrs();
   bool debug = false;
 
@@ -39,6 +33,12 @@ public:
   addr_type map_name_addr;
   addr_type force_jump_addr;
 
+  //offsets to players
+  addr_type m_iCrosshairIndex = 0xBBB8;
+  addr_type m_iTeamNum = 0x12C;
+  addr_type m_dwBoneMatrix = 0x2C70;
+  addr_type m_bIsScoped = 0x4144;
+
   MemoryAccess(Settings*);
   pid_t getPid();
   Addr_Range getModule(const std::string&);
@@ -46,10 +46,7 @@ public:
   bool write(void*, void*, size_t);
   Addr_Range getClientRange();
   Addr_Range getEngineRange();
-  unsigned int getCrosshairTarget();
   addr_type getCallAddress(void*);
-  Team getTeam();
-  std::string getMapName();
   addr_type find_pattern(const char*, const char*, Addr_Range);
   void updateLocalPlayerAddr();
   Vector getBone(addr_type, unsigned int);

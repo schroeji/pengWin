@@ -15,6 +15,9 @@ struct Vector2D {
   inline float operator*(Vector2D a) {
     return a.x * x + a.y * y;
   }
+  inline Vector2D operator*(float a) {
+    return {a*x, a*y};
+  }
 };
 
 struct Vector {
@@ -29,6 +32,9 @@ struct Vector {
   }
   inline Vector operator-(Vector a) {
     return {x - a.x, y - a.y, z - a.z};
+  }
+  inline Vector operator*(float a) {
+    return {a*x, a*y, a*z};
   }
 };
 
@@ -72,9 +78,8 @@ struct EntityType {
 	int m_iPendingTeamNum; // 0x130
 	int m_iHealth; // 0x134
 	unsigned long m_fFlags; // 0x138
-	Vector m_vecViewOffset; // 0x13C
-  char __buf[0x8];
-	// Vector m_vecVelocity; // 0x148
+	Vector2D m_vecViewOffset; // 0x13C
+	Vector m_vecVelocity; // 0x148
 	Vector m_vecBaseVelocity; // 0x154
 	QAngle m_angNetworkAngles; // 0x160
 	Vector m_vecNetworkOrigin; // 0x16C
@@ -150,6 +155,7 @@ void normalize_vector(Vector2D*);
 Vector getDist(Vector*, Vector*);
 float scalar_prod(Vector*, Vector*);
 float scalar_prod(Vector2D*, Vector2D*);
+
 
 inline float degree_to_radian(float x) {
   return x*0.01745329;

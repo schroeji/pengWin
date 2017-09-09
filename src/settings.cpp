@@ -73,6 +73,8 @@ void Settings::load(const string& file) {
             cout << "WARNING: invalid aim_key" << endl;
         } else if (splits[0] == "aim_sleep")
           aim_sleep = strtol(splits[1].c_str(), NULL, 10);
+        else if (splits[0] == "smoothing_factor")
+          smoothing_factor = strtof(splits[1].c_str(), NULL);
       }
     }
   }
@@ -96,6 +98,7 @@ void Settings::print() {
   cout << "Aim Key: " << XKeysymToString(aim_key) << endl;
   cout << "Aimbot FOV: " << radian_to_degree(aim_fov) << endl;
   cout << "aim_sleep: " << aim_sleep << endl;
+  cout << "smoothing_factor: " << smoothing_factor << endl;
   cout << "find_map: " << find_map << endl;
   cout << "------------------------" << endl;
 }

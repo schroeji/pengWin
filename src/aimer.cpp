@@ -105,7 +105,11 @@ void Aimer::aimCheck() {
                        local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
                        local_player->m_vecOrigin.z};
   Vector dist = getDist(&player_pos, &target_pos);
+
+  dist = dist + predictPositionOffset(enemy);
   if (settings.debug) printf("deb dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
+  if (settings.debug) printf("player_pos %f, %f, %f\n", player_pos.x, player_pos.y, player_pos.z);
+  if (settings.debug) printf("target_pos %f, %f, %f\n", target_pos.x, target_pos.y, target_pos.z);
   if (dist.x == 0 && dist.y == 0 && dist.z == 0)
     return;
   MouseMovement move = calcMouseMovement(view, dist);
@@ -169,8 +173,11 @@ MouseMovement Aimer::calcMouseMovement(Vector view, Vector dist) {
   } else {
     orientation_y = 0;
   }
-  int moveAngle_x = static_cast<int>(orientation_x * missing_angle_x * angle_multiplier_x * inverse_sens);
-  int moveAngle_y = static_cast<int>(orientation_y * missing_angle_y * angle_multiplier_y * inverse_sens);
+  float multiplier = angle_multiplier;
+  if (csgo.isScoped())
+    multiplier = angle_multiplier_scoped;
+  int moveAngle_x = static_cast<int>(orientation_x * missing_angle_x * multiplier * inverse_sens * settings.smoothing_factor);
+  int moveAngle_y = static_cast<int>(orientation_y * missing_angle_y * multiplier * inverse_sens * settings.smoothing_factor);
   return {moveAngle_x, moveAngle_y};
 }
 
@@ -215,24 +222,23 @@ Vector Aimer::getView() {
 }
 
 EntityType* Aimer::closestTargetInFov() {
-  EntityType* local_player = csgo.getLocalPlayer();
-  if (!local_player)
-    return nullptr;
-  Vector player_pos = {local_player->m_vecOrigin.x,
-                       local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
-                       local_player->m_vecOrigin.z};
+  EntityType* local_player;
   Vector view;
   try {
+    local_player = csgo.getLocalPlayer();
     view = getView();
   } catch (runtime_error e) {
     throw e;
   }
+  Vector player_pos = {local_player->m_vecOrigin.x,
+                       local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
+                       local_player->m_vecOrigin.z};
   vector<EntityType*> players = csgo.getPlayers();
   if (players.size() < 2)
     throw runtime_error("Only one player.");
   EntityType* closestPlayer = nullptr;
   float closestAngle = settings.aim_fov;
-  Team team = mem.getTeam();
+  Team team = csgo.getTeam();
   for (EntityType* enemy : players) {
     if (enemy == local_player || enemy->m_iTeamNum == team)
       continue;
@@ -258,4 +264,10 @@ EntityType* Aimer::closestTargetInFov() {
   if (closestPlayer == nullptr)
     throw runtime_error("No player in FOV");
   return closestPlayer;
+}
+
+Vector Aimer::predictPositionOffset(EntityType* player) {
+  Vector vel = {player->m_vecVelocity.y, player->m_vecVelocity.z, player->m_vecVelocity.x};
+  float t = (float) settings.main_loop_sleep / 1000.0;
+  return vel * t;
 }

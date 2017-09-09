@@ -147,33 +147,6 @@ addr_type MemoryAccess::getCallAddress(void* addr) {
   return 0;
 }
 
-
-unsigned int MemoryAccess::getCrosshairTarget() {
-  unsigned int ret;
-  if(!read((void*) (local_player_addr + crosshair_id_offset), &ret, sizeof(ret)))
-    throw runtime_error("Could not get CrosshairTarget.");
-  return ret;
-}
-
-Team MemoryAccess::getTeam() {
-  unsigned int team;
-  if(!read((void*) (local_player_addr + team_number_offset), &team, sizeof(team)))
-    throw runtime_error("Could not get Team.");
-  return (Team) team;
-}
-
-string MemoryAccess::getMapName() {
-  char MapName[32];
-  if (!read((void*)(map_name_addr), &MapName, sizeof(MapName)))
-    throw runtime_error("Could not get MapName.");
-  // mem.read((void*)(Address + OFFSET_MAPNAME), &MapName, sizeof(MapName));
-  string map_path(MapName);
-  // vector<string> no_path = split_string(map_path, "/");
-  vector<string> no_bsp = split_string(map_path, ".");
-  string ret(no_bsp[0]);
-  return ret;
-}
-
 void MemoryAccess::updateLocalPlayerAddr() {
   if (!read((void*) local_player_addr_location, &local_player_addr, sizeof(local_player_addr)))
     if (settings->debug) cout << "WARNING: could not get localplayer" << endl;
@@ -181,10 +154,10 @@ void MemoryAccess::updateLocalPlayerAddr() {
 
 Vector MemoryAccess::getBone(addr_type player, unsigned int boneid) {
   if(player == 0)
-    return {0,0,0};
+    throw runtime_error("getBone: Player is nullptr.");
   addr_type boneMatrix_addr;
 
-  if (!read((void*) (player + bone_matrix_offset), &boneMatrix_addr, sizeof(boneMatrix_addr)))
+  if (!read((void*) (player + m_dwBoneMatrix), &boneMatrix_addr, sizeof(boneMatrix_addr)))
     throw runtime_error("Could not get BoneMatrix.");
   BoneInfo bone;
   if (!read((void*) (boneMatrix_addr + 0x30 * boneid), &bone, sizeof(bone)))

@@ -45,10 +45,8 @@ void GameManager::grabPlayers(){
     cout << "Could not get objects" << endl;
     return;
   }
-  for (EntityType* player : players)
-    delete player;
-  players.clear();
-  player_addrs.clear();
+  vector<EntityType*> new_players;
+  vector<addr_type> new_player_addrs;
   local_player_index = -1;
   for (unsigned int i = 0; i < count; i++) {
     // cout << "reading obj: " << i <<endl;
@@ -58,15 +56,21 @@ void GameManager::grabPlayers(){
     EntityType* player = new EntityType;
     mem.read(objects[i].m_pEntity, player, sizeof(EntityType));
     if ((player->m_iTeamNum == Team::CT || player->m_iTeamNum == Team::T) && player->m_iHealth > 0 && !player->m_bDormant) {
-      // cout << dec << "player: " << players.size() << " addr: " << objects[i].m_pEntity << endl;
-      players.push_back(player);
-      player_addrs.push_back((addr_type) objects[i].m_pEntity);
+      // cout << dec << "player: " << new_players.size() << " addr: " << objects[i].m_pEntity << endl;
+      new_players.push_back(player);
+      new_player_addrs.push_back((addr_type) objects[i].m_pEntity);
       if (objects[i].m_pEntity == (void*) mem.local_player_addr)
-        local_player_index = players.size() - 1;
+        local_player_index = new_players.size() - 1;
     }
     else
       delete player;
   }
+  // copy new players and delete old ones after for thread safety
+  vector<EntityType*> old_players = players;
+  players = new_players;
+  player_addrs = new_player_addrs;
+  for (EntityType* player : old_players)
+    delete player;
 }
 
 vector<EntityType*>& GameManager::getPlayers() {
@@ -78,15 +82,17 @@ void GameManager::printPlayers() {
   cout << "---------Players---------" << endl;
   for (EntityType* player : players) {
     cout << dec << "Player: " << i << endl;
+    cout << hex << "Addr: " << player_addrs[i] << endl;
     printf("ID: %d\n", player->m_iEntityId);
-    cout << "hp: " << player->m_iHealth << endl;
+    cout << dec << "hp: " << player->m_iHealth << endl;
     if(player->m_iTeamNum == Team::CT)
       cout << "Team: CT" << endl;
     else if(player->m_iTeamNum == Team::T)
       cout << "Team: T" << endl;
     printf("Origin x=%f y=%f z=%f\n", player->m_vecOrigin.x, player->m_vecOrigin.y, player->m_vecOrigin.z);
     printf("Angle: x=%4.16lf y=%4.16lf z=%f\n", player->m_angNetworkAngles.x, player->m_angNetworkAngles.y, player->m_angNetworkAngles.z);
-    printf("view offset: %f, %f, %f\n", player->m_vecViewOffset.x,  player->m_vecViewOffset.y, player->m_vecViewOffset.z);
+    printf("view offset: %f, %f\n", player->m_vecViewOffset.x,  player->m_vecViewOffset.y);
+    printf("Velocity: %f, %f, %f\n", player->m_vecVelocity.x,  player->m_vecVelocity.y, player->m_vecVelocity.z);
     cout << "-----" << endl;
     i++;
   }
@@ -167,4 +173,37 @@ addr_type GameManager::getPlayerAddr(EntityType* player) {
       return player_addrs[i];
   }
   return 0;
+}
+
+string GameManager::getMapName() {
+  char MapName[32];
+  if (!mem.read((void*)(mem.map_name_addr), &MapName, sizeof(MapName)))
+    throw runtime_error("Could not get MapName.");
+  // mem.read((void*)(Address + OFFSET_MAPNAME), &MapName, sizeof(MapName));
+  string map_path(MapName);
+  // vector<string> no_path = split_string(map_path, "/");
+  vector<string> no_bsp = split_string(map_path, ".");
+  string ret(no_bsp[0]);
+  return ret;
+}
+
+bool GameManager::isScoped() {
+  char buf;
+  if(!mem.read((void*) (mem.local_player_addr + mem.m_bIsScoped), &buf, sizeof(buf)))
+     return false;
+  return (bool) buf;
+}
+
+Team GameManager::getTeam() {
+  unsigned int team;
+  if(!mem.read((void*) (mem.local_player_addr + mem.m_iTeamNum), &team, sizeof(team)))
+    throw runtime_error("Could not get Team.");
+  return (Team) team;
+}
+
+unsigned int GameManager::getCrosshairTarget() {
+  unsigned int ret;
+  if(!mem.read((void*) (mem.local_player_addr + mem.m_iCrosshairIndex), &ret, sizeof(ret)))
+    throw runtime_error("Could not get CrosshairTarget.");
+  return ret;
 }

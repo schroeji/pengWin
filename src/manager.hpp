@@ -18,6 +18,10 @@ public:
   bool gameRunning();
   bool isOnServer();
   addr_type getPlayerAddr(EntityType*);
+  std::string getMapName();
+  bool isScoped();
+  Team getTeam();
+  unsigned int getCrosshairTarget();
 
 private:
   MemoryAccess& mem;
