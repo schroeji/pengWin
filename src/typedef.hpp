@@ -42,6 +42,15 @@ struct QAngle {
 	float x; // Pitch
 	float y; // Yaw
 	float z; // Roll
+  inline QAngle operator+(QAngle a) {
+    return {a.x + x, a.y + y, a.z + z};
+  }
+  inline QAngle operator-(QAngle a) {
+    return {x - a.x, y - a.y, z - a.z};
+  }
+  inline QAngle operator*(float a) {
+    return {a*x, a*y, a*z};
+  }
 };
 
 struct EntityType {

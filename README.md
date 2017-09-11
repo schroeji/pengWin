@@ -7,8 +7,11 @@ Current Features:
 - Offset Dumper
 - Loading settings from file
 - BunnyHop
+- Aimbot
+- Defining Hotkeys
 
 TODO:
 - Sound ESP
-- Aimbot (use BoneMatrix) + Aimkey
 - BlockBot
+- Only grab keys in csgo
+- Make mouseclicks hotkey available

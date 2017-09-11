@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
     while (csgo.isOnServer()) {
       csgo.grabPlayers();
       if (debug) {
-        csgo.printPlayers();
+        // csgo.printPlayers();
       }
       if (use_radar)
         csgo.printPlayerLocationsToFile("/tmp/locs.csv");

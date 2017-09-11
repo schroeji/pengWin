@@ -69,8 +69,8 @@ void GameManager::grabPlayers(){
   vector<EntityType*> old_players = players;
   players = new_players;
   player_addrs = new_player_addrs;
-  // for (EntityType* player : old_players)
-  //   delete player;
+  for (EntityType* player : old_players)
+    delete player;
 }
 
 vector<EntityType*>& GameManager::getPlayers() {
@@ -153,10 +153,15 @@ MemoryAccess& GameManager::getMemoryAccess() {
 }
 
 EntityType* GameManager::getLocalPlayer() {
-  if(!players.empty() && local_player_index != -1)
-    return players[local_player_index];
-  else
-    throw runtime_error("No local player");
+  mem.updateLocalPlayerAddr();
+  if (!mem.read((void*) mem.local_player_addr, (void*) local_player, sizeof(EntityType)))
+      throw runtime_error("No local player");
+  return local_player;
+
+  // if(!players.empty() && local_player_index != -1)
+  //   return players[local_player_index];
+  // else
+  //   throw runtime_error("No local player");
 }
 
 bool GameManager::gameRunning() {

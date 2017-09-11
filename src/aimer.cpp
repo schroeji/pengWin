@@ -151,8 +151,6 @@ MouseMovement Aimer::calcMouseMovement(Vector view, Vector dist) {
   missing_angle_y = min(1.f, max(-1.f , missing_angle_y));
   missing_angle_x = acos(missing_angle_x);
   missing_angle_y = acos(missing_angle_y);
-  missing_angle_x = radian_to_degree(missing_angle_x);
-  missing_angle_y = radian_to_degree(missing_angle_y);
   // determinante gives the orientation of the two vectors
   float det_x = view.x * dist.z - view.z * dist.x;
   float orientation_x = 0;
@@ -173,6 +171,11 @@ MouseMovement Aimer::calcMouseMovement(Vector view, Vector dist) {
   } else {
     orientation_y = 0;
   }
+  // QAngle aimPunch = csgo.getAimPunch();
+  // missing_angle_x = missing_angle_x - aimPunch.y;
+  // missing_angle_y = missing_angle_y - aimPunch.x;
+  missing_angle_x = radian_to_degree(missing_angle_x);
+  missing_angle_y = radian_to_degree(missing_angle_y);
   float multiplier = angle_multiplier;
   if (csgo.isScoped())
     multiplier = angle_multiplier_scoped;
@@ -212,6 +215,9 @@ Vector Aimer::getView() {
     throw e;
   }
   QAngle currAngle = local_player->m_angNetworkAngles;
+  // times two because of weapon_recoil_scale convar
+  QAngle aimPunch = csgo.getAimPunch() * 2.0;
+  currAngle = currAngle + aimPunch;
   float radians_x = degree_to_radian(-currAngle.x); // pitch
   float radians_y = degree_to_radian(currAngle.y);  // yaw
   float v1 = cos(radians_x) * sin(radians_y);
@@ -234,6 +240,7 @@ EntityType* Aimer::closestTargetInFov() {
                        local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
                        local_player->m_vecOrigin.z};
   vector<EntityType*> players = csgo.getPlayers();
+  unsigned int boneIds[] = {4, 5, 6, 8};
   if (players.size() < 2)
     throw runtime_error("Only one player.");
   EntityType* closestPlayer = nullptr;
@@ -243,22 +250,24 @@ EntityType* Aimer::closestTargetInFov() {
     if (enemy == local_player || enemy->m_iTeamNum == team)
       continue;
     addr_type enemy_addr = csgo.getPlayerAddr(enemy);
-    Vector enemy_pos = mem.getBone(enemy_addr, 0x8);
-    Vector dist = getDist(&player_pos, &enemy_pos);
-    normalize_vector(&dist);
-    float angle = acos(dist * view);
-    // printf("dist: %f, %f,  %f\n", dist.x, dist.y, dist.z);
-    // printf("view: %f, %f, %f\n", view.x, view.y, view.z);
-    // printf("angle: %f, %f, %f\n", angle, radian_to_degree(angle), settings.aim_fov);
-    if (angle > settings.aim_fov)
-      continue;
-    if (closestPlayer == nullptr) {
-      closestPlayer = enemy;
-      closestAngle = angle;
-    }
-    else if (closestAngle > angle) {
-      closestPlayer = enemy;
-      closestAngle = angle;
+    for (unsigned int boneID : boneIds ) {
+      Vector enemy_pos = mem.getBone(enemy_addr, boneID);
+      Vector dist = getDist(&player_pos, &enemy_pos);
+      normalize_vector(&dist);
+      float angle = acos(dist * view);
+      // printf("dist: %f, %f,  %f\n", dist.x, dist.y, dist.z);
+      // printf("view: %f, %f, %f\n", view.x, view.y, view.z);
+      // printf("angle: %f, %f, %f\n", angle, radian_to_degree(angle), settings.aim_fov);
+      if (angle > settings.aim_fov)
+        continue;
+      if (closestPlayer == nullptr) {
+        closestPlayer = enemy;
+        closestAngle = angle;
+      }
+      else if (closestAngle > angle) {
+        closestPlayer = enemy;
+        closestAngle = angle;
+      }
     }
   }
   if (closestPlayer == nullptr)
@@ -273,12 +282,8 @@ Vector Aimer::predictPositionOffset(EntityType* player) {
 }
 
 MouseMovement Aimer::calcRecoil() {
-
-  EntityType* local_player;
-  try {
-    local_player = csgo.getLocalPlayer();
-  } catch(runtime_error e){
-    return {0, 0};
-  }
-
+  QAngle m_aimPunchAngle = csgo.getAimPunch();
+  int dx = static_cast<int>(-m_aimPunchAngle.y * angle_multiplier * inverse_sens);
+  int dy = static_cast<int>(-m_aimPunchAngle.x * angle_multiplier * inverse_sens);
+  return {dx, dy};
 }

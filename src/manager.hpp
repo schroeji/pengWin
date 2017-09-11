@@ -31,4 +31,5 @@ private:
   std::vector<addr_type> player_addrs;
   // number of the local_player in players
   int local_player_index = -1;
+  EntityType* local_player = new EntityType;
 };
