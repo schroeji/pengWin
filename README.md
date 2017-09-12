@@ -15,3 +15,4 @@ TODO:
 - BlockBot
 - Only grab keys in csgo
 - Make mouseclicks hotkey available
+- Visibility check (BSP parsing)
