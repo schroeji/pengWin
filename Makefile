@@ -7,7 +7,7 @@ CC = g++
 CFLAGS  = -g -Wall
 
 # the build target executable:
-TARGET = external_hack
+TARGET = pengWin
 TARGET_DUMPER = offset_dumper
 
 #includes
