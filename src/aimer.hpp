@@ -4,6 +4,7 @@
 #include "clicker.hpp"
 #include "settings.hpp"
 
+
 class Aimer {
 private:
   GameManager& csgo;
@@ -17,7 +18,7 @@ private:
   const float angle_multiplier_scoped = 1 / 0.0127111077308654;
   Vector getView();
   Vector predictPositionOffset(EntityType*);
-  EntityType* closestTargetInFov();
+  std::pair<EntityType*, Vector> closestTargetInFov(Vector view);
   MouseMovement calcRecoil();
   MouseMovement calcMouseMovement(Vector, Vector);
 

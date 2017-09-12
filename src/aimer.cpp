@@ -93,9 +93,10 @@ void Aimer::aimCheck() {
   Vector view;
   try {
     local_player = csgo.getLocalPlayer();
-    enemy = closestTargetInFov();
     view = getView();
-    target_pos = mem.getBone(csgo.getPlayerAddr(enemy), 0x8);
+    pair<EntityType*, Vector> temp = closestTargetInFov(view);
+    enemy = temp.first;
+    target_pos = temp.second;
   } catch(runtime_error e) {
     if (settings.debug) cout << "EXCEPTION:" << e.what() << endl;
     this_thread::sleep_for(chrono::milliseconds(settings.aim_sleep));
@@ -227,12 +228,11 @@ Vector Aimer::getView() {
   return {v1, v2, v3};
 }
 
-EntityType* Aimer::closestTargetInFov() {
+pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
   EntityType* local_player;
-  Vector view;
+  Vector bone_pos;
   try {
     local_player = csgo.getLocalPlayer();
-    view = getView();
   } catch (runtime_error e) {
     throw e;
   }
@@ -240,19 +240,26 @@ EntityType* Aimer::closestTargetInFov() {
                        local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
                        local_player->m_vecOrigin.z};
   vector<EntityType*> players = csgo.getPlayers();
-  unsigned int boneIds[] = {4, 5, 6, 8};
+  unsigned int boneIds[] = {3, 6, 7, 8};
   if (players.size() < 2)
     throw runtime_error("Only one player.");
   EntityType* closestPlayer = nullptr;
   float closestAngle = settings.aim_fov;
+  Vector closestBone = {0, 0, 0};
   Team team = csgo.getTeam();
   for (EntityType* enemy : players) {
     if (enemy == local_player || enemy->m_iTeamNum == team)
       continue;
     addr_type enemy_addr = csgo.getPlayerAddr(enemy);
     for (unsigned int boneID : boneIds ) {
-      Vector enemy_pos = mem.getBone(enemy_addr, boneID);
-      Vector dist = getDist(&player_pos, &enemy_pos);
+      // cout << "bone ID:" << boneID << endl;
+      try {
+        bone_pos = mem.getBone(enemy_addr, boneID);
+        // printf("bone: %f, %f, %f \n", bone_pos.x, bone_pos.z, bone_pos.z);
+      } catch(runtime_error e) {
+        if (settings.debug) cout << e.what() << endl;;
+      }
+      Vector dist = getDist(&player_pos, &bone_pos);
       normalize_vector(&dist);
       float angle = acos(dist * view);
       // printf("dist: %f, %f,  %f\n", dist.x, dist.y, dist.z);
@@ -263,16 +270,18 @@ EntityType* Aimer::closestTargetInFov() {
       if (closestPlayer == nullptr) {
         closestPlayer = enemy;
         closestAngle = angle;
+        closestBone = bone_pos;
       }
       else if (closestAngle > angle) {
         closestPlayer = enemy;
         closestAngle = angle;
+        closestBone = bone_pos;
       }
     }
   }
   if (closestPlayer == nullptr)
     throw runtime_error("No player in FOV");
-  return closestPlayer;
+  return pair<EntityType*, Vector>(closestPlayer, closestBone);
 }
 
 Vector Aimer::predictPositionOffset(EntityType* player) {

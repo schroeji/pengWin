@@ -4,10 +4,10 @@ A simple external CSGO-Hack for Linux.
 Current Features:
 - External Radar
 - Triggerbot
-- Offset Dumper
-- Loading settings from file
 - BunnyHop
 - Aimbot
+- Offset Dumper
+- Loading settings from file
 - Defining Hotkeys
 
 TODO:

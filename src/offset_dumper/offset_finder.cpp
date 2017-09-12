@@ -42,9 +42,9 @@ void write_settings(const string& file_name) {
   file << "trigger_key=Caps_Lock" << endl;
   file << "bhop_key=space" << endl;
   file << "aim_key=Caps_Lock" << endl;
-  file << "aim_sleep=50" << endl;
-  file << "aim_fov=6.0" << endl;
-  file << "smoothing_factor=0.2" << endl;
+  file << "aim_sleep=30" << endl;
+  file << "aim_fov=3.0" << endl;
+  file << "smoothing_factor=0.4" << endl;
   file << "find_map=true" << endl;
   file << "debug=false" << endl;
   file.close();
