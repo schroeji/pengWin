@@ -96,15 +96,15 @@ int main(int argc, char** argv) {
     }
 
     if (use_bhop) {
-      boost::function<void()> bhopFunc = boost::bind(&BunnyHopper::jumpCheck, &bhopper);
+      boost::function<void(unsigned int)> bhopFunc = boost::bind(&BunnyHopper::jumpCheck, &bhopper, _1);
       hotkeyMan.bind(settings.bhop_key, bhopFunc);
     }
     if (use_trigger){
-      boost::function<void()> triggerFunc = boost::bind(&Trigger::triggerCheck, &trigger);
+      boost::function<void(unsigned int)> triggerFunc = boost::bind(&Trigger::triggerCheck, &trigger, _1);
       hotkeyMan.bind(settings.trigger_key, triggerFunc);
     }
     if (use_aimbot) {
-      boost::function<void()> aimFunc = boost::bind(&Aimer::aimCheck, &aimer);
+      boost::function<void(unsigned int)> aimFunc = boost::bind(&Aimer::aimCheck, &aimer, _1);
       hotkeyMan.bind(settings.aim_key, aimFunc);
     }
     hotkeyMan.startListen();

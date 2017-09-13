@@ -29,7 +29,7 @@ void BunnyHopper::jump() {
   mem.write((void*) (mem.force_jump_addr), &jump, sizeof(int));
 }
 
-void BunnyHopper::jumpCheck() {
+void BunnyHopper::jumpCheck(unsigned int i) {
   EntityType* localPlayer;
   unsigned int onGround;
   try {

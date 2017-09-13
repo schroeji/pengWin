@@ -20,14 +20,15 @@ public:
   // main settings
   long int main_loop_sleep;
   bool debug = false;
+  string mouse_file = "/dev/input/event0";
 
   // trigger settings
   long int trigger_delay;
   bool trigger_use_random = false;
-  KeySym trigger_key;
+  string trigger_key;
 
   //bhop settings
-  KeySym bhop_key;
+  string bhop_key;
 
   //radar settings
   bool find_map = false;
@@ -35,8 +36,10 @@ public:
   //aimbot settings
   float aim_fov;
   long int aim_sleep;
-  KeySym aim_key;
+  string aim_key;
   float smoothing_factor = 0.2;
+  bool aim_autoshoot = false;
+  bool aim_smooth_first_shot = true;
 
   Settings(const string&);
   static Settings getInstance();

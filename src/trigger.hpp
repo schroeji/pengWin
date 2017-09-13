@@ -14,5 +14,5 @@ private:
 public:
   Trigger(GameManager& csgo);
   ~Trigger();
-  void triggerCheck();
+  void triggerCheck(unsigned int);
 };

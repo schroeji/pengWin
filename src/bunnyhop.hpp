@@ -13,5 +13,5 @@ private:
 public:
   BunnyHopper(GameManager& csgo);
   ~BunnyHopper();
-  void jumpCheck();
+  void jumpCheck(unsigned int);
 };

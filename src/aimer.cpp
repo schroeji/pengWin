@@ -86,7 +86,7 @@ Aimer::~Aimer() {
   close(uinput);
 }
 
-void Aimer::aimCheck() {
+void Aimer::aimCheck(unsigned int i) {
   EntityType* local_player;
   EntityType* enemy;
   Vector target_pos;
@@ -113,7 +113,13 @@ void Aimer::aimCheck() {
   if (settings.debug) printf("target_pos %f, %f, %f\n", target_pos.x, target_pos.y, target_pos.z);
   if (dist.x == 0 && dist.y == 0 && dist.z == 0)
     return;
-  MouseMovement move = calcMouseMovement(view, dist);
+
+  MouseMovement move;
+  if (!settings.aim_smooth_first_shot && i == 0)
+    move = calcMouseMovement(view, dist, false);
+  else
+    move = calcMouseMovement(view, dist, true);
+
   if (settings.debug) cout << dec << "move angle x: " << move.x << endl;
   if (settings.debug) cout << dec << "move angle y: " << move.y << endl;
   if (move.x == 0 && move.y == 0) {
@@ -122,13 +128,15 @@ void Aimer::aimCheck() {
   }
   try {
     moveAim(move);
+    if (settings.aim_autoshoot)
+      clicker.xClick();
   } catch(runtime_error e) {
     if (settings.debug) cout << "EXCEPTION:" << e.what() << endl;
   }
   this_thread::sleep_for(chrono::milliseconds(settings.aim_sleep));
 }
 
-MouseMovement Aimer::calcMouseMovement(Vector view, Vector dist) {
+MouseMovement Aimer::calcMouseMovement(Vector view, Vector dist, bool use_smooth) {
   normalize_vector(&view);
   normalize_vector(&dist);
   if (settings.debug) printf("view: %f, %f, %f\n", view.x, view.y, view.z);
@@ -180,8 +188,11 @@ MouseMovement Aimer::calcMouseMovement(Vector view, Vector dist) {
   float multiplier = angle_multiplier;
   if (csgo.isScoped())
     multiplier = angle_multiplier_scoped;
-  int moveAngle_x = static_cast<int>(orientation_x * missing_angle_x * multiplier * inverse_sens * settings.smoothing_factor);
-  int moveAngle_y = static_cast<int>(orientation_y * missing_angle_y * multiplier * inverse_sens * settings.smoothing_factor);
+  float smooth = 1.0;
+  if (use_smooth)
+    smooth = settings.smoothing_factor;
+  int moveAngle_x = static_cast<int>(orientation_x * missing_angle_x * multiplier * inverse_sens * smooth);
+  int moveAngle_y = static_cast<int>(orientation_y * missing_angle_y * multiplier * inverse_sens * smooth);
   return {moveAngle_x, moveAngle_y};
 }
 
@@ -288,11 +299,4 @@ Vector Aimer::predictPositionOffset(EntityType* player) {
   Vector vel = {player->m_vecVelocity.y, player->m_vecVelocity.z, player->m_vecVelocity.x};
   float t = (float) settings.main_loop_sleep / 1000.0;
   return vel * t;
-}
-
-MouseMovement Aimer::calcRecoil() {
-  QAngle m_aimPunchAngle = csgo.getAimPunch();
-  int dx = static_cast<int>(-m_aimPunchAngle.y * angle_multiplier * inverse_sens);
-  int dy = static_cast<int>(-m_aimPunchAngle.x * angle_multiplier * inverse_sens);
-  return {dx, dy};
 }

@@ -24,7 +24,7 @@ Use the included Makefile to build.
 Then run `chmod 700 pengWin` and `chown root pengWin` to make the hack unaccessible for VAC.
 
 # Usage
-`sudo ./pengWin [options]`  
+`sudo ./pengWin [options]`
 Possible options are:  
 -aimbot  
 -bhop  
