@@ -1,7 +1,7 @@
-#include "manager.hpp"
-#include "memory_access.hpp"
-#include "typedef.hpp"
-#include "settings.hpp"
+#include "misc/manager.hpp"
+#include "misc/memory_access.hpp"
+#include "misc/typedef.hpp"
+#include "misc/settings.hpp"
 
 class BunnyHopper {
 private:

@@ -1,9 +1,8 @@
-#include "typedef.hpp"
-#include "manager.hpp"
-#include "memory_access.hpp"
-#include "clicker.hpp"
-#include "settings.hpp"
-
+#include "misc/typedef.hpp"
+#include "misc/manager.hpp"
+#include "misc/memory_access.hpp"
+#include "misc/clicker.hpp"
+#include "misc/settings.hpp"
 
 class Aimer {
 private:

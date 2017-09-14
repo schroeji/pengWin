@@ -1,7 +1,7 @@
 #include "bunnyhop.hpp"
-#include "typedef.hpp"
-#include "manager.hpp"
-#include "settings.hpp"
+#include "misc/typedef.hpp"
+#include "misc/manager.hpp"
+#include "misc/settings.hpp"
 
 #include <X11/keysymdef.h>
 #include <X11/Xlib.h>

@@ -12,11 +12,10 @@ Unlike other external hacks it does not write to the games memory at all.
 - Loading settings from file
 - Defining Hotkeys
 
-# TODO:
+# Todo:
 - Sound ESP
 - BlockBot
 - Only grab keys in csgo
-- Make mouseclicks hotkey available
 - Visibility check (BSP parsing)
 
 # Building

@@ -11,10 +11,10 @@ TARGET = pengWin
 TARGET_DUMPER = offset_dumper
 
 #includes
-INC=-lX11 -lXtst -lboost_thread -lboost_system
+INC=-lX11 -lXtst -lboost_thread -lboost_system -I src/
 
-SRC=$(wildcard src/*.cpp)
-SRC_DUMPER = src/memory_access.cpp src/typedef.cpp src/offset_dumper/offset_finder.cpp src/settings.cpp
+SRC=$(wildcard src/main.cpp src/misc/*.cpp src/hacks/*.cpp)
+SRC_DUMPER = src/offset_dumper/offset_finder.cpp src/misc/*.cpp
 
 all: $(TARGET) $(TARGET_DUMPER)
 

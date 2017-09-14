@@ -1,8 +1,8 @@
-#include "typedef.hpp"
+#include "misc/typedef.hpp"
 #include "aimer.hpp"
-#include "manager.hpp"
-#include "clicker.hpp"
-#include "settings.hpp"
+#include "misc/manager.hpp"
+#include "misc/clicker.hpp"
+#include "misc/settings.hpp"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>

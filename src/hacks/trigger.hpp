@@ -1,8 +1,8 @@
-#include "memory_access.hpp"
-#include "manager.hpp"
-#include "clicker.hpp"
-#include "typedef.hpp"
-#include "settings.hpp"
+#include "misc/memory_access.hpp"
+#include "misc/manager.hpp"
+#include "misc/clicker.hpp"
+#include "misc/typedef.hpp"
+#include "misc/settings.hpp"
 
 class Trigger {
 private:

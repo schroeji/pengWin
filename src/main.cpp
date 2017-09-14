@@ -1,12 +1,12 @@
-#include "memory_access.hpp"
-#include "typedef.hpp"
-#include "manager.hpp"
-#include "visu.hpp"
-#include "trigger.hpp"
-#include "aimer.hpp"
-#include "settings.hpp"
-#include "bunnyhop.hpp"
-#include "hotkey.hpp"
+#include "misc/memory_access.hpp"
+#include "misc/typedef.hpp"
+#include "misc/manager.hpp"
+#include "misc/settings.hpp"
+#include "misc/hotkey.hpp"
+#include "hacks/visu.hpp"
+#include "hacks/trigger.hpp"
+#include "hacks/aimer.hpp"
+#include "hacks/bunnyhop.hpp"
 
 #include <stdio.h>
 #include <string.h>
