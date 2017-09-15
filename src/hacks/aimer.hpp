@@ -15,7 +15,7 @@ private:
   const float sensitivity = 1.3;
   const float inverse_sens = 1 / sensitivity;
   const float angle_multiplier_scoped = 1 / 0.0127111077308654;
-  Vector getView();
+  Vector getView(bool);
   Vector predictPositionOffset(EntityType*);
   std::pair<EntityType*, Vector> closestTargetInFov(Vector view);
   MouseMovement calcMouseMovement(Vector, Vector, bool);

@@ -54,9 +54,7 @@ int main(int argc, char** argv) {
   Settings settings("settings.cfg");
   debug = debug || settings.debug;
   settings.debug = debug;
-  if (debug) {
-    settings.print();
-  }
+  settings.print();
   MemoryAccess mem(&settings);
   GameManager csgo = GameManager(mem);
 

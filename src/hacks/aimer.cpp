@@ -93,7 +93,8 @@ void Aimer::aimCheck(unsigned int i) {
   Vector view;
   try {
     local_player = csgo.getLocalPlayer();
-    view = getView();
+    // don't aim correct for tap shooting
+    view = getView(i > 200/settings.aim_sleep);
     pair<EntityType*, Vector> temp = closestTargetInFov(view);
     enemy = temp.first;
     target_pos = temp.second;
@@ -219,7 +220,7 @@ void Aimer::moveAim(MouseMovement move) {
     throw runtime_error("Could not write mouse movement.");
 }
 
-Vector Aimer::getView() {
+Vector Aimer::getView(bool rcs) {
   EntityType* local_player;
   try {
     local_player = csgo.getLocalPlayer();
@@ -229,7 +230,8 @@ Vector Aimer::getView() {
   QAngle currAngle = local_player->m_angNetworkAngles;
   // times two because of weapon_recoil_scale convar
   QAngle aimPunch = csgo.getAimPunch() * 2.0;
-  currAngle = currAngle + aimPunch;
+  if (rcs)
+    currAngle = currAngle + aimPunch;
   float radians_x = degree_to_radian(-currAngle.x); // pitch
   float radians_y = degree_to_radian(currAngle.y);  // yaw
   float v1 = cos(radians_x) * sin(radians_y);
@@ -251,7 +253,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
                        local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
                        local_player->m_vecOrigin.z};
   vector<EntityType*> players = csgo.getPlayers();
-  unsigned int boneIds[] = {3, 6, 7, 8};
+  unsigned int boneIds[] = {3, 6, 8};
   if (players.size() < 2)
     throw runtime_error("Only one player.");
   EntityType* closestPlayer = nullptr;
