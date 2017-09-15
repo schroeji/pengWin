@@ -17,6 +17,7 @@ Unlike other external hacks it does not write to the games memory at all.
 - BlockBot
 - Only grab keys in csgo
 - Visibility check (BSP parsing)
+- Switch visu to using the pipe
 
 # Building
 Use the included Makefile to build.

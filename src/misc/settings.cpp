@@ -59,6 +59,8 @@ void Settings::load(const string& file) {
           trigger_key = splits[1];
         } else if (splits[0] == "find_map")
           find_map = (splits[1] == "true");
+        else if (splits[0] == "radar_sleep")
+          radar_sleep = strtol(splits[1].c_str(), NULL, 10);
         else if (splits[0] == "debug")
           debug = (splits[1] == "true");
         else if (splits[0] == "aim_fov")
@@ -103,5 +105,6 @@ void Settings::print() {
   cout << "aim_smooth_first_shot: " << aim_smooth_first_shot << endl;
   cout << "smoothing_factor: " << smoothing_factor << endl;
   cout << "find_map: " << find_map << endl;
+  cout << "radar_sleep: " << radar_sleep << endl;
   cout << "------------------------" << endl;
 }

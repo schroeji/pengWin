@@ -157,11 +157,10 @@ EntityType* GameManager::getLocalPlayer() {
   if (!mem.read((void*) mem.local_player_addr, (void*) local_player, sizeof(EntityType)))
       throw runtime_error("No local player");
   return local_player;
+}
 
-  // if(!players.empty() && local_player_index != -1)
-  //   return players[local_player_index];
-  // else
-  //   throw runtime_error("No local player");
+int GameManager::getLocalPlayerIndex() {
+  return local_player_index;
 }
 
 bool GameManager::gameRunning() {

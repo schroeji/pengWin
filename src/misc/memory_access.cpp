@@ -24,7 +24,7 @@ MemoryAccess::MemoryAccess(Settings* settings) : settings(settings) {
 void MemoryAccess::updateAddrs() {
   local_player_addr_location = client_range.first + local_player_offset;
   if(!read((void*) local_player_addr_location, &local_player_addr, sizeof(local_player_addr)))
-    cout << "WARNING: could not get local_player" << endl;
+    if(settings->debug) cout << "WARNING: could not get local_player" << endl;
 
   glow_addr = client_range.first + glow_offset;
   if (debug) cout << hex << "glow_addr: " << glow_addr << endl;
@@ -33,7 +33,7 @@ void MemoryAccess::updateAddrs() {
   if (settings != nullptr) {
     attack_addr = getCallAddress((void*) attack_addr_call_location);
     if(!attack_addr)
-      cout << "WARNING: could not get attack_addr" << endl;
+      if (settings->debug) cout << "WARNING: could not get attack_addr" << endl;
   }
 
   map_name_addr = engine_range.first + map_name_offset;

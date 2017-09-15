@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
   Trigger trigger(csgo);
   Aimer aimer(csgo);
   BunnyHopper bhopper(csgo);
-  Visu visu;
+  Visu visu(csgo);
   HotkeyManager hotkeyMan(csgo);
 
   while (csgo.gameRunning()) {

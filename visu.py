@@ -5,20 +5,37 @@ import numpy as np
 import sys
 import os
 import time
-import _thread
+from select import select
+# import _thread
 
+SEPERATOR = "|"
 matplotlib.rcParams['toolbar'] = 'None'
 fig, ax = plt.subplots()
 xdata, ydata = [], []
 ln = plt.scatter([], [], animated=True)
 # ln.set_offsets([[0.5], [0.4]])
 # print(ln.get_offsets())
-location_file = "/tmp/locs.csv"
+# location_file = "/tmp/locs.csv"
+
+def readFromInput():
+  ready, _, _ = select([sys.stdin], [], [])
+  while (len(ready) > 0):
+    inp = input()
+    ready, _, _ = select([sys.stdin], [], [], 0)
+    if (inp == "quit"):
+      plt.close()
+
+  lines = inp.split(SEPERATOR)
+  arr = []
+  for line in lines:
+    arr.append(np.fromstring(line, sep=','))
+  arr = np.asarray(arr)
+  return arr
 
 def getData(i):
   try :
     #Format: id,hp,team,x,y,z
-    data = np.loadtxt(location_file, delimiter=",")
+    data = readFromInput()
   except:
     return ln,
   if(len(data) == 0):
@@ -88,16 +105,15 @@ def catch_term_sig():
 # map_name = "de_cache"
 
 map_name = sys.argv[1]
+interval = int(sys.argv[2])
 fig.canvas.set_window_title("Radar - {}".format(map_name))
 
 has_plotted = False
-_thread.start_new_thread(catch_term_sig, ())
+# _thread.start_new_thread(catch_term_sig, ())
 
 while(not has_plotted):
   time.sleep(1)
-  if (os.path.isfile(location_file)):
-    if (os.path.getsize(location_file) > 0):
-      has_plotted = True
-      img = plt.imread("overviews/{}_radar.jpg".format(map_name))
-      ani = animation.FuncAnimation(fig, getData, init_func=blit_init, interval=200, blit=True)
-      plt.show()
+  has_plotted = True
+  img = plt.imread("overviews/{}_radar.jpg".format(map_name))
+  ani = animation.FuncAnimation(fig, getData, init_func=blit_init, interval=interval, blit=True)
+  plt.show()

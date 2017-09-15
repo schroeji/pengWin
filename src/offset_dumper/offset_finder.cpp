@@ -1,5 +1,5 @@
-#include "../memory_access.hpp"
-#include "../typedef.hpp"
+#include "misc/memory_access.hpp"
+#include "misc/typedef.hpp"
 
 #include <iostream>
 #include <vector>
@@ -51,6 +51,7 @@ void write_settings(const string& file_name) {
   file << "aim_smooth_first_shot=false" << endl;
   file << "smoothing_factor=0.4" << endl;
   file << "find_map=true" << endl;
+  file << "radar_sleep=200" << endl;
   file << "debug=false" << endl;
   file.close();
 }

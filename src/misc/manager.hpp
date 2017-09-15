@@ -15,6 +15,7 @@ public:
   MemoryAccess& getMemoryAccess();
   std::vector<EntityType*>& getPlayers();
   EntityType* getLocalPlayer();
+  int getLocalPlayerIndex();
   bool gameRunning();
   bool isOnServer();
   addr_type getPlayerAddr(EntityType*);
