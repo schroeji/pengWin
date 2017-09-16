@@ -22,7 +22,7 @@ HotkeyManager::HotkeyManager(GameManager csgo) : csgo(csgo),
   // enable multi threading for X11
   XInitThreads();
   // sets the error handler so the program does not crash for invalid grabs
-  // XSetErrorHandler(x_error_handler);
+  XSetErrorHandler(x_error_handler);
   display = XOpenDisplay(NULL);
   rootWindow = DefaultRootWindow(display);
 }

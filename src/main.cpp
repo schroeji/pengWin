@@ -3,7 +3,7 @@
 #include "misc/manager.hpp"
 #include "misc/settings.hpp"
 #include "misc/hotkey.hpp"
-#include "hacks/visu.hpp"
+#include "hacks/radar.hpp"
 #include "hacks/trigger.hpp"
 #include "hacks/aimer.hpp"
 #include "hacks/bunnyhop.hpp"
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
   Trigger trigger(csgo);
   Aimer aimer(csgo);
   BunnyHopper bhopper(csgo);
-  Visu visu(csgo);
+  Radar radar(csgo);
   HotkeyManager hotkeyMan(csgo);
 
   while (csgo.gameRunning()) {
@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
         cin >> map_name;
       }
       cout << "Found Map: " << map_name << endl;
-      visu.start(map_name);
+      radar.start(map_name);
     }
 
     if (use_bhop) {
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
         csgo.printPlayerLocationsToFile("/tmp/locs.csv");
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     }
-    if (use_radar) visu.stop();
+    if (use_radar) radar.stop();
     if (debug) cout << "Not on a server. Entering sleep mode..." << endl;
   }
 

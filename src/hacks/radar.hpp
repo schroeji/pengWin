@@ -7,7 +7,7 @@
 #include <iostream>
 #include <boost/thread.hpp>
 
-class Visu {
+class Radar {
 
 private:
   FILE* handle;
@@ -18,8 +18,8 @@ private:
   Settings settings;
 
 public:
-  Visu(GameManager&);
-  ~Visu();
+  Radar(GameManager&);
+  ~Radar();
   void start(const std::string&);
   void stop();
 };

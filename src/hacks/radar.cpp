@@ -1,4 +1,4 @@
-#include "visu.hpp"
+#include "radar.hpp"
 
 #include <vector>
 #include <iostream>
@@ -8,20 +8,20 @@
 #include <chrono>
 
 using namespace std;
-Visu::Visu(GameManager& csgo) : csgo(csgo),
-                                settings(Settings::getInstance()){}
+Radar::Radar(GameManager& csgo) : csgo(csgo),
+                                  settings(Settings::getInstance()){}
 
-Visu::~Visu() {
+Radar::~Radar() {
 }
 
-void Visu::start(const string& map_name) {
+void Radar::start(const string& map_name) {
   string cmd = "python visu.py " + map_name + " " + to_string(settings.radar_sleep);
   handle = popen(cmd.c_str(), "w");
   run = true;
-  writeLocations = boost::thread(boost::bind(&Visu::writeFunc, this));
+  writeLocations = boost::thread(boost::bind(&Radar::writeFunc, this));
 }
 
-void Visu::stop(){
+void Radar::stop(){
   run = false;
   writeLocations.join();
   fputs("quit\n", handle);
@@ -29,7 +29,7 @@ void Visu::stop(){
   pclose(handle);
 }
 
-void Visu::writeFunc() {
+void Radar::writeFunc() {
   while (run) {
     this_thread::sleep_for(chrono::milliseconds(settings.radar_sleep));
     const char SEPERATOR[] = "|";

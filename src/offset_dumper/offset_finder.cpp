@@ -17,7 +17,7 @@ void write_offsets(vector<string> names, vector<string> offsets, const string& f
     cout << "offset and name length not matching" << endl;
   }
   ofstream file(file_name);
-  file << "# offsets" << endl;
+  file << "## offsets" << endl;
   for (size_t i = 0; i < names.size(); i++){
     file << names[i] << "=" << offsets[i] << endl;
   }
@@ -34,25 +34,30 @@ void print_offsets(vector<string> names, vector<string> offsets) {
 void write_settings(const string& file_name) {
   ofstream file(file_name, ios_base::app);
   file << endl;
-  file << "# settings" << endl;
+  file << "## settings" << endl;
+  file << "# general settings" << endl;
   file << "main_loop_sleep=10" << endl;
+  file << "debug=false" << endl;
   file << "# file for reading mouse clicks" << endl;
   file << "mouse_file=/dev/input/event0" << endl;
+  file << "# trigger settings" << endl;
   file << "trigger_delay=10" << endl;
   file << "trigger_use_random=false" << endl;
   file << "# find your key with \"$ dumpkeys -l\"" << endl;
   file << "trigger_key=Caps_Lock" << endl;
+  file << "# bhop settings" << endl;
   file << "bhop_key=space" << endl;
+  file << "# aimbot settings" << endl;
   file << "aim_key=mouse1" << endl;
-  file << "aim_sleep=30" << endl;
-  file << "aim_fov=3.0" << endl;
+  file << "aim_sleep=20" << endl;
+  file << "aim_fov=1.0" << endl;
   file << "aim_autoshoot=false" << endl;
-  file <<  "# enable / disable smoothing on first shot you may want to disable this for perfect flicks" << endl;
-  file << "aim_smooth_first_shot=false" << endl;
-  file << "smoothing_factor=0.4" << endl;
+  file << "# enable / disable smoothing on first shot you may want to disable this for perfect flicks" << endl;
+  file << "aim_smooth_first_shot=true" << endl;
+  file << "smoothing_factor=0.25" << endl;
+  file << "# radar settings" << endl;
   file << "find_map=true" << endl;
-  file << "radar_sleep=200" << endl;
-  file << "debug=false" << endl;
+  file << "radar_sleep=150" << endl;
   file.close();
 }
 
