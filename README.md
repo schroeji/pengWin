@@ -15,7 +15,6 @@ Unlike other external hacks it does not write to the games memory at all.
 # Todo:
 - Sound ESP
 - BlockBot
-- Only grab keys in csgo
 - Visibility check (BSP parsing)
 - Switch visu to using the pipe
 

@@ -4,6 +4,7 @@
 #include <X11/Xlib.h>
 #include <X11/keysymdef.h>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
 #include <boost/thread.hpp>
 #include <functional>
 #include <linux/input.h>
@@ -17,14 +18,15 @@ int x_error_handler(Display* d, XErrorEvent* e) {
   return 0;
 }
 
-HotkeyManager::HotkeyManager(GameManager csgo) : csgo(csgo),
-                                                 settings(Settings::getInstance()) {
+HotkeyManager::HotkeyManager(GameManager& csgo) : csgo(csgo),
+                                                  settings(Settings::getInstance()) {
   // enable multi threading for X11
   XInitThreads();
   // sets the error handler so the program does not crash for invalid grabs
   XSetErrorHandler(x_error_handler);
   display = XOpenDisplay(NULL);
   rootWindow = DefaultRootWindow(display);
+  csWindow = findCSWindow();
 }
 
 HotkeyManager::~HotkeyManager() {}
@@ -114,20 +116,20 @@ void HotkeyManager::keyPressListen() {
 
   for (map<unsigned int, boost::function<void(unsigned int)>>::iterator it = bindings.begin(); it != bindings.end(); it++) {
     modifiers = AnyModifier;
-    XUngrabKey(display, it->first, modifiers, rootWindow);
+    XUngrabKey(display, it->first, modifiers, csWindow);
     // grab with anymodifer (fails for space)
-    XGrabKey(display, it->first, modifiers, rootWindow, owner_events, pointer_mode,
+    XGrabKey(display, it->first, modifiers, csWindow, owner_events, pointer_mode,
              keyboard_mode);
     // grab with caps_lock
     modifiers = LockMask;
-    XGrabKey(display, it->first, modifiers, rootWindow, owner_events, pointer_mode,
+    XGrabKey(display, it->first, modifiers, csWindow, owner_events, pointer_mode,
              keyboard_mode);
     // grab without modifier
     modifiers = 0;
-    XGrabKey(display, it->first, modifiers, rootWindow, owner_events, pointer_mode,
+    XGrabKey(display, it->first, modifiers, csWindow, owner_events, pointer_mode,
              keyboard_mode);
   }
-  XSelectInput(display, rootWindow, KeyPressMask);
+  XSelectInput(display, csWindow, KeyPressMask);
   while (csgo.isOnServer()) {
     XNextEvent(display, &event);
     if (event.type == KeyPress) {
@@ -184,4 +186,17 @@ void HotkeyManager::forwardEvent(XEvent event) {
   }
   XSendEvent(display, PointerWindow, true, NoEventMask, &event);
   XFlush(display);
+}
+
+Window HotkeyManager::findCSWindow() {
+  FILE* in;
+  char buf[128];
+  string cmd = "xdotool search --any --pid \"" + to_string(csgo.getMemoryAccess().getPid()) + "\"";
+  in = popen(cmd.c_str(), "r");
+  fgets(buf, 128, in);
+  pclose(in);
+  Window w = (Window) strtoul(buf, NULL, 10);
+  if (w == 0)
+    throw runtime_error("Could not find window or xdotool is not installed.");
+  return w;
 }

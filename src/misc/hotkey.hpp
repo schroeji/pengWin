@@ -7,7 +7,7 @@
 
 class HotkeyManager {
 public:
-  HotkeyManager(GameManager);
+  HotkeyManager(GameManager&);
   ~HotkeyManager();
   void bind(string, boost::function<void(unsigned int)>);
   void startListen();
@@ -23,9 +23,12 @@ private:
 
   Display* display;
   Window rootWindow;
-  GameManager csgo;
+  Window csWindow;
+  GameManager& csgo;
   Settings settings;
 
+  Window findCSWindow();
+  Window findWindowRecursive(Window);
   void callLoop(unsigned int, boost::function<void(unsigned int)>);
   void keyPressListen();
   void mousePressListen();
