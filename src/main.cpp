@@ -77,9 +77,7 @@ int main(int argc, char** argv) {
 
     if (debug) cout << "Connected to a server..." << endl;
 
-    if (use_radar) {
-      radar.start(map_name);
-    }
+    if (use_radar) radar.start();
 
     if (use_bhop) {
       boost::function<void(unsigned int)> bhopFunc = boost::bind(&BunnyHopper::jumpCheck, &bhopper, _1);
@@ -93,7 +91,8 @@ int main(int argc, char** argv) {
       boost::function<void(unsigned int)> aimFunc = boost::bind(&Aimer::aimCheck, &aimer, _1);
       hotkeyMan.bind(settings.aim_key, aimFunc);
     }
-    hotkeyMan.startListen();
+    if (use_bhop || use_trigger || use_aimbot)
+      hotkeyMan.startListen();
 
     // main loop
     while (csgo.isOnServer()) {
