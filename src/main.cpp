@@ -113,8 +113,6 @@ int main(int argc, char** argv) {
       if (debug) {
         // csgo.printPlayers();
       }
-      if (use_radar)
-        csgo.printPlayerLocationsToFile("/tmp/locs.csv");
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     }
     if (use_radar) radar.stop();
