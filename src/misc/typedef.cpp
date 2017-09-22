@@ -42,7 +42,7 @@ Vector getDist(Vector* a, Vector* b) {
   return Vector{b->x - a->x, b->y - a->y, b->z - a->z};
 }
 
-float scalar_prod(const Vector* a, const Vector* b) {
+float scalar_prod(Vector* a, Vector* b) {
   return (a->x * b->x) + (a->y * b->y) + (a->z * b->z);
 }
 
