@@ -20,6 +20,6 @@ private:
 public:
   Radar(GameManager&);
   ~Radar();
-  void start(const std::string&);
+  void start();
   void stop();
 };

@@ -14,7 +14,22 @@ Radar::Radar(GameManager& csgo) : csgo(csgo),
 Radar::~Radar() {
 }
 
-void Radar::start(const string& map_name) {
+void Radar::start() {
+  // first find map
+  string map_name = "";
+  if (settings.find_map) {
+    if (settings.debug) cout << "Scanning for map..." << endl;
+    while (map_name == "") {
+      map_name = csgo.getMapName();
+      this_thread::sleep_for(chrono::milliseconds(1000));
+    }
+  } else {
+    cout << "Map detection deactivated. Please choose map:" << endl;
+    cin >> map_name;
+  }
+  cout << "Found Map: " << map_name << endl;
+
+  //start visualization
   string cmd = "python visu.py " + map_name + " " + to_string(settings.radar_sleep);
   handle = popen(cmd.c_str(), "w");
   run = true;

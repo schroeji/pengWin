@@ -78,18 +78,6 @@ int main(int argc, char** argv) {
     if (debug) cout << "Connected to a server..." << endl;
 
     if (use_radar) {
-      string map_name = "";
-      if (settings.find_map) {
-        if (debug) cout << "Scanning for map..." << endl;
-        while (map_name == "") {
-          map_name = csgo.getMapName();
-          this_thread::sleep_for(chrono::milliseconds(1000));
-        }
-      } else {
-        cout << "Map detection deactivated. Please choose map:" << endl;
-        cin >> map_name;
-      }
-      cout << "Found Map: " << map_name << endl;
       radar.start(map_name);
     }
 
