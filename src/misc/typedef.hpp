@@ -24,17 +24,26 @@ struct Vector {
 	float x;
 	float y;
 	float z;
-  inline Vector operator+(Vector a) {
+  inline Vector operator+(Vector a) const {
     return {a.x + x, a.y + y, a.z + z};
   }
-  inline float operator*(Vector a) {
+  inline Vector operator+=(Vector a) {
+    x += a.x;
+    y += a.y;
+    z += a.z;
+    return *this;
+  }
+  inline float operator*(const Vector a) const {
     return a.x * x + a.y * y + a.z * z;
   }
-  inline Vector operator-(Vector a) {
+  inline Vector operator-(const Vector a) const {
     return {x - a.x, y - a.y, z - a.z};
   }
-  inline Vector operator*(float a) {
+  inline Vector operator*(float a) const {
     return {a*x, a*y, a*z};
+  }
+  inline Vector operator/(float a) {
+    return {x/a, y/a, z/a};
   }
 };
 
@@ -162,7 +171,7 @@ std::vector<std::string> split_string(const std::string&, const std::string&);
 void normalize_vector(Vector*);
 void normalize_vector(Vector2D*);
 Vector getDist(Vector*, Vector*);
-float scalar_prod(Vector*, Vector*);
+float scalar_prod(const Vector*, const Vector*);
 float scalar_prod(Vector2D*, Vector2D*);
 
 

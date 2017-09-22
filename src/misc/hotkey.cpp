@@ -9,6 +9,7 @@
 #include <functional>
 #include <linux/input.h>
 #include <fcntl.h>
+#include <iostream>
 
 
 using namespace std;
