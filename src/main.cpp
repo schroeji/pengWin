@@ -67,8 +67,10 @@ int main(int argc, char** argv) {
   HotkeyManager hotkeyMan(csgo);
 
   BSPMap bspmap;
+
   string cs_path("/home/hidden/.steam/steam/steamapps/common/Counter-Strike Global Offensive/");
   cout << "Load:" << bspmap.load(cs_path.c_str(), "de_dust2.bsp") << endl;
+  bspmap.DisplayInfo();
 
   while (csgo.gameRunning()) {
     if (debug) cout << "Waiting until connected..." << endl;
@@ -117,14 +119,17 @@ int main(int argc, char** argv) {
       csgo.grabPlayers();
       if (debug) {
         // csgo.printPlayers();
-        Vector one = {csgo.getLocalPlayer()->m_vecOrigin.z,
-                      csgo.getLocalPlayer()->m_vecOrigin.y + 50,
-                      csgo.getLocalPlayer()->m_vecOrigin.x };
-        Vector two = one;
-        two.x = two.x + 50;
+        Vector one = {csgo.getLocalPlayer()->m_vecOrigin.y,
+                      csgo.getLocalPlayer()->m_vecOrigin.z + 50,
+                      csgo.getLocalPlayer()->m_vecOrigin.x};
+
+        Vector two = {csgo.getPlayers()[1]->m_vecOrigin.y,
+                      csgo.getPlayers()[1]->m_vecOrigin.z + 50,
+                      csgo.getPlayers()[1]->m_vecOrigin.x};
+
         printf("one x=%f y=%f z=%f\n", one.x, one.y, one.z);
         printf("two x=%f y=%f z=%f\n", two.x, two.y, two.z);
-        cout << "vis: " << bspmap.Visible(one, two) << endl;
+        cout << bspmap.Visible(one, two) << endl;
       }
       // if (use_radar)
         // csgo.printPlayerLocationsToFile("/tmp/locs.csv");

@@ -266,8 +266,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
     addr_type enemy_addr = csgo.getPlayerAddr(enemy);
     for (unsigned int boneID : boneIds ) {
       // cout << "bone ID:" << boneID << endl;
-      try {
-        bone_pos = mem.getBone(enemy_addr, boneID);
+      try {bone_pos = mem.getBone(enemy_addr, boneID);
         // printf("bone: %f, %f, %f \n", bone_pos.x, bone_pos.z, bone_pos.z);
       } catch(runtime_error e) {
         if (settings.debug) cout << e.what() << endl;;

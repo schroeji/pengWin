@@ -57,8 +57,7 @@ bool BSPMap::load( const char* path, const char* mapName )
 	fPath += "/csgo/maps/";
 	fPath += m_mapName;
 	// shit man you really want this shit?
-	// HANDLE hFile = CreateFile( fPath.c_str(), GENERIC_READ, NULL, NULL, OPEN_ALWAYS, NULL, NULL );
-  // cout << "Path:" << fPath << endl;
+	// HANDLE hFile = CreateFile( fPath.c_str(), GENERIC_READ, NULL, NULL, OPEN_ALWAYS, NULL, NULL ); // cout << "Path:" << fPath << endl;
 	FILE* hFile = fopen(fPath.c_str(), "r");
 	if( hFile == NULL ) {
     cout << "no handle" << endl;
@@ -152,11 +151,7 @@ dleaf_t* BSPMap::GetLeafFromPoint( const Vector point )
 
 	float d = 0.0f;
 
-	while( nodenum >= 0 )
-	{
-		if( &m_node == NULL || &m_plane == NULL )
-			return NULL;
-
+	while( nodenum >= 0 ) {
 		node = &m_node[ nodenum ];
 		plane = &m_plane[ node->planenum ];
 		d = (point * plane->normal) - plane->dist;
@@ -179,11 +174,13 @@ bool BSPMap::Visible( const Vector &vStart, const Vector &vEnd ) // added in con
 	Vector direction = vEnd - vStart;
 	Vector point = vStart;
 
-	int steps = (int) len( direction );
+  int steps = static_cast<int>(len(direction));
+
+  // cout << "steps:" << steps << endl;
 
 	if( steps > 4000 ){
     // performence issue when checking long distances, 2000 too short
-    cout << "too far" << endl;
+    // cout << "too far" << endl;
 		return false;   // we'll assume we can't see someone at great lengths
   }
 
@@ -191,14 +188,14 @@ bool BSPMap::Visible( const Vector &vStart, const Vector &vEnd ) // added in con
 
 	dleaf_t* leaf = nullptr;
 
-	while( steps )
-	{
+	while( steps ) {
 		point += direction;
 		leaf = GetLeafFromPoint( point );
-    printf("point x=%f y=%f z=%f\n", point.x, point.y, point.z);
+    // printf("point x=%f y=%f z=%f\n", point.x, point.y, point.z);
 		// Tried differenent masks, none seem to work :/ becauce ur a bitch tbh tbf fam
-		if( leaf->contents & CONTENTS_SOLID ) {
-      cout << "steps: " << steps << endl;
+    // cout << "contents: " << hex << leaf->contents << endl;
+		if(!(leaf->contents & CONTENTS_SOLID)) {
+      // cout << "steps: " << steps << endl;
 			return false;
     }
 

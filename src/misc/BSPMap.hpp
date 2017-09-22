@@ -72,10 +72,8 @@ struct dleaf_t
 	short				leafWaterDataID;	// -1 for not in water
 
 	//!!! NOTE: for maps of version 19 or lower uncomment this block
-	/*
-	CompressedLightCube	ambientLighting;	// Precaculated light info for entities.
-	short			padding;		// padding to 4-byte boundary
-	*/
+	// CompressedLightCube	ambientLighting;	// Precaculated light info for entities.
+	// short			padding;		// padding to 4-byte boundary
 };
 
 struct lump_t
