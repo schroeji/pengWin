@@ -1,6 +1,7 @@
 #include "hotkey.hpp"
 #include "manager.hpp"
 
+#include <iostream>
 #include <X11/Xlib.h>
 #include <X11/keysymdef.h>
 #include <X11/Xutil.h>
@@ -9,6 +10,8 @@
 #include <functional>
 #include <linux/input.h>
 #include <fcntl.h>
+#include <chrono>
+#include <thread>
 
 
 using namespace std;
@@ -58,6 +61,7 @@ void HotkeyManager::startListen() {
     return;
   keyPressListener = boost::thread(boost::bind(&HotkeyManager::keyPressListen, this));
   mousePressListener = boost::thread(boost::bind(&HotkeyManager::mousePressListen, this));
+  this_thread::sleep_for(chrono::milliseconds(3));
   if (settings.debug) cout << "Started Hotkey listener..." << endl;
 }
 
@@ -89,7 +93,7 @@ void HotkeyManager::mousePressListen() {
       try {
         func = bindings.at(keycode);
       } catch (out_of_range e) {
-        throw runtime_error("No binding for pressed key.");
+        throw runtime_error("No binding for pressed key. This should not happen.");
       }
       holding_key[keycode] = true;
       threads[keycode] = boost::thread(boost::bind(&HotkeyManager::callLoop,
@@ -111,58 +115,54 @@ void HotkeyManager::keyPressListen() {
   unsigned int modifiers;
   int pointer_mode = GrabModeAsync;
   int keyboard_mode = GrabModeAsync;
-  bool owner_events = false;
+  bool owner_events = True;
   XEvent event;
 
   for (map<unsigned int, boost::function<void(unsigned int)>>::iterator it = bindings.begin(); it != bindings.end(); it++) {
+
     modifiers = AnyModifier;
+    if (settings.debug) cout << "Grabbing keycode:" << it->first << endl;
     XUngrabKey(display, it->first, modifiers, csWindow);
     // grab with anymodifer (fails for space)
     XGrabKey(display, it->first, modifiers, csWindow, owner_events, pointer_mode,
              keyboard_mode);
     // grab with caps_lock
-    modifiers = LockMask;
-    XGrabKey(display, it->first, modifiers, csWindow, owner_events, pointer_mode,
-             keyboard_mode);
+    // modifiers = LockMask;
+    // XGrabKey(display, it->first, modifiers, csWindow, owner_events, pointer_mode,
+             // keyboard_mode);
     // grab without modifier
-    modifiers = 0;
-    XGrabKey(display, it->first, modifiers, csWindow, owner_events, pointer_mode,
-             keyboard_mode);
+    // modifiers = 0;
+    // XGrabKey(display, it->first, modifiers, csWindow, owner_events, pointer_mode,
+             // keyboard_mode);
   }
-  XSelectInput(display, csWindow, KeyPressMask);
   while (csgo.isOnServer()) {
     XNextEvent(display, &event);
+    // without this events are consumed; idk why even with owner_events = true
+    forwardEvent(event);
     if (event.type == KeyPress) {
-      if (settings.debug) cout << "key pressed..." << endl;
-      if (holding_key.find(event.xbutton.button) != holding_key.end()) {
-        if (holding_key.at(event.xbutton.button))
-          continue;
-      } else {
-        forwardEvent(event);
-        if (settings.debug) cout << "Event forwarded" << endl;
+      if (settings.debug) cout << "HotKey pressed..." << endl;
+      if (holding_key.find(event.xbutton.button) == holding_key.end() ||
+          holding_key.at(event.xbutton.button)) {
         continue;
       }
       boost::function<void(unsigned int)> func;
       try {
         func = bindings.at(event.xbutton.button);
       } catch (out_of_range e) {
-        throw runtime_error("No binding for pressed Key");
+        throw runtime_error("No binding for pressed Key. This should not happen.");
       }
       holding_key[event.xbutton.button] = true;
       threads[event.xbutton.button] = boost::thread(boost::bind(&HotkeyManager::callLoop,
                                                                 this,
                                                                 event.xbutton.button,
                                                                 func));
-    } else if(event.type == KeyRelease) {
-      if (holding_key.find(event.xbutton.button) != holding_key.end()) {
-        if (holding_key.at(event.xbutton.button)) {
-          holding_key[event.xbutton.button] = false;
-          // when debugging wait for thread to terminate
-          if (settings.debug) threads[event.xbutton.button].join();
-        }
-      } else {
-        forwardEvent(event);
-      }
+    } else if (event.type == KeyRelease &&
+               holding_key.find(event.xbutton.button) != holding_key.end() &&
+               holding_key.at(event.xbutton.button)) {
+      holding_key[event.xbutton.button] = false;
+      // when debugging wait for thread to terminate
+      if (settings.debug) threads[event.xbutton.button].join();
+      if (settings.debug) cout << "joined thread" << endl;
     }
   }
 }
@@ -176,15 +176,15 @@ void HotkeyManager::callLoop(unsigned int keycode, boost::function<void(unsigned
 }
 
 void HotkeyManager::forwardEvent(XEvent event) {
-  while (event.xbutton.subwindow) {
-    event.xbutton.window = event.xbutton.subwindow;
-    XQueryPointer (display, event.xbutton.window,
-                   &event.xbutton.root, &event.xbutton.subwindow,
-                   &event.xbutton.x_root, &event.xbutton.y_root,
-                   &event.xbutton.x, &event.xbutton.y,
-                   &event.xbutton.state);
-  }
-  XSendEvent(display, PointerWindow, true, NoEventMask, &event);
+  // while (event.xbutton.subwindow) {
+  //   event.xbutton.window = event.xbutton.subwindow;
+  //   XQueryPointer (display, event.xbutton.window,
+  //                  &event.xbutton.root, &event.xbutton.subwindow,
+  //                  &event.xbutton.x_root, &event.xbutton.y_root,
+  //                  &event.xbutton.x, &event.xbutton.y,
+  //                  &event.xbutton.state);
+  // }
+  XSendEvent(display, csWindow, true, NoEventMask, &event);
   XFlush(display);
 }
 
@@ -196,6 +196,7 @@ Window HotkeyManager::findCSWindow() {
   fgets(buf, 128, in);
   pclose(in);
   Window w = (Window) strtoul(buf, NULL, 10);
+  if (settings.debug) cout << "Found CSGO Window ID: "<< dec << w << endl;
   if (w == 0)
     throw runtime_error("Could not find window or xdotool is not installed.");
   return w;
