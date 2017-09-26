@@ -176,14 +176,6 @@ void HotkeyManager::callLoop(unsigned int keycode, boost::function<void(unsigned
 }
 
 void HotkeyManager::forwardEvent(XEvent event) {
-  // while (event.xbutton.subwindow) {
-  //   event.xbutton.window = event.xbutton.subwindow;
-  //   XQueryPointer (display, event.xbutton.window,
-  //                  &event.xbutton.root, &event.xbutton.subwindow,
-  //                  &event.xbutton.x_root, &event.xbutton.y_root,
-  //                  &event.xbutton.x, &event.xbutton.y,
-  //                  &event.xbutton.state);
-  // }
   XSendEvent(display, csWindow, true, NoEventMask, &event);
   XFlush(display);
 }

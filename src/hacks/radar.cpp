@@ -30,7 +30,7 @@ void Radar::start() {
   cout << "Found Map: " << map_name << endl;
 
   //start visualization
-  string cmd = "python visu.py " + map_name + " " + to_string(settings.radar_sleep);
+  string cmd = "python3 visu.py " + map_name + " " + to_string(settings.radar_sleep);
   handle = popen(cmd.c_str(), "w");
   run = true;
   writeLocations = boost::thread(boost::bind(&Radar::writeFunc, this));

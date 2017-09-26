@@ -39,11 +39,12 @@ public:
   long int aim_sleep;
   string aim_key;
   float smoothing_factor = 0.2;
+  float sensitivity;
   bool aim_autoshoot = false;
   bool aim_smooth_first_shot = true;
 
   Settings(const string&);
-  static Settings getInstance();
+  static Settings& getInstance();
   void load(const string&);
   void print();
 };

@@ -15,7 +15,7 @@ private:
   bool run = true;
   void writeFunc();
   GameManager& csgo;
-  Settings settings;
+  Settings& settings;
 
 public:
   Radar(GameManager&);

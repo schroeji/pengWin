@@ -24,7 +24,9 @@ using namespace std;
 Aimer::Aimer(GameManager& csgo) : csgo(csgo),
                                   mem(csgo.getMemoryAccess()),
                                   clicker(Clicker(csgo.getMemoryAccess())),
-                                  settings(Settings::getInstance()) {
+                                  settings(Settings::getInstance()),
+                                  inverse_sens(1 / settings.sensitivity) {
+  // prepare mouse
   struct uinput_user_dev uidev;
   uinput = open("/dev/input/uinput", O_WRONLY | O_NONBLOCK);
 
@@ -93,7 +95,7 @@ void Aimer::aimCheck(unsigned int i) {
   Vector view;
   try {
     local_player = csgo.getLocalPlayer();
-    // don't aim correct for tap shooting
+    // don't recoil compensate for tap shooting
     view = getView(i > 200/settings.aim_sleep);
     pair<EntityType*, Vector> temp = closestTargetInFov(view);
     enemy = temp.first;
@@ -278,7 +280,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
       // printf("dist: %f, %f,  %f\n", dist.x, dist.y, dist.z);
       // printf("view: %f, %f, %f\n", view.x, view.y, view.z);
       // printf("angle: %f, %f, %f\n", angle, radian_to_degree(angle), settings.aim_fov);
-      if (angle > settings.aim_fov)
+      if (angle > (settings.aim_fov / 2.))
         continue;
       if (closestPlayer == nullptr) {
         closestPlayer = enemy;

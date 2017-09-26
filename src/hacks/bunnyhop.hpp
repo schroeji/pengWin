@@ -7,7 +7,7 @@ class BunnyHopper {
 private:
   GameManager& csgo;
   MemoryAccess& mem;
-  Settings settings;
+  Settings& settings;
   void jump();
 
 public:

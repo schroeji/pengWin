@@ -1,4 +1,5 @@
 
+# pengWin
 pengWin is a fully external hack for Counter-Strike\: Global Offensive.  
 In comparison to internal cheats (e.g. AimTux) it does not inject any code into the game.  
 Unlike other external hacks it does not write to the games memory at all.
@@ -18,7 +19,7 @@ Unlike other external hacks it does not write to the games memory at all.
 - Visibility check (BSP parsing)
 
 # Building
-Dependencies: 
+Dependencies:  
 - boost  
 - xdotool  
 - python3 + matplotlib + numpy  

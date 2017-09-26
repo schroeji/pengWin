@@ -14,7 +14,7 @@ Settings::Settings(const string& file) {
   instance = this;
 }
 
-Settings Settings::getInstance() {
+Settings& Settings::getInstance() {
   return *instance;
 }
 
@@ -73,6 +73,8 @@ void Settings::load(const string& file) {
           aim_sleep = strtol(splits[1].c_str(), NULL, 10);
         else if (splits[0] == "smoothing_factor")
           smoothing_factor = strtof(splits[1].c_str(), NULL);
+        else if (splits[0] == "sensitivity")
+          sensitivity = strtof(splits[1].c_str(), NULL);
         else if (splits[0] == "aim_autoshoot")
           aim_autoshoot = (splits[1] == "true");
         else if (splits[0] == "aim_smooth_first_shot")
@@ -104,6 +106,7 @@ void Settings::print() {
   cout << "aim_autoshoot: " << aim_autoshoot << endl;
   cout << "aim_smooth_first_shot: " << aim_smooth_first_shot << endl;
   cout << "smoothing_factor: " << smoothing_factor << endl;
+  cout << "sensitivity: " << sensitivity << endl;
   cout << "find_map: " << find_map << endl;
   cout << "radar_sleep: " << radar_sleep << endl;
   cout << "------------------------" << endl;

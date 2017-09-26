@@ -9,7 +9,7 @@ private:
   GameManager& csgo;
   MemoryAccess& mem;
   Clicker clicker;
-  Settings settings;
+  Settings& settings;
 
 public:
   Trigger(GameManager& csgo);

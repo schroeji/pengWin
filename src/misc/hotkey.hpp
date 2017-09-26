@@ -25,7 +25,7 @@ private:
   Window rootWindow;
   Window csWindow;
   GameManager& csgo;
-  Settings settings;
+  Settings& settings;
 
   Window findCSWindow();
   Window findWindowRecursive(Window);

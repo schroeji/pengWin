@@ -50,11 +50,13 @@ void write_settings(const string& file_name) {
   file << "# aimbot settings" << endl;
   file << "aim_key=mouse1" << endl;
   file << "aim_sleep=20" << endl;
-  file << "aim_fov=1.0" << endl;
+  file << "aim_fov=1.9" << endl;
   file << "aim_autoshoot=false" << endl;
   file << "# enable / disable smoothing on first shot you may want to disable this for perfect flicks" << endl;
   file << "aim_smooth_first_shot=true" << endl;
   file << "smoothing_factor=0.25" << endl;
+  file << "# your ingame sensitivity (used for aim calculations)" << endl;
+  file << "sensitivity=1.3" << endl;
   file << "# radar settings" << endl;
   file << "find_map=true" << endl;
   file << "radar_sleep=150" << endl;
