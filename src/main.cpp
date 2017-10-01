@@ -18,7 +18,21 @@
 
 using namespace std;
 
+void printUsage(const string& name, const string& config_file) {
+  cout << "usage: ";
+  cout << name << " [options]" << endl;
+  cout << "Possible options:" << endl;
+  cout << "-a, -aimbot    Enable Aimbot" << endl;
+  cout << "-b, -bhop      Enable Bunnyhop" << endl;
+  cout << "-d, -debug     Enable debugging" << endl;
+  cout << "-r, -radar     Enable external Radar" << endl;
+  cout << "-t, -trigger   Enable Triggerbot" << endl;
+  cout << endl;
+  cout << "For advanced configuration use: " << config_file << endl;;
+}
+
 int main(int argc, char** argv) {
+  string config_file = "settings.cfg";
   if (getuid() != 0){
     cout << "Not root" << endl;
     return 0;
@@ -29,29 +43,34 @@ int main(int argc, char** argv) {
   bool debug = false;
   bool use_bhop = false;
   for (int i = 1; i < argc; i++) {
-    if (!strcmp(argv[i], "-radar")) {
+    if (!strcmp(argv[i], "--radar") || !strcmp(argv[i], "-r")) {
       cout << "Enabled: Radar" << endl;
       use_radar = true;
     }
-    else if (!strcmp(argv[i], "-trigger")) {
+    else if (!strcmp(argv[i], "--trigger") || !strcmp(argv[i], "-t")) {
       cout << "Enabled: Trigger" << endl;
       use_trigger = true;
     }
-    else if (!strcmp(argv[i], "-debug")) {
+    else if (!strcmp(argv[i], "--debug") || !strcmp(argv[i], "-d")) {
       debug = true;
       cout << "Enabled: Debugging" << endl;
     }
-    else if (!strcmp(argv[i], "-aimbot")) {
+    else if (!strcmp(argv[i], "--aimbot") || !strcmp(argv[i], "-a")) {
       use_aimbot = true;
       cout << "Enabled: Aimbot" << endl;
     }
-    else if (!strcmp(argv[i], "-bhop")) {
+    else if (!strcmp(argv[i], "--bhop") || !strcmp(argv[i], "-b")) {
       use_bhop = true;
       cout << "Enabled: Bunnyhop" << endl;
     }
   }
+  if(! (use_aimbot || use_bhop || debug || use_trigger || use_radar)) {
+    cout << "Please give at least one valid argument." << endl;
+    printUsage(string(argv[0]), config_file);
+    return 0;
+  }
 
-  Settings settings("settings.cfg");
+  Settings settings(config_file.c_str());
   debug = debug || settings.debug;
   settings.debug = debug;
   settings.print();
