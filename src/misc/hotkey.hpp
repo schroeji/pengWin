@@ -10,7 +10,9 @@ public:
   HotkeyManager(GameManager&);
   ~HotkeyManager();
   void bind(string, boost::function<void(unsigned int)>);
+  void unbind(string);
   void startListen();
+  void stopListen();
 
 private:
   boost::thread keyListener;

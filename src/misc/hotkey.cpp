@@ -53,7 +53,22 @@ void HotkeyManager::bind(string key, boost::function<void(unsigned int)> func){
     bindings.insert(std::pair<unsigned int, boost::function<void(unsigned int)>>(keycode, func));
     holding_key.insert(std::pair<unsigned int, bool>(keycode, false));
   }
+}
 
+void HotkeyManager::unbind(string key) {
+
+  bool isKeyboard = (key.compare(0, 5, "mouse") &&
+                     key.compare(0, 5, "MOUSE") &&
+                     key.compare(0, 5, "Mouse"));
+  unsigned int keycode;
+  if (isKeyboard) {
+    KeySym keysym = XStringToKeysym(key.c_str());
+    keycode = XKeysymToKeycode(display, keysym);
+  } else {
+    int button_nr = stoi(key.substr(5, 1));
+    keycode = mouseListOffset + button_nr;
+  }
+  bindings.erase(keycode);
 }
 
 void HotkeyManager::startListen() {
@@ -63,6 +78,12 @@ void HotkeyManager::startListen() {
   mousePressListener = boost::thread(boost::bind(&HotkeyManager::mousePressListen, this));
   this_thread::sleep_for(chrono::milliseconds(3));
   if (settings.debug) cout << "Started Hotkey listener..." << endl;
+}
+
+void HotkeyManager::stopListen() {
+  keyPressListener.join();
+  mousePressListener.join();
+  if (settings.debug) cout << "Stopped Hotkey listener." << endl;
 }
 
 unsigned int HotkeyManager::eventCodeToMouseButton(unsigned int code) {
