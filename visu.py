@@ -61,8 +61,8 @@ def getData(i):
 
 def blit_init():
   if(map_name == "de_dust2"):
-    xlims = (-2400, 1954)
-    ylims = (-1155, 3383)
+    xlims = (-2400, 2040)
+    ylims = (-1287, 3232)
   elif(map_name == "de_inferno"):
     xlims = (-2087, 2950)
     ylims = (-1140, 3870)
