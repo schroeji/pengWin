@@ -12,7 +12,7 @@ class Radar {
 private:
   FILE* handle;
   boost::thread writeLocations;
-  bool run = true;
+  bool running;
   void writeFunc();
   GameManager& csgo;
   Settings& settings;

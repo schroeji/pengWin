@@ -55,9 +55,9 @@ void Settings::load(const string& file) {
           trigger_delay = strtol(splits[1].c_str(), NULL, 10);
         else if (splits[0] == "trigger_use_random")
           trigger_use_random = (splits[1] == "true");
-        else if (splits[0] == "trigger_key") {
+        else if (splits[0] == "trigger_key")
           trigger_key = splits[1];
-        } else if (splits[0] == "find_map")
+        else if (splits[0] == "find_map")
           find_map = (splits[1] == "true");
         else if (splits[0] == "radar_sleep")
           radar_sleep = strtol(splits[1].c_str(), NULL, 10);
@@ -65,11 +65,11 @@ void Settings::load(const string& file) {
           debug = (splits[1] == "true");
         else if (splits[0] == "aim_fov")
           aim_fov = degree_to_radian(strtof(splits[1].c_str(), NULL));
-        else if (splits[0] == "bhop_key") {
+        else if (splits[0] == "bhop_key")
           bhop_key = splits[1];
-        } else if (splits[0] == "aim_key") {
+        else if (splits[0] == "aim_key")
           aim_key = splits[1];
-        } else if (splits[0] == "aim_sleep")
+        else if (splits[0] == "aim_sleep")
           aim_sleep = strtol(splits[1].c_str(), NULL, 10);
         else if (splits[0] == "smoothing_factor")
           smoothing_factor = strtof(splits[1].c_str(), NULL);
@@ -79,6 +79,8 @@ void Settings::load(const string& file) {
           aim_autoshoot = (splits[1] == "true");
         else if (splits[0] == "aim_smooth_first_shot")
           aim_smooth_first_shot = (splits[1] == "true");
+        else if (splits[0] == "panic_key")
+          panic_key = splits[1];
       }
     }
   }

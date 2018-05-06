@@ -38,7 +38,9 @@ void write_settings(const string& file_name) {
   file << "# general settings" << endl;
   file << "main_loop_sleep=10" << endl;
   file << "debug=false" << endl;
+  file << "panic_key=F9" << endl;
   file << "# file for reading mouse clicks" << endl;
+  file << "# usually /dev/input/event*" << endl;
   file << "mouse_file=/dev/input/event0" << endl;
   file << "# trigger settings" << endl;
   file << "trigger_delay=10" << endl;

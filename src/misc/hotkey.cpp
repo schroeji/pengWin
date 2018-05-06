@@ -48,15 +48,16 @@ void HotkeyManager::bind(string key, boost::function<void(unsigned int)> func){
     // use mouseListOffset as offset for the mouse button keycodes
     // this is kinda hackish, but this way we dont need another map
     // change 1 to mosue button
-    int button_nr = stoi(key.substr(5, 1));
+    int button_nr = stoi(key.substr(5, key.length()));
     unsigned int keycode = mouseListOffset + button_nr;
     bindings.insert(std::pair<unsigned int, boost::function<void(unsigned int)>>(keycode, func));
     holding_key.insert(std::pair<unsigned int, bool>(keycode, false));
+    if (settings.debug) cout << "Bound mouse key: " << button_nr << endl;
   }
+  listening = false;
 }
 
 void HotkeyManager::unbind(string key) {
-
   bool isKeyboard = (key.compare(0, 5, "mouse") &&
                      key.compare(0, 5, "MOUSE") &&
                      key.compare(0, 5, "Mouse"));
@@ -65,7 +66,7 @@ void HotkeyManager::unbind(string key) {
     KeySym keysym = XStringToKeysym(key.c_str());
     keycode = XKeysymToKeycode(display, keysym);
   } else {
-    int button_nr = stoi(key.substr(5, 1));
+    int button_nr = stoi(key.substr(5, key.length()));
     keycode = mouseListOffset + button_nr;
   }
   bindings.erase(keycode);
@@ -74,6 +75,7 @@ void HotkeyManager::unbind(string key) {
 void HotkeyManager::startListen() {
   if (bindings.size() < 1)
     return;
+  listening = true;
   keyPressListener = boost::thread(boost::bind(&HotkeyManager::keyPressListen, this));
   mousePressListener = boost::thread(boost::bind(&HotkeyManager::mousePressListen, this));
   this_thread::sleep_for(chrono::milliseconds(3));
@@ -81,13 +83,21 @@ void HotkeyManager::startListen() {
 }
 
 void HotkeyManager::stopListen() {
+  if (!listening)
+    return;
+  listening = false;
   keyPressListener.join();
+  if (settings.debug) cout << "Joined keyPressListener..." << endl;
   mousePressListener.join();
+  if (settings.debug) cout << "Joined mousePressListener..." << endl;
+  for (map<unsigned int, bool>::iterator it = holding_key.begin(); it != holding_key.end(); it++) {
+    it->second = false;
+  }
   if (settings.debug) cout << "Stopped Hotkey listener." << endl;
 }
 
 unsigned int HotkeyManager::eventCodeToMouseButton(unsigned int code) {
-  // -271 for event.code and +mouseListOffset to map to the irght position in bindings
+  // -271 for event.code and +mouseListOffset to map to the right position in bindings
   return code + mouseListOffset - 271;
 }
 
@@ -99,17 +109,16 @@ void HotkeyManager::mousePressListen() {
     perror("opening device");
     exit(EXIT_FAILURE);
   }
-
-  while (csgo.isOnServer()) {
+  while (listening && csgo.isOnServer()) {
     // event value == 1 => button press
     // event value == 0 => button release
     read(fd, &event, sizeof(struct input_event));
     unsigned int keycode = eventCodeToMouseButton(event.code);
     // skip if no mapping present
-    if (bindings.find(keycode) == bindings.end())
+    if (bindings.find(keycode) == bindings.end()) {
       continue;
-
-    if (!holding_key.at(keycode) && event.value == 1) { // button press
+    }
+    if (!holding_key.at(keycode) && event.value > 0) { // button press
       boost::function<void(unsigned int)> func;
       try {
         func = bindings.at(keycode);
@@ -156,12 +165,12 @@ void HotkeyManager::keyPressListen() {
     // XGrabKey(display, it->first, modifiers, csWindow, owner_events, pointer_mode,
              // keyboard_mode);
   }
-  while (csgo.isOnServer()) {
+  while (listening && csgo.isOnServer()) {
     XNextEvent(display, &event);
     // without this events are consumed; idk why even with owner_events = true
     forwardEvent(event);
     if (event.type == KeyPress) {
-      if (settings.debug) cout << "HotKey pressed..." << endl;
+      if (settings.debug) cout << "HotKey pressed:" << event.xbutton.button << endl;
       if (holding_key.find(event.xbutton.button) == holding_key.end() ||
           holding_key.at(event.xbutton.button)) {
         continue;
@@ -182,7 +191,7 @@ void HotkeyManager::keyPressListen() {
                holding_key.at(event.xbutton.button)) {
       holding_key[event.xbutton.button] = false;
       // when debugging wait for thread to terminate
-      if (settings.debug) threads[event.xbutton.button].join();
+      // if (settings.debug) threads[event.xbutton.button].join();
       if (settings.debug) cout << "joined thread" << endl;
     }
   }
@@ -213,4 +222,8 @@ Window HotkeyManager::findCSWindow() {
   if (w == 0)
     throw runtime_error("Could not find window or xdotool is not installed.");
   return w;
+}
+
+bool HotkeyManager::isListening() {
+  return listening;
 }

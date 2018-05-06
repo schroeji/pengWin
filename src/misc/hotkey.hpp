@@ -13,6 +13,7 @@ public:
   void unbind(string);
   void startListen();
   void stopListen();
+  bool isListening();
 
 private:
   boost::thread keyListener;
@@ -22,6 +23,7 @@ private:
   boost::thread keyPressListener;
   boost::thread mousePressListener;
   const unsigned int mouseListOffset = 0x160;
+  bool listening;
 
   Display* display;
   Window rootWindow;

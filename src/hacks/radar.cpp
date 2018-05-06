@@ -9,7 +9,9 @@
 
 using namespace std;
 Radar::Radar(GameManager& csgo) : csgo(csgo),
-                                  settings(Settings::getInstance()){}
+                                  settings(Settings::getInstance()){
+  running = false;
+}
 
 Radar::~Radar() {
 }
@@ -32,20 +34,23 @@ void Radar::start() {
   //start visualization
   string cmd = "python3 visu.py " + map_name + " " + to_string(settings.radar_sleep);
   handle = popen(cmd.c_str(), "w");
-  run = true;
+  running = true;
   writeLocations = boost::thread(boost::bind(&Radar::writeFunc, this));
 }
 
 void Radar::stop(){
-  run = false;
-  writeLocations.join();
-  fputs("quit\n", handle);
-  fflush(handle);
-  pclose(handle);
+  if (running) {
+    running = false;
+    writeLocations.join();
+    fputs("quit\n", handle);
+    fflush(handle);
+    pclose(handle);
+    if(settings.debug) cout << "Stopped radar..." << std::endl;
+  }
 }
 
 void Radar::writeFunc() {
-  while (run) {
+  while (running) {
     this_thread::sleep_for(chrono::milliseconds(settings.radar_sleep));
     const char SEPERATOR[] = "|";
     vector<EntityType*> players = csgo.getPlayers();

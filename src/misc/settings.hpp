@@ -20,7 +20,8 @@ public:
   // main settings
   long int main_loop_sleep;
   bool debug = false;
-  string mouse_file = "/dev/input/event0";
+  string mouse_file;
+  string panic_key;
 
   // trigger settings
   long int trigger_delay;

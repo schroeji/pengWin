@@ -22,11 +22,11 @@ void printUsage(const string& name, const string& config_file) {
   cout << "usage: ";
   cout << name << " [options]" << endl;
   cout << "Possible options:" << endl;
-  cout << "-a, -aimbot    Enable Aimbot" << endl;
-  cout << "-b, -bhop      Enable Bunnyhop" << endl;
-  cout << "-d, -debug     Enable debugging" << endl;
-  cout << "-r, -radar     Enable external Radar" << endl;
-  cout << "-t, -trigger   Enable Triggerbot" << endl;
+  cout << "-a, --aimbot    Enable Aimbot" << endl;
+  cout << "-b, --bhop      Enable Bunnyhop" << endl;
+  cout << "-d, --debug     Enable debugging" << endl;
+  cout << "-r, --radar     Enable external Radar" << endl;
+  cout << "-t, --trigger   Enable Triggerbot" << endl;
   cout << endl;
   cout << "For advanced configuration use: " << config_file << endl;;
 }
@@ -42,6 +42,8 @@ int main(int argc, char** argv) {
   bool use_aimbot = false;
   bool debug = false;
   bool use_bhop = false;
+  bool panicked = false;
+
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "--radar") || !strcmp(argv[i], "-r")) {
       cout << "Enabled: Radar" << endl;
@@ -84,7 +86,7 @@ int main(int argc, char** argv) {
   Radar radar(csgo);
   HotkeyManager hotkeyMan(csgo);
 
-  while (csgo.gameRunning()) {
+  while (!panicked && csgo.gameRunning()) {
     if (debug) cout << "Waiting until connected..." << endl;
     while (!csgo.isOnServer()) {
       if (!csgo.gameRunning())
@@ -110,21 +112,29 @@ int main(int argc, char** argv) {
       boost::function<void(unsigned int)> aimFunc = boost::bind(&Aimer::aimCheck, &aimer, _1);
       hotkeyMan.bind(settings.aim_key, aimFunc);
     }
-    if (use_bhop || use_trigger || use_aimbot)
-      hotkeyMan.startListen();
+    // function for panic key to stop everything
+    boost::function<void(unsigned int)> stop = [&hotkeyMan, &radar, &panicked](unsigned int x) {
+      hotkeyMan.stopListen();
+      radar.stop();
+      panicked = true;
+    };
+    hotkeyMan.bind(settings.panic_key, stop);
+    hotkeyMan.startListen();
 
     // main loop
-    while (csgo.isOnServer()) {
+    while (!panicked && csgo.isOnServer()) {
       csgo.grabPlayers();
       if (debug) {
         // csgo.printPlayers();
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     }
-    if (use_radar) radar.stop();
+    if (!panicked)
+      stop(0);
+    if (debug) cout << "Stopped everything..." << endl;
     if (debug) cout << "Not on a server. Entering sleep mode..." << endl;
   }
 
-  if (debug) cout << "Game closed. Terminating..." << endl;
+  if (debug) cout << "Game closed or panic key pressed. Terminating..." << endl;
   return 0;
 }
