@@ -4,7 +4,7 @@ CC = g++
 # compiler flags:
 #  -g    adds debugging information to the executable file
 #  -Wall turns on most, but not all, compiler warnings
-CFLAGS  = -g -Wall
+CFLAGS  = -Wall
 
 # the build target executable:
 TARGET = pengWin
@@ -17,6 +17,8 @@ SRC=$(wildcard src/main.cpp src/misc/*.cpp src/hacks/*.cpp)
 SRC_DUMPER = src/offset_dumper/offset_finder.cpp src/misc/*.cpp
 
 all: $(TARGET) $(TARGET_DUMPER)
+debug: CFLAGS += -DDEBUG -g
+debug: $(TARGET) $(TARGET_DUMPER)
 
 $(TARGET): src/main.cpp
 	$(CC) $(CFLAGS) $(INC) -o $(TARGET) $(SRC)
