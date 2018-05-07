@@ -17,6 +17,7 @@ SRC=$(wildcard src/main.cpp src/misc/*.cpp src/hacks/*.cpp)
 SRC_DUMPER = src/offset_dumper/offset_finder.cpp src/misc/*.cpp
 
 all: $(TARGET) $(TARGET_DUMPER)
+all: CFLAGS += -O3
 debug: CFLAGS += -DDEBUG -g
 debug: $(TARGET) $(TARGET_DUMPER)
 

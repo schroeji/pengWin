@@ -32,6 +32,7 @@ private:
   Settings& settings;
 
   Window findCSWindow();
+  Window activeWindow();
   Window findWindowRecursive(Window);
   void callLoop(unsigned int, boost::function<void(unsigned int)>);
   void keyPressListen();

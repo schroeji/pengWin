@@ -118,11 +118,12 @@ void HotkeyManager::mousePressListen() {
     if (bindings.find(keycode) == bindings.end()) {
       continue;
     }
-    if (!holding_key.at(keycode) && event.value > 0) { // button press
+    Window activeWin = activeWindow();
+    if (!holding_key.at(keycode) && event.value > 0 && activeWin == csWindow) { // button press
       boost::function<void(unsigned int)> func;
       try {
         func = bindings.at(keycode);
-      } catch (out_of_range e) {
+      } catch (const out_of_range& e) {
         throw runtime_error("No binding for pressed key. This should not happen.");
       }
       holding_key[keycode] = true;
@@ -133,7 +134,9 @@ void HotkeyManager::mousePressListen() {
     } else if (holding_key.at(keycode) && event.value == 0) { // button release
       holding_key[keycode] = false;
       // when debugging wait for thread to terminate
-      if (settings.debug) threads[keycode].join();
+      // if (settings.debug) threads[keycode].join();
+    } else if (activeWin != csWindow) {
+      if (settings.debug) cout << "Ignoring because other window focused." << endl;
     } else {
       if (settings.debug) cout << "WARNING: inconsistent mouse state" << endl;
       holding_key.at(keycode) = false;
@@ -178,7 +181,7 @@ void HotkeyManager::keyPressListen() {
       boost::function<void(unsigned int)> func;
       try {
         func = bindings.at(event.xbutton.button);
-      } catch (out_of_range e) {
+      } catch (const out_of_range& e) {
         throw runtime_error("No binding for pressed Key. This should not happen.");
       }
       holding_key[event.xbutton.button] = true;
@@ -219,6 +222,20 @@ Window HotkeyManager::findCSWindow() {
   pclose(in);
   Window w = (Window) strtoul(buf, NULL, 10);
   if (settings.debug) cout << "Found CSGO Window ID: "<< dec << w << endl;
+  if (w == 0)
+    throw runtime_error("Could not find window or xdotool is not installed.");
+  return w;
+}
+
+Window HotkeyManager::activeWindow() {
+  FILE* in;
+  char buf[128];
+  string cmd = "xdotool getWindowfocus";
+  in = popen(cmd.c_str(), "r");
+  fgets(buf, 128, in);
+  pclose(in);
+  Window w = (Window) strtoul(buf, NULL, 10);
+  if (settings.debug) cout << "Focused window:" << dec << w << endl;
   if (w == 0)
     throw runtime_error("Could not find window or xdotool is not installed.");
   return w;

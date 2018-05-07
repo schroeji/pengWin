@@ -100,7 +100,7 @@ void Aimer::aimCheck(unsigned int i) {
     pair<EntityType*, Vector> temp = closestTargetInFov(view);
     enemy = temp.first;
     target_pos = temp.second;
-  } catch(runtime_error e) {
+  } catch(const runtime_error& e) {
     if (settings.debug) cout << "EXCEPTION:" << e.what() << endl;
     this_thread::sleep_for(chrono::milliseconds(settings.aim_sleep));
     return;
@@ -133,7 +133,7 @@ void Aimer::aimCheck(unsigned int i) {
     moveAim(move);
     if (settings.aim_autoshoot)
       clicker.xClick();
-  } catch(runtime_error e) {
+  } catch(const runtime_error& e) {
     if (settings.debug) cout << "EXCEPTION:" << e.what() << endl;
   }
   this_thread::sleep_for(chrono::milliseconds(settings.aim_sleep));
@@ -226,7 +226,7 @@ Vector Aimer::getView(bool rcs) {
   EntityType* local_player;
   try {
     local_player = csgo.getLocalPlayer();
-  } catch (runtime_error e) {
+  } catch (const runtime_error& e) {
     throw e;
   }
   QAngle currAngle = local_player->m_angNetworkAngles;
@@ -248,7 +248,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
   Vector bone_pos;
   try {
     local_player = csgo.getLocalPlayer();
-  } catch (runtime_error e) {
+  } catch (const runtime_error& e) {
     throw e;
   }
   Vector player_pos = {local_player->m_vecOrigin.x,
@@ -271,7 +271,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
       try {
         bone_pos = mem.getBone(enemy_addr, boneID);
         // printf("bone: %f, %f, %f \n", bone_pos.x, bone_pos.z, bone_pos.z);
-      } catch(runtime_error e) {
+      } catch(const runtime_error& e) {
         if (settings.debug) cout << e.what() << endl;;
       }
       Vector dist = getDist(&player_pos, &bone_pos);

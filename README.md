@@ -18,7 +18,7 @@ Unlike other external hacks it does not write to the games memory at all.
 - BlockBot
 - Visibility check (BSP parsing)
 - Panic key (toggleable bindings)
-- disbale when CS window not focused
+- display defusing on radar
 
 # Building
 Dependencies:

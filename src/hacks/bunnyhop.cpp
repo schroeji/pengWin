@@ -34,7 +34,7 @@ void BunnyHopper::jumpCheck(unsigned int i) {
   unsigned int onGround;
   try {
     localPlayer = csgo.getLocalPlayer();
-  } catch (exception e){
+  } catch (const exception& e){
     return;
   }
   onGround = localPlayer->m_fFlags & 1;
