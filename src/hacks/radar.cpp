@@ -57,16 +57,19 @@ void Radar::writeFunc() {
     if (players.empty())
       continue;
     // print local player index into array[0,0]
-    string first_line = to_string(csgo.getLocalPlayerIndex()) + ",0,0,0,0,0";
+    string first_line = to_string(csgo.getLocalPlayerIndex()) + ",0,0,0,0,0,0,0";
     fputs(first_line.c_str(), handle);
-    // Format: number,hp,team,x,y,z
+    // Format: number,hp,team,weapon,defusing,x,y,z
     int i = 0;
     for (EntityType* player : players) {
+      addr_type player_addr = csgo.getPlayerAddr(player);
       fputs(SEPERATOR, handle);
       ostringstream os;
       os << i << ",";
       os << player->m_iHealth << ",";
       os << player->m_iTeamNum << ",";
+      os << csgo.getWeapon(player_addr) << ",";
+      os << csgo.isDefusing(player_addr) << ",";
       os << player->m_vecOrigin.x << ",";
       os << player->m_vecOrigin.y << ",";
       os << player->m_vecOrigin.z;

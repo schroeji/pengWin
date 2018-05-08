@@ -1,11 +1,13 @@
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import matplotlib
-import numpy as np
-import sys
 import os
+import sys
 import time
 from select import select
+
+import matplotlib
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import numpy as np
+
 # import _thread
 
 SEPERATOR = "|"
@@ -34,7 +36,7 @@ def readFromInput():
 
 def getData(i):
   try :
-    #Format: id,hp,team,x,y,z
+    #Format: id,hp,team,weapon,defusing,x,y,z
     data = readFromInput()
   except:
     return ln,
@@ -45,16 +47,23 @@ def getData(i):
   local_player_index = int(data[0,0])
   data = data[1:]
   # data = data[data[:, 1] != 0]
-  xs = data[:, 3]
+  xs = data[:, -3]
+  player_count = len(xs)
   # ys = []
-  zs = data[:, 5]
+  zs = data[:, -1]
   cs = [ 'b' if c == 3 else 'r' for c in data[:,2]]
   if (local_player_index != -1 and local_player_index < len(data)):
     cs[local_player_index] = 'g'
   hps = data[:, 1].astype(int, copy=False)
+  defusings = (data[:, 4] == 1)
   ln.set_offsets(list(zip(zs, xs)))
   ln.set_color(cs)
-  txt = [ax.annotate(str(hps[i]),(zs[i], xs[i]), color=cs[i]) for i in range(len(xs))]
+  strings = []
+  for i in range(player_count):
+    strings.append(str(hps[i]))
+    if defusings[i]:
+      strings[-1] += " def"
+  txt = [ax.annotate(strings[i], (zs[i], xs[i]), color=cs[i]) for i in range(player_count)]
   txt.insert(0, ln)
   # return ln,
   return tuple(txt)

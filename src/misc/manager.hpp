@@ -22,16 +22,18 @@ public:
   std::string getMapName();
   bool isScoped(addr_type);
   bool isDefusing(addr_type);
+  Weapon getWeapon(addr_type);
   Team getTeam();
   unsigned int getCrosshairTarget();
   QAngle getAimPunch();
 
 private:
   MemoryAccess& mem;
-  ObjectManager manager;
   std::vector<EntityType*> players;
   std::vector<addr_type> player_addrs;
   // number of the local_player in players
   int local_player_index = -1;
   EntityType* local_player = new EntityType;
+  GlowObjectManager_t manager;
+  GlowObjectDefinition_t g_glow[1024];
 };

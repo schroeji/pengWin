@@ -42,10 +42,12 @@ public:
   addr_type m_bIsScoped = 0x4144;
   addr_type m_Local = 0x36f0;
   addr_type m_bIsDefusing = 0x4150;
+  addr_type m_hActiveWeapon = 0x3628;
   //ofsets to player+ m_Local
   addr_type m_viewPunchAngle = 0x68;
   addr_type m_aimPunchAngle = 0x74;
-
+  addr_type m_AttributeManager60 = 0x3520;
+  addr_type m_iItemDefinitionIndex = 0x268;
   MemoryAccess(Settings*);
   pid_t getPid();
   Addr_Range getModule(const std::string&);

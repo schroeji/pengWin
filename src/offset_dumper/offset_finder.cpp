@@ -61,7 +61,7 @@ void write_settings(const string& file_name) {
   file << "sensitivity=1.3" << endl;
   file << "# radar settings" << endl;
   file << "find_map=true" << endl;
-  file << "radar_sleep=150" << endl;
+  file << "radar_sleep=100" << endl;
   file.close();
 }
 
