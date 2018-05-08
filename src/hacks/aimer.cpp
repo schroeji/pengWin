@@ -111,7 +111,7 @@ void Aimer::aimCheck(unsigned int i) {
   Vector dist = getDist(&player_pos, &target_pos);
 
   dist = dist + predictPositionOffset(enemy);
-  if (settings.debug) printf("deb dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
+  if (settings.debug) printf("distance vector: %f, %f, %f\n", dist.x, dist.y, dist.z);
   if (settings.debug) printf("player_pos %f, %f, %f\n", player_pos.x, player_pos.y, player_pos.z);
   if (settings.debug) printf("target_pos %f, %f, %f\n", target_pos.x, target_pos.y, target_pos.z);
   if (dist.x == 0 && dist.y == 0 && dist.z == 0)
@@ -189,7 +189,7 @@ MouseMovement Aimer::calcMouseMovement(Vector view, Vector dist, bool use_smooth
   missing_angle_x = radian_to_degree(missing_angle_x);
   missing_angle_y = radian_to_degree(missing_angle_y);
   float multiplier = angle_multiplier;
-  if (csgo.isScoped())
+  if (csgo.isScoped(mem.local_player_addr))
     multiplier = angle_multiplier_scoped;
   float smooth = 1.0;
   if (use_smooth)

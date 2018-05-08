@@ -12,12 +12,12 @@ Unlike other external hacks it does not write to the games memory at all.
 - Offset Dumper
 - Loading settings from file
 - Defining Hotkeys
+- Panic key
 
 # Todo:
 - Sound ESP
 - BlockBot
 - Visibility check (BSP parsing)
-- Panic key (toggleable bindings)
 - display defusing on radar
 
 # Building

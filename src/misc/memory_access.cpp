@@ -3,10 +3,12 @@
 #include "settings.hpp"
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <string.h>
 #include <sys/uio.h>
 #include <stdlib.h>
+#include <vector>
 
 using namespace std;
 
@@ -165,4 +167,34 @@ Vector MemoryAccess::getBone(addr_type player, unsigned int boneid) {
   // bone location vectors have a different order than m_vecOrigin
   // printf("bone: %f, %f, %f\n", bone.y, bone.z, bone.x);
   return {bone.y, bone.z, bone.x};
+}
+
+void MemoryAccess::printBlock(addr_type addr, size_t size) {
+  unsigned char buffer[size];
+  read((void*) addr, buffer, size);
+  for (size_t i = 0; i < size; i++) {
+    if (i % 16 == 0)
+      cout << hex << endl << addr + i << ":";
+    cout << hex << setw(2) << setfill('0') << (unsigned int)buffer[i] << " ";
+  }
+  cout << endl;
+}
+
+vector<int> MemoryAccess::diffMem(addr_type addr, size_t size) {
+  vector<int> result;
+  if (diffBuffer == nullptr) {
+    diffBuffer = (unsigned char*) malloc(size);
+    read((void*) addr, diffBuffer, size);
+    return result;
+  }
+  unsigned char buffer[size];
+  read((void*) addr, buffer, size);
+  for (size_t i = 0; i < size; i++) {
+    if (diffBuffer[i] != buffer[i]) {
+      result.push_back(i);
+    }
+  }
+  if (result.size() > 0)
+    memcpy(diffBuffer, buffer, size);
+  return result;
 }

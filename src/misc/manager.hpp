@@ -20,7 +20,8 @@ public:
   bool isOnServer();
   addr_type getPlayerAddr(EntityType*);
   std::string getMapName();
-  bool isScoped();
+  bool isScoped(addr_type);
+  bool isDefusing(addr_type);
   Team getTeam();
   unsigned int getCrosshairTarget();
   QAngle getAimPunch();

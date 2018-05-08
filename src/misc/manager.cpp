@@ -94,6 +94,13 @@ void GameManager::printPlayers() {
     printf("view offset: %f, %f\n", player->m_vecViewOffset.x,  player->m_vecViewOffset.y);
     printf("Velocity: %f, %f, %f\n", player->m_vecVelocity.x,  player->m_vecVelocity.y, player->m_vecVelocity.z);
     printf("Aimpunch: %f, %f, %f\n", getAimPunch().x,  getAimPunch().y, getAimPunch().z);
+    printf("Defusing: %d\n", isDefusing(player_addrs[i]));
+    vector<int> diffs = mem.diffMem(mem.local_player_addr + 0x4000, 0x200);
+    if (diffs.size() > 0) {
+      for (int i : diffs)
+        cout << hex << i << endl;
+      // mem.printBlock(mem.local_player_addr + 0x4000, 0x400);
+    }
     cout << "-----" << endl;
     i++;
   }
@@ -192,9 +199,9 @@ string GameManager::getMapName() {
   return ret;
 }
 
-bool GameManager::isScoped() {
+bool GameManager::isScoped(addr_type player_addr) {
   char buf;
-  if(!mem.read((void*) (mem.local_player_addr + mem.m_bIsScoped), &buf, sizeof(buf)))
+  if(!mem.read((void*) (player_addr + mem.m_bIsScoped), &buf, sizeof(buf)))
      return false;
   return (bool) buf;
 }
@@ -207,15 +214,22 @@ Team GameManager::getTeam() {
 }
 
 unsigned int GameManager::getCrosshairTarget() {
-  unsigned int ret;
-  if(!mem.read((void*) (mem.local_player_addr + mem.m_iCrosshairIndex), &ret, sizeof(ret)))
+  unsigned int target;
+  if(!mem.read((void*) (mem.local_player_addr + mem.m_iCrosshairIndex), &target, sizeof(target)))
     throw runtime_error("Could not get CrosshairTarget.");
-  return ret;
+  return target;
 }
 
 QAngle GameManager::getAimPunch() {
   QAngle ang;
   if(!mem.read((void*) (mem.local_player_addr + mem.m_Local + mem.m_aimPunchAngle), &ang, sizeof(ang)))
-    throw runtime_error("Could not get CrosshairTarget.");
+    throw runtime_error("Could not get AimPunch.");
   return ang;
+}
+
+bool GameManager::isDefusing(addr_type player_addr) {
+  char buf;
+  if(!mem.read((void*) (player_addr + mem.m_bIsDefusing), &buf, sizeof(buf)))
+    return false;
+  return (bool) buf;
 }

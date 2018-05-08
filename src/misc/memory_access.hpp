@@ -3,6 +3,7 @@
 #include "settings.hpp"
 
 #include <string>
+#include <vector>
 class MemoryAccess {
 private:
   const std::string GAME_NAME = "csgo_linux64";
@@ -10,6 +11,7 @@ private:
   Settings* settings;
   Addr_Range engine_range;
   Addr_Range client_range;
+  unsigned char* diffBuffer = nullptr;
 
   addr_type local_player_addr_location;
   addr_type attack_addr_call_location;
@@ -23,8 +25,8 @@ private:
   //offsets to engine base
   addr_type map_name_offset;
 
-  void updateAddrs();
   bool debug = false;
+  void updateAddrs();
 
 public:
   addr_type local_player_addr;
@@ -39,7 +41,7 @@ public:
   addr_type m_dwBoneMatrix = 0x2C70;
   addr_type m_bIsScoped = 0x4144;
   addr_type m_Local = 0x36f0;
-
+  addr_type m_bIsDefusing = 0x4150;
   //ofsets to player+ m_Local
   addr_type m_viewPunchAngle = 0x68;
   addr_type m_aimPunchAngle = 0x74;
@@ -55,4 +57,6 @@ public:
   addr_type find_pattern(const char*, const char*, Addr_Range);
   void updateLocalPlayerAddr();
   Vector getBone(addr_type, unsigned int);
+  void printBlock(addr_type, size_t);
+  std::vector<int> diffMem(addr_type, size_t);
 };
