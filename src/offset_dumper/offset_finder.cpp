@@ -86,8 +86,8 @@ int main(int argc, char** argv) {
   const char map_name_pattern[] = "xxxxxxxxxxxx????";
   const char force_jump_data[] = "\x44\x89\xe8\xc1\xe0\x1d\xc1\xf8\x1f\x83\xe8\x03\x45\x84\xe4\x74\x08\x21\xd0";
   const char force_jump_pattern[] = "xxxxxxxxxxxxxxxx?xx";
-  const char split_screen_pattern[] = "\x55\x89\xFE\x48\x8D\x3D\x00\x00\x00\x00\x48\x89\xE5\x5D\xE9\xAD\xFF\xFF\xFF";
-  const char force_jump_pattern[] = "xxxxxx????xxxxxxxxx";
+  const char split_screen_data[] = "\x55\x89\xFE\x48\x8D\x3D\x00\x00\x00\x00\x48\x89\xE5\x5D\xE9\xAD\xFF\xFF\xFF";
+  const char split_screen_pattern[] = "xxxxxx????xxxxxxxxx";
 
   vector<string> offsets;
   vector<string> offset_names;

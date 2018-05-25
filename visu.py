@@ -19,6 +19,7 @@ ln = plt.scatter([], [], animated=True)
 # print(ln.get_offsets())
 # location_file = "/tmp/locs.csv"
 
+
 def weapon(wid):
   if wid == 0:
     return "NONE"
@@ -37,7 +38,7 @@ def weapon(wid):
   if wid == 9:
     return "AWP"
   if wid == 10:
-    return "FAMA"
+    return "FAMAS"
   if wid == 11:
     return "G3SG1"
   if wid == 13:
@@ -84,8 +85,18 @@ def weapon(wid):
     return "SCOUT"
   if wid == 42:
     return "KNIFE"
-  if wid in range(43, 48):
-    return "NADE"
+  if wid == 43:
+    return "FLASH"
+  if wid == 44:
+    return "HE"
+  if wid == 45:
+    return "SMOKE"
+  if wid == 46:
+    return "MOLO"
+  if wid == 47:
+    return "DEC"
+  if wid == 48:
+    return "INC"
   if wid == 49:
     return "C4"
   if wid == 59:

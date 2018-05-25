@@ -161,6 +161,7 @@ void normalize_vector(Vector2D*);
 Vector getDist(Vector*, Vector*);
 float scalar_prod(Vector*, Vector*);
 float scalar_prod(Vector2D*, Vector2D*);
+float sgn(float);
 
 
 inline float degree_to_radian(float x) {

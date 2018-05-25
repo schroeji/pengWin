@@ -165,24 +165,10 @@ MouseMovement Aimer::calcMouseMovement(Vector view, Vector dist, bool use_smooth
   missing_angle_y = acos(missing_angle_y);
   // determinante gives the orientation of the two vectors
   float det_x = view.x * dist.z - view.z * dist.x;
-  float orientation_x = 0;
-  if (det_x > 0) {
-    orientation_x = 1;
-  } else if (det_x < 0) {
-    orientation_x = -1;
-  } else {
-    orientation_x = 0;
-  }
+  float orientation_x = sgn(det_x);
   // because both are normalized the one with bigger y component
   // is counter-clockwise of the other in the 2D plane
-  float orientation_y = 0;
-  if (tmp.y > dist.y) {
-    orientation_y = 1;
-  } else if (tmp.y < dist.y) {
-    orientation_y = -1;
-  } else {
-    orientation_y = 0;
-  }
+  float orientation_y = sgn(tmp.y - dist.y);
   // QAngle aimPunch = csgo.getAimPunch();
   // missing_angle_x = missing_angle_x - aimPunch.y;
   // missing_angle_y = missing_angle_y - aimPunch.x;

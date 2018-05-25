@@ -49,3 +49,7 @@ float scalar_prod(Vector* a, Vector* b) {
 float scalar_prod(Vector2D* a, Vector2D* b) {
   return (a->x * b->x) + (a->y * b->y);
 }
+
+float sgn(float val) {
+  return (0.0 < val) - (val < 0.0);
+}
