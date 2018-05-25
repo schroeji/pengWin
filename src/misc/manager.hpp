@@ -23,9 +23,9 @@ public:
   bool isScoped(addr_type);
   bool isDefusing(addr_type);
   Weapon getWeapon(addr_type);
-  Team getTeam();
-  unsigned int getCrosshairTarget();
-  QAngle getAimPunch();
+  Team getTeam(addr_type);
+  unsigned int getCrosshairTarget(addr_type);
+  QAngle getAimPunch(addr_type);
 
 private:
   MemoryAccess& mem;

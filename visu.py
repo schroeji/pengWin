@@ -19,6 +19,88 @@ ln = plt.scatter([], [], animated=True)
 # print(ln.get_offsets())
 # location_file = "/tmp/locs.csv"
 
+def weapon(wid):
+  if wid == 0:
+    return "NONE"
+  if wid == 1:
+    return "DEAGLE"
+  if wid == 2:
+    return "DUALS"
+  if wid == 3:
+    return "FIVE7"
+  if wid == 4:
+    return "GLOCK"
+  if wid == 7:
+    return "AK47"
+  if wid == 8:
+    return "AUG"
+  if wid == 9:
+    return "AWP"
+  if wid == 10:
+    return "FAMA"
+  if wid == 11:
+    return "G3SG1"
+  if wid == 13:
+    return "GALIL"
+  if wid == 14:
+    return "M249"
+  if wid == 16:
+    return "M4A4"
+  if wid == 17:
+    return "MAC10"
+  if wid == 19:
+    return "P90"
+  if wid == 24:
+    return "UMP"
+  if wid == 25:
+    return "XM1014"
+  if wid == 26:
+    return "BIZON"
+  if wid == 27:
+    return "MAG7"
+  if wid == 28:
+    return "NEGEV"
+  if wid == 29:
+    return "SAWED"
+  if wid == 30:
+    return "TEC9"
+  if wid == 31:
+    return "TASER"
+  if wid == 32:
+    return "P2000"
+  if wid == 33:
+    return "MP7"
+  if wid == 34:
+    return "MP9"
+  if wid == 35:
+    return "NOVA"
+  if wid == 36:
+    return "P250"
+  if wid == 38:
+    return "SCAR"
+  if wid == 39:
+    return "SG556"
+  if wid == 40:
+    return "SCOUT"
+  if wid == 42:
+    return "KNIFE"
+  if wid in range(43, 48):
+    return "NADE"
+  if wid == 49:
+    return "C4"
+  if wid == 59:
+    return "KNIFE"
+  if wid == 60:
+    return "M4A1"
+  if wid == 61:
+    return "USP"
+  if wid == 63:
+    return "CZ75"
+  if wid == 63:
+    return "REV"
+  if wid in range(500, 520):
+    return "KNIFE"
+
 def readFromInput():
   ready, _, _ = select([sys.stdin], [], [])
   while (len(ready) > 0):
@@ -55,12 +137,14 @@ def getData(i):
   if (local_player_index != -1 and local_player_index < len(data)):
     cs[local_player_index] = 'g'
   hps = data[:, 1].astype(int, copy=False)
+  weapons = data[:, 3]
   defusings = (data[:, 4] == 1)
   ln.set_offsets(list(zip(zs, xs)))
   ln.set_color(cs)
   strings = []
   for i in range(player_count):
     strings.append(str(hps[i]))
+    strings[-1] += " " + weapon(weapons[i])
     if defusings[i]:
       strings[-1] += " def"
   txt = [ax.annotate(strings[i], (zs[i], xs[i]), color=cs[i]) for i in range(player_count)]
@@ -107,7 +191,6 @@ def catch_term_sig():
     if (inp == "quit"):
       plt.close()
       break
-
 # map_name = "de_dust2"
 # map_name = "de_inferno"
 # map_name = "de_mirage"

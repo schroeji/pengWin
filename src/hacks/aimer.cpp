@@ -231,7 +231,7 @@ Vector Aimer::getView(bool rcs) {
   }
   QAngle currAngle = local_player->m_angNetworkAngles;
   // times two because of weapon_recoil_scale convar
-  QAngle aimPunch = csgo.getAimPunch() * 2.0;
+  QAngle aimPunch = csgo.getAimPunch(mem.local_player_addr) * 2.0;
   if (rcs)
     currAngle = currAngle + aimPunch;
   float radians_x = degree_to_radian(-currAngle.x); // pitch
@@ -261,7 +261,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
   EntityType* closestPlayer = nullptr;
   float closestAngle = settings.aim_fov;
   Vector closestBone = {0, 0, 0};
-  Team team = csgo.getTeam();
+  Team team = csgo.getTeam(mem.local_player_addr);
   for (EntityType* enemy : players) {
     if (enemy == local_player || enemy->m_iTeamNum == team)
       continue;
@@ -286,8 +286,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
         closestPlayer = enemy;
         closestAngle = angle;
         closestBone = bone_pos;
-      }
-      else if (closestAngle > angle) {
+      } else if (closestAngle > angle) {
         closestPlayer = enemy;
         closestAngle = angle;
         closestBone = bone_pos;

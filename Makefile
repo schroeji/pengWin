@@ -22,6 +22,7 @@ debug: CFLAGS += -DDEBUG -g
 debug: $(TARGET) $(TARGET_DUMPER)
 pengwin: $(TARGET)
 pengwin: CFLAGS += -O3
+offset: $(TARGET_DUMPER)
 
 $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) $(INC) -o $(TARGET) $(SRC)

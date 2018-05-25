@@ -92,7 +92,7 @@ void GameManager::printPlayers() {
     printf("Angle: x=%4.16lf y=%4.16lf z=%f\n", player->m_angNetworkAngles.x, player->m_angNetworkAngles.y, player->m_angNetworkAngles.z);
     printf("view offset: %f, %f\n", player->m_vecViewOffset.x,  player->m_vecViewOffset.y);
     printf("Velocity: %f, %f, %f\n", player->m_vecVelocity.x,  player->m_vecVelocity.y, player->m_vecVelocity.z);
-    printf("Aimpunch: %f, %f, %f\n", getAimPunch().x,  getAimPunch().y, getAimPunch().z);
+    printf("Aimpunch: %f, %f, %f\n", getAimPunch(mem.local_player_addr).x,  getAimPunch(mem.local_player_addr).y, getAimPunch(mem.local_player_addr).z);
     printf("Defusing: %d\n", isDefusing(player_addrs[i]));
     printf("Weapon: %x\n", getWeapon(player_addrs[i]));
     vector<int> diffs = mem.diffMem(mem.local_player_addr + 0x3500, 0x200);
@@ -205,23 +205,23 @@ bool GameManager::isScoped(addr_type player_addr) {
   return (bool) buf;
 }
 
-Team GameManager::getTeam() {
+Team GameManager::getTeam(addr_type player_addr) {
   unsigned int team;
-  if(!mem.read((void*) (mem.local_player_addr + mem.m_iTeamNum), &team, sizeof(team)))
+  if(!mem.read((void*) (player_addr + mem.m_iTeamNum), &team, sizeof(team)))
     throw runtime_error("Could not get Team.");
   return (Team) team;
 }
 
-unsigned int GameManager::getCrosshairTarget() {
+unsigned int GameManager::getCrosshairTarget(addr_type player_addr) {
   unsigned int target;
-  if(!mem.read((void*) (mem.local_player_addr + mem.m_iCrosshairIndex), &target, sizeof(target)))
+  if(!mem.read((void*) (player_addr + mem.m_iCrosshairIndex), &target, sizeof(target)))
     throw runtime_error("Could not get CrosshairTarget.");
   return target;
 }
 
-QAngle GameManager::getAimPunch() {
+QAngle GameManager::getAimPunch(addr_type player_addr) {
   QAngle ang;
-  if(!mem.read((void*) (mem.local_player_addr + mem.m_Local + mem.m_aimPunchAngle), &ang, sizeof(ang)))
+  if(!mem.read((void*) (player_addr + mem.m_Local + mem.m_aimPunchAngle), &ang, sizeof(ang)))
     throw runtime_error("Could not get AimPunch.");
   return ang;
 }
