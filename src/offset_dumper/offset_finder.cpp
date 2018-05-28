@@ -57,6 +57,7 @@ void write_settings(const string& file_name) {
   file << "# enable / disable smoothing on first shot you may want to disable this for perfect flicks" << endl;
   file << "aim_smooth_first_shot=true" << endl;
   file << "smoothing_factor=0.25" << endl;
+  file << "smoke_check=true" << endl;
   file << "# your ingame sensitivity (used for aim calculations)" << endl;
   file << "sensitivity=1.3" << endl;
   file << "# radar settings" << endl;

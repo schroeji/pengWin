@@ -43,6 +43,7 @@ public:
   float sensitivity;
   bool aim_autoshoot = false;
   bool aim_smooth_first_shot = true;
+  bool smoke_check;
 
   Settings(const string&);
   static Settings& getInstance();

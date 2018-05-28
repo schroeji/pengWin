@@ -26,10 +26,13 @@ public:
   Team getTeam(addr_type);
   unsigned int getCrosshairTarget(addr_type);
   QAngle getAimPunch(addr_type);
+  std::vector<Vector> getSmokeLocations();
+  bool lineThroughSmoke(Vector start, Vector end);
 
 private:
   MemoryAccess& mem;
   std::vector<EntityType*> players;
+  std::vector<EntityType*> nonPlayerEntities;
   std::vector<addr_type> player_addrs;
   // number of the local_player in players
   int local_player_index = -1;

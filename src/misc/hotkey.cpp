@@ -114,6 +114,7 @@ void HotkeyManager::mousePressListen() {
     // event value == 0 => button release
     read(fd, &event, sizeof(struct input_event));
     unsigned int keycode = eventCodeToMouseButton(event.code);
+    // if (settings.debug) cout << "Mouse event:" << keycode << endl;
     // skip if no mapping present
     if (bindings.find(keycode) == bindings.end()) {
       continue;

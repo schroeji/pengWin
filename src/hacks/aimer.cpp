@@ -116,12 +116,8 @@ void Aimer::aimCheck(unsigned int i) {
   if (settings.debug) printf("target_pos %f, %f, %f\n", target_pos.x, target_pos.y, target_pos.z);
   if (dist.x == 0 && dist.y == 0 && dist.z == 0)
     return;
-
-  MouseMovement move;
-  if (!settings.aim_smooth_first_shot && i == 0)
-    move = calcMouseMovement(view, dist, false);
-  else
-    move = calcMouseMovement(view, dist, true);
+  bool use_smooth = settings.aim_smooth_first_shot || i != 0;
+  MouseMovement move = calcMouseMovement(view, dist, use_smooth);
 
   if (settings.debug) cout << dec << "move angle x: " << move.x << endl;
   if (settings.debug) cout << dec << "move angle y: " << move.y << endl;
@@ -169,17 +165,12 @@ MouseMovement Aimer::calcMouseMovement(Vector view, Vector dist, bool use_smooth
   // because both are normalized the one with bigger y component
   // is counter-clockwise of the other in the 2D plane
   float orientation_y = sgn(tmp.y - dist.y);
-  // QAngle aimPunch = csgo.getAimPunch();
-  // missing_angle_x = missing_angle_x - aimPunch.y;
-  // missing_angle_y = missing_angle_y - aimPunch.x;
   missing_angle_x = radian_to_degree(missing_angle_x);
   missing_angle_y = radian_to_degree(missing_angle_y);
   float multiplier = angle_multiplier;
   if (csgo.isScoped(mem.local_player_addr))
     multiplier = angle_multiplier_scoped;
-  float smooth = 1.0;
-  if (use_smooth)
-    smooth = settings.smoothing_factor;
+  float smooth = use_smooth ? settings.smoothing_factor : 1.0;
   int moveAngle_x = static_cast<int>(orientation_x * missing_angle_x * multiplier * inverse_sens * smooth);
   int moveAngle_y = static_cast<int>(orientation_y * missing_angle_y * multiplier * inverse_sens * smooth);
   return {moveAngle_x, moveAngle_y};
@@ -251,6 +242,8 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
   for (EntityType* enemy : players) {
     if (enemy == local_player || enemy->m_iTeamNum == team)
       continue;
+    if (settings.smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
+      continue;
     addr_type enemy_addr = csgo.getPlayerAddr(enemy);
     for (unsigned int boneID : boneIds ) {
       // cout << "bone ID:" << boneID << endl;
@@ -260,12 +253,10 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
       } catch(const runtime_error& e) {
         if (settings.debug) cout << e.what() << endl;;
       }
+      // find angle between player and target
       Vector dist = getDist(&player_pos, &bone_pos);
       normalize_vector(&dist);
       float angle = acos(dist * view);
-      // printf("dist: %f, %f,  %f\n", dist.x, dist.y, dist.z);
-      // printf("view: %f, %f, %f\n", view.x, view.y, view.z);
-      // printf("angle: %f, %f, %f\n", angle, radian_to_degree(angle), settings.aim_fov);
       if (angle > (settings.aim_fov / 2.))
         continue;
       if (closestPlayer == nullptr) {

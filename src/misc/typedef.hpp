@@ -5,6 +5,11 @@
 #include <vector>
 #include <string>
 #include <math.h>
+
+// according to http://counterstrike.wikia.com/wiki/Smoke_Grenade
+// radius should be 144 we use less because edges are not straight
+#define smokeRadius 135.0
+
 typedef std::pair<unsigned long int, unsigned long int> Addr_Range;
 typedef unsigned long int addr_type;
 
@@ -235,3 +240,38 @@ enum Weapon {
 	KNIFE_BUTTERFLY = 515,
 	KNIFE_PUSH = 516
 };
+
+// m_fFlags
+// source: https://github.com/pmrowla/hl2sdk-csgo/blob/master/public/const.h#L110
+#define	FL_ONGROUND				(1<<0)	// At rest / on the ground
+#define FL_DUCKING				(1<<1)	// Player flag -- Player is fully crouched
+#define	FL_WATERJUMP			(1<<3)	// player jumping out of water
+#define FL_ONTRAIN				(1<<4) // Player is _controlling_ a train, so movement commands should be ignored on client during prediction.
+#define FL_INRAIN				(1<<5)	// Indicates the entity is standing in rain
+#define FL_FROZEN				(1<<6) // Player is frozen for 3rd person camera
+#define FL_ATCONTROLS			(1<<7) // Player can't move, but keeps key inputs for controlling another entity
+#define	FL_CLIENT				(1<<8)	// Is a player
+#define FL_FAKECLIENT			(1<<9)	// Fake client, simulated server side; don't send network messages to them
+#define	FL_INWATER				(1<<10)	// In water
+// NON-PLAYER SPECIFIC (i.e., not used by GameMovement or the client .dll ) -- Can still be applied to players, though
+#define	FL_FLY					(1<<11)	// Changes the SV_Movestep() behavior to not need to be on ground
+#define	FL_SWIM					(1<<12)	// Changes the SV_Movestep() behavior to not need to be on ground (but stay in water)
+#define	FL_CONVEYOR				(1<<13)
+#define	FL_NPC					(1<<14)
+#define	FL_GODMODE				(1<<15)
+#define	FL_NOTARGET				(1<<16)
+#define	FL_AIMTARGET			(1<<17)	// set if the crosshair needs to aim onto the entity
+#define	FL_PARTIALGROUND		(1<<18)	// not all corners are valid
+#define FL_STATICPROP			(1<<19)	// Eetsa static prop!
+#define FL_GRAPHED				(1<<20) // worldgraph has this ent listed as something that blocks a connection
+#define FL_GRENADE				(1<<21)
+#define FL_STEPMOVEMENT			(1<<22)	// Changes the SV_Movestep() behavior to not do any processing
+#define FL_DONTTOUCH			(1<<23)	// Doesn't generate touch functions, generates Untouch() for anything it was touching when this flag was set
+#define FL_BASEVELOCITY			(1<<24)	// Base velocity has been applied this frame (used to convert base velocity into momentum)
+#define FL_WORLDBRUSH			(1<<25)	// Not moveable/removeable brush entity (really part of the world, but represented as an entity for transparency or something)
+#define FL_OBJECT				(1<<26) // Terrible name. This is an object that NPCs should see. Missiles, for example.
+#define FL_KILLME				(1<<27)	// This entity is marked for death -- will be freed by game DLL
+#define FL_ONFIRE				(1<<28)	// You know...
+#define FL_DISSOLVING			(1<<29) // We're dissolving!
+#define FL_TRANSRAGDOLL			(1<<30) // In the process of turning into a client side ragdoll.
+#define FL_UNBLOCKABLE_BY_PLAYER (1<<31)

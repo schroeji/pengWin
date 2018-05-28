@@ -79,6 +79,8 @@ void Settings::load(const string& file) {
           aim_autoshoot = (splits[1] == "true");
         else if (splits[0] == "aim_smooth_first_shot")
           aim_smooth_first_shot = (splits[1] == "true");
+        else if (splits[0] == "smoke_check")
+          smoke_check = (splits[1] == "true");
         else if (splits[0] == "panic_key")
           panic_key = splits[1];
       }
@@ -103,11 +105,13 @@ void Settings::print() {
   cout << "Trigger Key: " << trigger_key << endl;
   cout << "Bhop Key: " << bhop_key << endl;
   cout << "Aim Key: " << aim_key << endl;
+  cout << "Panic Key: " << panic_key << endl;
   cout << "Aimbot FOV: " << radian_to_degree(aim_fov) << endl;
   cout << "aim_sleep: " << aim_sleep << endl;
   cout << "aim_autoshoot: " << aim_autoshoot << endl;
   cout << "aim_smooth_first_shot: " << aim_smooth_first_shot << endl;
   cout << "smoothing_factor: " << smoothing_factor << endl;
+  cout << "smoke_check: " << smoke_check << endl;
   cout << "sensitivity: " << sensitivity << endl;
   cout << "find_map: " << find_map << endl;
   cout << "radar_sleep: " << radar_sleep << endl;

@@ -38,6 +38,7 @@ void normalize_vector(Vector2D* vec) {
   vec->y /= length;
 }
 
+
 Vector getDist(Vector* a, Vector* b) {
   return Vector{b->x - a->x, b->y - a->y, b->z - a->z};
 }
