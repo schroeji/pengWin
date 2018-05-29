@@ -1,6 +1,7 @@
 #pragma once
 #include "memory_access.hpp"
 #include "typedef.hpp"
+#include "util.hpp"
 
 #include <string>
 #include <vector>

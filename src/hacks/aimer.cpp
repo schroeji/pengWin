@@ -1,4 +1,5 @@
 #include "misc/typedef.hpp"
+#include "misc/util.hpp"
 #include "aimer.hpp"
 #include "misc/manager.hpp"
 #include "misc/clicker.hpp"
@@ -127,7 +128,7 @@ void Aimer::aimCheck(unsigned int i) {
   }
   try {
     moveAim(move);
-    if (settings.aim_autoshoot)
+    if (settings.aim_autoshoot && len(move) < 4)
       clicker.xClick();
   } catch(const runtime_error& e) {
     if (settings.debug) cout << "EXCEPTION:" << e.what() << endl;

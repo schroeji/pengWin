@@ -1,5 +1,5 @@
 #pragma once
-#include "typedef.hpp"
+#include "util.hpp"
 
 #include <string>
 #include <X11/Xlib.h>

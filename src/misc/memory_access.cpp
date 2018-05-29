@@ -1,6 +1,7 @@
 #include "memory_access.hpp"
 #include "typedef.hpp"
 #include "settings.hpp"
+#include "util.hpp"
 
 #include <iostream>
 #include <iomanip>

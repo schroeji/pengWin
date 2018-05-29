@@ -1,5 +1,5 @@
 #include "settings.hpp"
-#include "typedef.hpp"
+#include "util.hpp"
 
 #include <string>
 #include <fstream>
