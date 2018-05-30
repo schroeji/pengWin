@@ -79,7 +79,6 @@ int main(int argc, char** argv) {
   MemoryAccess mem(&settings);
   GameManager csgo = GameManager(mem);
 
-
   Trigger trigger(csgo);
   Aimer aimer(csgo);
   BunnyHopper bhopper(csgo);

@@ -94,5 +94,5 @@ inline float len(Vector vec) {
 
 inline int len(MouseMovement move) {
   // manhatten distance
-  return move.x + move.y;
+  return abs(move.x) + abs(move.y);
 }

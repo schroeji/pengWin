@@ -155,7 +155,7 @@ void MemoryAccess::updateLocalPlayerAddr() {
     if (settings->debug) cout << "WARNING: could not get localplayer" << endl;
 }
 
-Vector MemoryAccess::getBone(addr_type player, unsigned int boneid) {
+Vector MemoryAccess::getBone(addr_type player, unsigned int boneID) {
   if(player == 0)
     throw runtime_error("getBone: Player is nullptr.");
   addr_type boneMatrix_addr;
@@ -163,7 +163,7 @@ Vector MemoryAccess::getBone(addr_type player, unsigned int boneid) {
   if (!read((void*) (player + m_dwBoneMatrix), &boneMatrix_addr, sizeof(boneMatrix_addr)))
     throw runtime_error("Could not get BoneMatrix.");
   BoneInfo bone;
-  if (!read((void*) (boneMatrix_addr + 0x30 * boneid), &bone, sizeof(bone)))
+  if (!read((void*) (boneMatrix_addr + sizeof(BoneInfo) * boneID), &bone, sizeof(bone)))
     throw runtime_error("Could not get BoneInfo.");
   // bone location vectors have a different order than m_vecOrigin
   // printf("bone: %f, %f, %f\n", bone.y, bone.z, bone.x);

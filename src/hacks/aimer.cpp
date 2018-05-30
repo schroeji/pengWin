@@ -233,7 +233,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
                        local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
                        local_player->m_vecOrigin.z};
   vector<EntityType*> players = csgo.getPlayers();
-  unsigned int boneIds[] = {3, 6, 7, 8, 66, 67, 73, 74};
+  // unsigned int boneIds[] = {3, 6, 7, 8, 66, 67, 73, 74};
   if (players.size() < 2)
     throw runtime_error("Only one player.");
   EntityType* closestPlayer = nullptr;
@@ -241,12 +241,13 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
   Vector closestBone = {0, 0, 0};
   Team team = csgo.getTeam(mem.local_player_addr);
   for (EntityType* enemy : players) {
-    if (enemy == local_player || enemy->m_iTeamNum == team)
+    if (enemy == local_player || (!settings.aim_teammates && enemy->m_iTeamNum == team))
       continue;
     if (settings.smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
       continue;
     addr_type enemy_addr = csgo.getPlayerAddr(enemy);
-    for (unsigned int boneID : boneIds ) {
+
+    for (unsigned int boneID : settings.bone_ids ) {
       // cout << "bone ID:" << boneID << endl;
       try {
         bone_pos = mem.getBone(enemy_addr, boneID);

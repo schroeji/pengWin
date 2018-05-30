@@ -2,6 +2,7 @@
 #include "util.hpp"
 
 #include <string>
+#include <vector>
 #include <X11/Xlib.h>
 
 using namespace std;
@@ -44,6 +45,8 @@ public:
   bool aim_autoshoot = false;
   bool aim_smooth_first_shot = true;
   bool smoke_check;
+  bool aim_teammates;
+  vector<unsigned int> bone_ids;
 
   Settings(const string&);
   static Settings& getInstance();

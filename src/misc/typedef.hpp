@@ -91,6 +91,51 @@ public:
   unsigned int unk5; // 0028 (054612E8)
 };
 
+enum Bone {
+  PELVIS = 0,
+  ORIGIN = 1,
+  BACK_NECK = 2,
+	SPINE0 = 3,
+	SPINE1 = 4,
+	SPINE2 = 5,
+	SPINE3 = 6,
+	NECK = 7,
+	HEAD0 = 8,
+	HEAD1 = 9,
+	NECK_FRONT = 10,
+	LEFT_SHOULDER = 11,
+	LEFT_ELBOW = 12,
+	LEFT_LOWER_ARM = 13,
+	LEFT_HAND = 14,
+  // for dust2 T
+  RIGHT_SHOULDER = 39,
+  RIGHT_ELBOW = 40,
+  RIGHT_LOWER_ARM = 41,
+  RIGHT_HAND = 42,
+
+  LEFT_FOOT = 70,
+  LEFT_THIGH = 71,
+  LEFT_KNEE = 72,
+
+  RIGHT_FOOT = 77,
+  RIGHT_THIGH = 78,
+  RIGHT_KNEE = 79,
+
+  // for dust 2 CT
+  // RIGHT_SHOULDER = 41,
+  // RIGHT_ELBOW = 42,
+  // RIGHT_LOWER_ARM = 43,
+  // RIGHT_HAND = 44
+
+  // LEFT_THIGH = 70,
+  // LEFT_KNEE = 71,
+  // LEFT_FOOT = 72,
+
+  // RIGHT_THIGH = 77,
+  // RIGHT_KNEE = 78,
+  // RIGHT_FOOT = 79,
+
+};
 
 enum Weapon {
   NONE = 0,
