@@ -246,11 +246,10 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
     if (settings.smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
       continue;
     addr_type enemy_addr = csgo.getPlayerAddr(enemy);
-
-    for (unsigned int boneID : settings.bone_ids ) {
-      // cout << "bone ID:" << boneID << endl;
+    BoneInfo* boneMatrix = mem.getBoneMatrix(enemy_addr);
+    for (unsigned int boneID : settings.bone_ids ) {cout << "bone ID:" << boneID << endl;
       try {
-        bone_pos = mem.getBone(enemy_addr, boneID);
+        bone_pos = {boneMatrix[boneID].y, boneMatrix[boneID].z, boneMatrix[boneID].x};
         // printf("bone: %f, %f, %f \n", bone_pos.x, bone_pos.z, bone_pos.z);
       } catch(const runtime_error& e) {
         if (settings.debug) cout << e.what() << endl;;
@@ -271,6 +270,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
         closestBone = bone_pos;
       }
     }
+    delete boneMatrix;
   }
   if (closestPlayer == nullptr)
     throw runtime_error("No player in FOV");

@@ -18,7 +18,6 @@ Unlike other external hacks it does not write to the games memory at all.
 - Sound ESP
 - BlockBot
 - Visibility check (BSP parsing)
-- Use Hitbox instead of bones
 - Weapon dependent aimbot
 - overflick?
 

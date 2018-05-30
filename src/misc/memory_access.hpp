@@ -59,7 +59,7 @@ public:
   addr_type getCallAddress(void*);
   addr_type find_pattern(const char*, const char*, Addr_Range);
   void updateLocalPlayerAddr();
-  Vector getBone(addr_type, unsigned int);
+  BoneInfo* getBoneMatrix(addr_type);
   void printBlock(addr_type, size_t);
   std::vector<int> diffMem(addr_type, size_t);
 };

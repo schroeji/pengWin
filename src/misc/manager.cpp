@@ -278,13 +278,7 @@ bool GameManager::lineThroughSmoke(Vector start, Vector end){
   Vector d = end - start;
   normalize_vector(&d);
   for (Vector smoke : smokeLocations) {
-    // according to https://en.wikipedia.org/wiki/Line%E2%80%93sphere_intersection
-    // a line and a sphere intersect if the following is >= 0
-    Vector smoke_to_start = start - smoke;
-    float t1 = d * smoke_to_start;
-    t1 = t1 * t1;
-    float has_intersection = t1 - smoke_to_start*smoke_to_start + smokeRadius*smokeRadius;
-    if (has_intersection >= 0) // solution exists => intersecion
+    if(lineSphereIntersection(start, end, smoke, smokeRadius))
       return true;
   }
   return false;

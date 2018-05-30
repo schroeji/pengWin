@@ -70,6 +70,8 @@ struct GlowObjectDefinition_t {
   static const int ENTRY_IN_USE = -2;
 }; // sizeof() == 0x34
 
+#define MAX_BONES 128
+
 struct BoneInfo {
 	char __pad0x0[0xA];
 	float x;
