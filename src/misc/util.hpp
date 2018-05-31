@@ -4,6 +4,7 @@
 #include <string>
 #include <math.h>
 #include <vector>
+#include <iostream>
 
 // according to http://counterstrike.wikia.com/wiki/Smoke_Grenade
 // radius should be 144 we use less because edges are not straight
@@ -102,6 +103,7 @@ inline bool lineSphereIntersection(Vector line_start, Vector line_end,
   // according to https://en.wikipedia.org/wiki/Line%E2%80%93sphere_intersection
   // a line and a sphere intersect if the following is >= 0
   Vector line_dir = line_end - line_start;
+  normalize_vector(&line_dir);
   Vector line_start_to_sphere_center = line_start - sphere_center;
   float t2 = line_start_to_sphere_center * line_start_to_sphere_center;
   float t1 = line_dir * line_start_to_sphere_center;

@@ -54,7 +54,7 @@ void write_settings(const string& file_name) {
   file << "aim_sleep=20" << endl;
   file << "aim_fov=1.9" << endl;
   file << "aim_autoshoot=false" << endl;
-  file << "bone_ids=3,6,7,8,66,67,73,74" << endl;
+  file << "bone_ids=3,4,5,6,7,8,10,11,12,13,14,39,40,41,42,70,71,72,77,78,79" << endl;
   file << "# enable / disable smoothing on first shot you may want to disable this for perfect flicks" << endl;
   file << "aim_smooth_first_shot=true" << endl;
   file << "smoothing_factor=0.25" << endl;

@@ -223,6 +223,7 @@ Vector Aimer::getView(bool rcs) {
 
 pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
   EntityType* local_player;
+  int local_player_index = csgo.getLocalPlayerIndex();
   Vector bone_pos;
   try {
     local_player = csgo.getLocalPlayer();
@@ -240,14 +241,20 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
   float closestAngle = settings.aim_fov;
   Vector closestBone = {0, 0, 0};
   Team team = csgo.getTeam(mem.local_player_addr);
+  if (settings.debug) cout << "Player count:" << players.size() << endl;
+  if (settings.debug) cout << "Local player index:" << local_player_index << endl;
+  int enemy_index = -1;
   for (EntityType* enemy : players) {
-    if (enemy == local_player || (!settings.aim_teammates && enemy->m_iTeamNum == team))
+    enemy_index++;
+    if (settings.debug) cout << "enemy index:" << enemy_index << endl;
+    if (enemy_index == local_player_index || (!settings.aim_teammates && enemy->m_iTeamNum == team))
       continue;
     if (settings.smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
       continue;
     addr_type enemy_addr = csgo.getPlayerAddr(enemy);
     BoneInfo* boneMatrix = mem.getBoneMatrix(enemy_addr);
-    for (unsigned int boneID : settings.bone_ids ) {cout << "bone ID:" << boneID << endl;
+    for (unsigned int boneID : settings.bone_ids) {
+      // cout << "bone ID:" << boneID << endl;
       try {
         bone_pos = {boneMatrix[boneID].y, boneMatrix[boneID].z, boneMatrix[boneID].x};
         // printf("bone: %f, %f, %f \n", bone_pos.x, bone_pos.z, bone_pos.z);
@@ -255,9 +262,9 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
         if (settings.debug) cout << e.what() << endl;;
       }
       // find angle between player and target
-      Vector dist = getDist(&player_pos, &bone_pos);
-      normalize_vector(&dist);
-      float angle = acos(dist * view);
+      Vector distVec = getDist(&player_pos, &bone_pos);
+      normalize_vector(&distVec);
+      float angle = acos(distVec * view);
       if (angle > (settings.aim_fov / 2.))
         continue;
       if (closestPlayer == nullptr) {
@@ -274,6 +281,12 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
   }
   if (closestPlayer == nullptr)
     throw runtime_error("No player in FOV");
+  // draw spherical hitboxes around the bone
+  // and ignore adjustments if already aiming at part of this hitbox
+  Vector distVec = getDist(&player_pos, &closestBone);
+  Vector target = player_pos + view*len(distVec);
+  if (lineSphereIntersection(player_pos, target, closestBone, 4.5f))
+    throw runtime_error("No adjustment needed");
   return pair<EntityType*, Vector>(closestPlayer, closestBone);
 }
 
