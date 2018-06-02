@@ -25,6 +25,7 @@ private:
 
   //offsets to engine base
   addr_type map_name_offset;
+  addr_type isConnected_offset;
 
   bool debug = false;
   void updateAddrs();
@@ -33,8 +34,10 @@ public:
   addr_type local_player_addr;
   addr_type glow_addr;
   addr_type attack_addr;
-  addr_type map_name_addr;
   addr_type force_jump_addr;
+
+  addr_type map_name_addr;
+  addr_type isConnected_addr;
 
   //offsets to players
   addr_type m_iCrosshairIndex = 0xBBB8;

@@ -128,11 +128,12 @@ int main(int argc, char** argv) {
         // csgo.printEntities();
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
+      cout << "onServer:" << csgo.isOnServer() << endl;
     }
+    if (debug) cout << "Not on a server. Stopping everything..." << endl;
     if (!panicked)
       stop(0);
-    if (debug) cout << "Stopped everything..." << endl;
-    if (debug) cout << "Not on a server. Entering sleep mode..." << endl;
+    if (debug) cout << "Stopped everything. Entering sleep mode..." << endl;
   }
 
   if (debug) cout << "Game closed or panic key pressed. Terminating..." << endl;

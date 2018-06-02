@@ -41,7 +41,7 @@ void write_settings(const string& file_name) {
   file << "panic_key=F9" << endl;
   file << "# file for reading mouse clicks" << endl;
   file << "# usually /dev/input/event*" << endl;
-  file << "mouse_file=/dev/input/event0" << endl;
+  file << "mouse_file=/dev/input/event2" << endl;
   file << "# trigger settings" << endl;
   file << "trigger_delay=10" << endl;
   file << "trigger_use_random=false" << endl;
@@ -54,7 +54,8 @@ void write_settings(const string& file_name) {
   file << "aim_sleep=20" << endl;
   file << "aim_fov=1.9" << endl;
   file << "aim_autoshoot=false" << endl;
-  file << "bone_ids=3,4,5,6,7,8,10,11,12,13,14,39,40,41,42,70,71,72,77,78,79" << endl;
+  file << "#bone_ids=3,4,5,6,7,8,10,11,12,13,14,39,40,41,42,70,71,72,77,78,79" << endl;
+  file << "bone_ids=3,4,5,6,7,8" << endl;
   file << "# enable / disable smoothing on first shot you may want to disable this for perfect flicks" << endl;
   file << "aim_smooth_first_shot=true" << endl;
   file << "smoothing_factor=0.25" << endl;
@@ -91,6 +92,8 @@ int main(int argc, char** argv) {
   const char force_jump_pattern[] = "xxxxxxxxxxxxxxxx?xx";
   const char split_screen_data[] = "\x55\x89\xFE\x48\x8D\x3D\x00\x00\x00\x00\x48\x89\xE5\x5D\xE9\xAD\xFF\xFF\xFF";
   const char split_screen_pattern[] = "xxxxxx????xxxxxxxxx";
+  const char isConnectedMove_data[] = "\x48\x8b\x05\x00\x00\x00\x00\xC6\x05\x00\x00\x00\x00\x00\x48\x8b\x10";
+  const char isConnectedMove_pattern[] = "xxx????x????xxxx";
 
   vector<string> offsets;
   vector<string> offset_names;
@@ -133,6 +136,14 @@ int main(int argc, char** argv) {
   sprintf(offset_buf, "0x%lx", force_jump_offset);
   offset_names.push_back("force_jump_offset");
   offsets.push_back(string(offset_buf));
+
+  addr_type isConnected_call = mem.find_pattern(isConnectedMove_data, isConnectedMove_pattern, engineRange);
+  addr_type isConnected_addr = mem.getCallAddress((void*) (isConnected_call + 0x8)) + 1;
+  addr_type isConnected_offset = isConnected_addr - engineRange.first;
+  sprintf(offset_buf, "0x%lx",isConnected_offset);
+  offset_names.push_back("isConnected_offset");
+  offsets.push_back(string(offset_buf));
+
 
   // cout << "Test1: " << test1 << endl;
   // cout << "Test2: " << test2 << endl;

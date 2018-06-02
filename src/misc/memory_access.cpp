@@ -20,6 +20,7 @@ MemoryAccess::MemoryAccess(Settings* settings) : settings(settings) {
     local_player_offset = settings->local_player_offset;
     map_name_offset = settings->map_name_offset;
     force_jump_offset = settings->force_jump_offset;
+    isConnected_offset = settings->isConnected_offset;
     debug = settings->debug;
   }
 }
@@ -39,8 +40,9 @@ void MemoryAccess::updateAddrs() {
       if (settings->debug) cout << "WARNING: could not get attack_addr" << endl;
   }
 
-  map_name_addr = engine_range.first + map_name_offset;
   force_jump_addr = client_range.first + force_jump_offset;
+  map_name_addr = engine_range.first + map_name_offset;
+  isConnected_addr = engine_range.first + isConnected_offset;
 }
 
 pid_t MemoryAccess::getPid() {

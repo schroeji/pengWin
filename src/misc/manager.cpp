@@ -181,8 +181,12 @@ bool GameManager::gameRunning() {
 }
 
 bool GameManager::isOnServer() {
-  mem.updateLocalPlayerAddr();
-  return mem.local_player_addr > 0 && gameRunning();
+  char buf;
+  // cout << hex << mem.isConnected_addr << endl;
+  if(!mem.read((void*) mem.isConnected_addr, &buf, sizeof(buf)))
+    return false;
+  cout << (int) buf << endl;
+  return (buf == 1);
 }
 
 addr_type GameManager::getPlayerAddr(EntityType* player) {

@@ -47,6 +47,8 @@ void Settings::load(const string& file) {
           map_name_offset = strtoul(splits[1].c_str(), NULL, 16);
         else if (splits[0] == "force_jump_offset")
           force_jump_offset = strtoul(splits[1].c_str(), NULL, 16);
+        else if (splits[0] == "isConnected_offset")
+          isConnected_offset = strtoul(splits[1].c_str(), NULL, 16);
         // settings
         else if (splits[0] == "main_loop_sleep")
           main_loop_sleep = strtol(splits[1].c_str(), NULL, 10);
@@ -104,6 +106,7 @@ void Settings::print() {
   cout << "local player offset: " << local_player_offset << endl;
   cout << "map_name_offset: " << map_name_offset << endl;
   cout << "force_jump_offset: " << force_jump_offset << endl;
+  cout << "isConnected_offset: " << isConnected_offset << endl;
 
   cout << "--------- Settings ---------" << endl;
   cout << "[General]" << endl;
