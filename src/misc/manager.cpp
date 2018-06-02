@@ -185,7 +185,6 @@ bool GameManager::isOnServer() {
   // cout << hex << mem.isConnected_addr << endl;
   if(!mem.read((void*) mem.isConnected_addr, &buf, sizeof(buf)))
     return false;
-  cout << (int) buf << endl;
   return (buf == 1);
 }
 

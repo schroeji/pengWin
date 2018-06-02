@@ -128,7 +128,6 @@ int main(int argc, char** argv) {
         // csgo.printEntities();
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
-      cout << "onServer:" << csgo.isOnServer() << endl;
     }
     if (debug) cout << "Not on a server. Stopping everything..." << endl;
     if (!panicked)
