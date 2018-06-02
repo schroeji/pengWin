@@ -12,7 +12,7 @@
 #include <fcntl.h>
 #include <chrono>
 #include <thread>
-
+#include <pthread.h>
 
 using namespace std;
 
@@ -86,10 +86,12 @@ void HotkeyManager::stopListen() {
   if (!listening)
     return;
   listening = false;
-  keyPressListener.join();
-  if (settings.debug) cout << "Joined keyPressListener..." << endl;
-  mousePressListener.join();
-  if (settings.debug) cout << "Joined mousePressListener..." << endl;
+  // keyPressListener.join();
+  pthread_cancel(keyPressListener.native_handle());
+  if (settings.debug) cout << "Killed keyPressListener..." << endl;
+  // mousePressListener.join();
+  pthread_cancel(mousePressListener.native_handle());
+  if (settings.debug) cout << "Killed mousePressListener..." << endl;
   for (map<unsigned int, bool>::iterator it = holding_key.begin(); it != holding_key.end(); it++) {
     it->second = false;
   }
@@ -170,7 +172,9 @@ void HotkeyManager::keyPressListen() {
              // keyboard_mode);
   }
   while (listening && csgo.isOnServer()) {
+    if (settings.debug) cout << "pre event" << endl;
     XNextEvent(display, &event);
+    if (settings.debug) cout << "post event" << endl;
     // without this events are consumed; idk why even with owner_events = true
     forwardEvent(event);
     if (event.type == KeyPress) {

@@ -115,7 +115,8 @@ int main(int argc, char** argv) {
     boost::function<void(unsigned int)> stop = [&hotkeyMan, &radar, &panicked](unsigned int x) {
       hotkeyMan.stopListen();
       radar.stop();
-      panicked = true;
+      if (x == 0)
+        panicked = true;
     };
     hotkeyMan.bind(settings.panic_key, stop);
     hotkeyMan.startListen();
@@ -130,8 +131,9 @@ int main(int argc, char** argv) {
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     }
     if (debug) cout << "Not on a server. Stopping everything..." << endl;
-    if (!panicked)
-      stop(0);
+    if (!panicked) {
+      stop(1);
+    }
     if (debug) cout << "Stopped everything. Entering sleep mode..." << endl;
   }
 

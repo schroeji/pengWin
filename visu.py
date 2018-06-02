@@ -107,10 +107,11 @@ def weapon(wid):
     return "USP"
   if wid == 63:
     return "CZ75"
-  if wid == 63:
+  if wid == 64:
     return "REV"
   if wid in range(500, 520):
     return "KNIFE"
+  return "UNK"
 
 def readFromInput():
   ready, _, _ = select([sys.stdin], [], [])
