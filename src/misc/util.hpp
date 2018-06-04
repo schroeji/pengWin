@@ -9,6 +9,9 @@
 // according to http://counterstrike.wikia.com/wiki/Smoke_Grenade
 // radius should be 144 we use less because edges are not straight
 #define smokeRadius 135.0
+// no aimbot adjustment if current view vectorintersects a sphere with this radius
+// around one of the target bones
+#define BONE_RADIUS 4.5f
 
 enum Team {
   CT = 3,

@@ -246,7 +246,6 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
   int enemy_index = -1;
   for (EntityType* enemy : players) {
     enemy_index++;
-    if (settings.debug) cout << "enemy index:" << enemy_index << endl;
     if (enemy_index == local_player_index || (!settings.aim_teammates && enemy->m_iTeamNum == team))
       continue;
     if (settings.smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
@@ -285,7 +284,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
   // and ignore adjustments if already aiming at part of this hitbox
   Vector distVec = getDist(&player_pos, &closestBone);
   Vector target = player_pos + view*len(distVec);
-  if (lineSphereIntersection(player_pos, target, closestBone, 4.5f))
+  if (lineSphereIntersection(player_pos, target, closestBone, BONE_RADIUS))
     throw runtime_error("No adjustment needed");
   return pair<EntityType*, Vector>(closestPlayer, closestBone);
 }

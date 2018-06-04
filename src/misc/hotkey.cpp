@@ -172,9 +172,7 @@ void HotkeyManager::keyPressListen() {
              // keyboard_mode);
   }
   while (listening && csgo.isOnServer()) {
-    if (settings.debug) cout << "pre event" << endl;
     XNextEvent(display, &event);
-    if (settings.debug) cout << "post event" << endl;
     // without this events are consumed; idk why even with owner_events = true
     forwardEvent(event);
     if (event.type == KeyPress) {
@@ -240,7 +238,6 @@ Window HotkeyManager::activeWindow() {
   fgets(buf, 128, in);
   pclose(in);
   Window w = (Window) strtoul(buf, NULL, 10);
-  if (settings.debug) cout << "Focused window:" << dec << w << endl;
   if (w == 0)
     throw runtime_error("Could not find window or xdotool is not installed.");
   return w;
