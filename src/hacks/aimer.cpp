@@ -119,7 +119,8 @@ void Aimer::aimCheck(unsigned int i) {
   if (dist.x == 0 && dist.y == 0 && dist.z == 0)
     return;
   bool use_smooth = settings.aim_smooth_first_shot || i != 0;
-  MouseMovement move = calcMouseMovement(local_player->m_angNetworkAngles, dist, use_smooth);
+  QAngle aimPunch = csgo.getAimPunch(mem.local_player_addr) * 2.0;
+  MouseMovement move = calcMouseMovement(local_player->m_angNetworkAngles + aimPunch, dist, use_smooth);
   if (settings.debug) cout << dec << "move angle x: " << move.x << endl;
   if (settings.debug) cout << dec << "move angle y: " << move.y << endl;
   if (move.x == 0 && move.y == 0) {
