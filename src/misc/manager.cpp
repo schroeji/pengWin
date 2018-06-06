@@ -85,7 +85,7 @@ void GameManager::printPlayers() {
   int i = 0;
   cout << "---------Players---------" << endl;
   for (EntityType* player : players) {
-    cout << dec << "Player: " << i << endl;
+    cout << dec << "--- Player: " << i << "---" << endl;
     cout << hex << "Addr: " << player_addrs[i] << endl;
     printf("ID: %d\n", player->m_iEntityId);
     cout << dec << "hp: " << player->m_iHealth << endl;

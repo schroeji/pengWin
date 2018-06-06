@@ -79,13 +79,23 @@ void normalize_vector(Vector2D*);
 Vector getDist(Vector*, Vector*);
 float scalar_prod(Vector*, Vector*);
 float scalar_prod(Vector2D*, Vector2D*);
+Vector cross_prod(Vector*, Vector*);
 float sgn(float);
 
 inline float degree_to_radian(float x) {
   return x*0.01745329;
 }
+
 inline float radian_to_degree(float x) {
   return x/0.01745329;
+}
+
+inline QAngle degree_to_radian(QAngle q) {
+  return {degree_to_radian(q.x), degree_to_radian(q.y), degree_to_radian(q.z)};
+}
+
+inline QAngle radian_to_degree(QAngle q) {
+  return {radian_to_degree(q.x), radian_to_degree(q.y), radian_to_degree(q.z)};
 }
 
 inline float len(Vector2D vec) {

@@ -87,8 +87,8 @@ int main(int argc, char** argv) {
 
   while (!panicked && csgo.gameRunning()) {
     if (debug) cout << "Waiting until connected..." << endl;
-    while (!csgo.isOnServer()) {
-      if (!csgo.gameRunning())
+    while (csgo.gameRunning()) {
+      if (csgo.isOnServer())
         break;
       this_thread::sleep_for(chrono::milliseconds(3000));
     }
@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
     while (!panicked && csgo.isOnServer()) {
       csgo.grabPlayers();
       if (debug) {
-        // csgo.printPlayers();
+        csgo.printPlayers();
         // csgo.printEntities();
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));

@@ -17,7 +17,7 @@ private:
   Vector getView(bool);
   Vector predictPositionOffset(EntityType*);
   std::pair<EntityType*, Vector> closestTargetInFov(Vector view);
-  MouseMovement calcMouseMovement(Vector, Vector, bool);
+  MouseMovement calcMouseMovement(QAngle, Vector, bool);
 
 public:
   Aimer(GameManager& csgo);

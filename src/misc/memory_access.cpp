@@ -46,12 +46,12 @@ void MemoryAccess::updateAddrs() {
 }
 
 pid_t MemoryAccess::getPid() {
-  pid = 0;
   FILE* in;
-  char buf[128];
+  char buf[128] = {0};
   string cmd = "pidof -s " + GAME_NAME;
   // when the pid has been found it might take some additional time
   // until all modules are laoded
+  pid = 0;
   in = popen(cmd.c_str(), "r");
   fgets(buf, 128, in);
   pclose(in);

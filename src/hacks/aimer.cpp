@@ -95,6 +95,7 @@ void Aimer::aimCheck(unsigned int i) {
   Vector target_pos;
   Vector view;
   try {
+    if(settings.debug) cout << "--- Aim Check ---" << endl;
     local_player = csgo.getLocalPlayer();
     // don't recoil compensate for tap shooting
     view = getView(i > 200/settings.aim_sleep);
@@ -118,8 +119,7 @@ void Aimer::aimCheck(unsigned int i) {
   if (dist.x == 0 && dist.y == 0 && dist.z == 0)
     return;
   bool use_smooth = settings.aim_smooth_first_shot || i != 0;
-  MouseMovement move = calcMouseMovement(view, dist, use_smooth);
-
+  MouseMovement move = calcMouseMovement(local_player->m_angNetworkAngles, dist, use_smooth);
   if (settings.debug) cout << dec << "move angle x: " << move.x << endl;
   if (settings.debug) cout << dec << "move angle y: " << move.y << endl;
   if (move.x == 0 && move.y == 0) {
@@ -136,45 +136,25 @@ void Aimer::aimCheck(unsigned int i) {
   this_thread::sleep_for(chrono::milliseconds(settings.aim_sleep));
 }
 
-MouseMovement Aimer::calcMouseMovement(Vector view, Vector dist, bool use_smooth) {
-  normalize_vector(&view);
+MouseMovement Aimer::calcMouseMovement(QAngle curr_angle, Vector dist, bool use_smooth) {
   normalize_vector(&dist);
-  if (settings.debug) printf("view: %f, %f, %f\n", view.x, view.y, view.z);
-  Vector2D view_x_z_projection = {view.x, view.z};
-  Vector2D view_y_z_projection = {view.y, view.z};
-  Vector2D dist_x_z_projection = {dist.x, dist.z};
-  Vector2D dist_y_z_projection = {dist.y, dist.z};
-  normalize_vector(&view_x_z_projection);
-  normalize_vector(&view_y_z_projection);
-  normalize_vector(&dist_x_z_projection);
-  normalize_vector(&dist_y_z_projection);
+  if (settings.debug) printf("dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
 
-  // needed for calculating the y angle
-  Vector tmp = {dist.x, view.y, dist.z};
-  normalize_vector(&tmp);
-
-  float missing_angle_x = view_x_z_projection * dist_x_z_projection;
-  float missing_angle_y = tmp * dist;
-  // restrict for acos
-  missing_angle_x = min(1.f, max(-1.f , missing_angle_x));
-  missing_angle_y = min(1.f, max(-1.f , missing_angle_y));
-  missing_angle_x = acos(missing_angle_x);
-  missing_angle_y = acos(missing_angle_y);
-  // determinante gives the orientation of the two vectors
-  float det_x = view.x * dist.z - view.z * dist.x;
-  float orientation_x = sgn(det_x);
-  // because both are normalized the one with bigger y component
-  // is counter-clockwise of the other in the 2D plane
-  float orientation_y = sgn(tmp.y - dist.y);
-  missing_angle_x = radian_to_degree(missing_angle_x);
-  missing_angle_y = radian_to_degree(missing_angle_y);
+  // curr_angle and target angle are in format {pitch, yaw, 0}
+  QAngle target_angle = {asin(-dist.y), atan2(dist.x, dist.z), 0};
+  target_angle = radian_to_degree(target_angle);
+  if (settings.debug) printf("curr_angle: %f, %f\n", curr_angle.x, curr_angle.y);
+  if (settings.debug) printf("target_angle: %f, %f\n", target_angle.x, target_angle.y);
+  QAngle missing_angle = target_angle - curr_angle;
+  if (settings.debug) printf("missing angles: x:%f y:%f\n", missing_angle.x, missing_angle.y);
   float multiplier = angle_multiplier;
   if (csgo.isScoped(mem.local_player_addr))
     multiplier = angle_multiplier_scoped;
   float smooth = use_smooth ? settings.smoothing_factor : 1.0;
-  int moveAngle_x = static_cast<int>(orientation_x * missing_angle_x * multiplier * inverse_sens * smooth);
-  int moveAngle_y = static_cast<int>(orientation_y * missing_angle_y * multiplier * inverse_sens * smooth);
-  return {moveAngle_x, moveAngle_y};
+  // because format is {pitch, yaw, roll} the y and x have to be swapped
+  int mouseAngle_x = static_cast<int>(-missing_angle.y * multiplier * inverse_sens * smooth);
+  int mouseAngle_y = static_cast<int>(missing_angle.x * multiplier * inverse_sens * smooth);
+  return {mouseAngle_x, mouseAngle_y};
 }
 
 void Aimer::moveAim(MouseMovement move) {
