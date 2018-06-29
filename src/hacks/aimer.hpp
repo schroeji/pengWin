@@ -5,6 +5,7 @@
 #include "misc/settings.hpp"
 
 class Aimer {
+
 private:
   GameManager& csgo;
   MemoryAccess& mem;
@@ -17,7 +18,8 @@ private:
   Vector getView(bool);
   Vector predictPositionOffset(EntityType*);
   std::pair<EntityType*, Vector> closestTargetInFov(Vector view);
-  MouseMovement calcMouseMovement(QAngle, Vector, bool);
+  MouseMovement mouseMovementDispatcher(QAngle, Vector, bool);
+  MouseMovement default_calcMouseMovement(QAngle, Vector, bool);
 
 public:
   Aimer(GameManager& csgo);

@@ -120,7 +120,7 @@ void Aimer::aimCheck(unsigned int i) {
     return;
   bool use_smooth = settings.aim_smooth_first_shot || i != 0;
   QAngle aimPunch = csgo.getAimPunch(mem.local_player_addr) * 2.0;
-  MouseMovement move = calcMouseMovement(local_player->m_angNetworkAngles + aimPunch, dist, use_smooth);
+  MouseMovement move = mouseMovementDispatcher(local_player->m_angNetworkAngles + aimPunch, dist, use_smooth);
   if (settings.debug) cout << dec << "move angle x: " << move.x << endl;
   if (settings.debug) cout << dec << "move angle y: " << move.y << endl;
   if (move.x == 0 && move.y == 0) {
@@ -137,7 +137,20 @@ void Aimer::aimCheck(unsigned int i) {
   this_thread::sleep_for(chrono::milliseconds(settings.aim_sleep));
 }
 
-MouseMovement Aimer::calcMouseMovement(QAngle curr_angle, Vector dist, bool use_smooth) {
+MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist, bool use_smooth) {
+  Weapon weapon = csgo.getWeapon(mem.local_player_addr);
+  switch(weapon) {
+  case Weapon::DEAGLE:
+    cout << "Deagle" << endl;
+    default_calcMouseMovement(curr_angle, dist, false);
+    break;
+  default:
+    default_calcMouseMovement(curr_angle, dist, use_smooth);
+  }
+
+}
+
+MouseMovement Aimer::default_calcMouseMovement(QAngle curr_angle, Vector dist, bool use_smooth) {
   normalize_vector(&dist);
   if (settings.debug) printf("dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
 
