@@ -20,6 +20,7 @@
 #include <chrono>
 #include <thread>
 #include <stdexcept>
+#include <cassert>
 
 using namespace std;
 Aimer::Aimer(GameManager& csgo) : csgo(csgo),
@@ -140,12 +141,38 @@ void Aimer::aimCheck(unsigned int i) {
 MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist, bool use_smooth) {
   Weapon weapon = csgo.getWeapon(mem.local_player_addr);
   switch(weapon) {
+  // pistols
   case Weapon::DEAGLE:
-    cout << "Deagle" << endl;
-    default_calcMouseMovement(curr_angle, dist, false);
-    break;
+  case Weapon::GLOCK:
+  case Weapon::USP_SILENCER:
+  case Weapon::FIVESEVEN:
+  case Weapon::HKP2000:
+  case Weapon::P250:
+  case Weapon::TEC9:
+    return default_calcMouseMovement(curr_angle, dist, use_smooth);
+  case Weapon::REVOLVER:
+    return default_calcMouseMovement(curr_angle, dist, use_smooth);
+    // snipers
+  case Weapon::AWP:
+  case Weapon::SSG08:
+    return default_calcMouseMovement(curr_angle, dist, false);
+    // auto snipers
+  case Weapon::G3SG1:
+  case Weapon::SCAR20:
+    return default_calcMouseMovement(curr_angle, dist, false);
+    // disable for nades / knives
+  case Weapon::SMOKEGRENADE:
+  case Weapon::FLASHBANG:
+  case Weapon::HEGRENADE:
+  case Weapon::MOLOTOV:
+  case Weapon::INCGRENADE:
+  case Weapon::DECOY:
+  case Weapon::C4:
+  case Weapon::KNIFE:
+  case Weapon::KNIFE_T:
+    return {0, 0};
   default:
-    default_calcMouseMovement(curr_angle, dist, use_smooth);
+    return default_calcMouseMovement(curr_angle, dist, use_smooth);
   }
 
 }
@@ -157,10 +184,19 @@ MouseMovement Aimer::default_calcMouseMovement(QAngle curr_angle, Vector dist, b
   // curr_angle and target angle are in format {pitch, yaw, 0}
   QAngle target_angle = {asin(-dist.y), atan2(dist.x, dist.z), 0};
   target_angle = radian_to_degree(target_angle);
+  if (sgn(target_angle.y) != sgn(curr_angle.y)) {
+    if (target_angle.y < 0)
+      target_angle.y += 360.;
+    else if(curr_angle.y < 0)
+      target_angle.y -= 360.;
+  }
   if (settings.debug) printf("curr_angle: %f, %f\n", curr_angle.x, curr_angle.y);
   if (settings.debug) printf("target_angle: %f, %f\n", target_angle.x, target_angle.y);
   QAngle missing_angle = target_angle - curr_angle;
   if (settings.debug) printf("missing angles: x:%f y:%f\n", missing_angle.x, missing_angle.y);
+  // cout << settings.aim_fov << endl;
+  assert(fabs(degree_to_radian(missing_angle.x)) < settings.aim_fov);
+  assert(fabs(degree_to_radian(missing_angle.y)) < settings.aim_fov);
   float multiplier = angle_multiplier;
   if (csgo.isScoped(mem.local_player_addr))
     multiplier = angle_multiplier_scoped;
