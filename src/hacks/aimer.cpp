@@ -195,8 +195,8 @@ MouseMovement Aimer::default_calcMouseMovement(QAngle curr_angle, Vector dist, b
   QAngle missing_angle = target_angle - curr_angle;
   if (settings.debug) printf("missing angles: x:%f y:%f\n", missing_angle.x, missing_angle.y);
   // cout << settings.aim_fov << endl;
-  assert(fabs(degree_to_radian(missing_angle.x)) < settings.aim_fov);
-  assert(fabs(degree_to_radian(missing_angle.y)) < settings.aim_fov);
+  assert(fabs(radian_to_degree(missing_angle.x)) < settings.aim_fov);
+  assert(fabs(radian_to_degree(missing_angle.y)) < settings.aim_fov);
   float multiplier = angle_multiplier;
   if (csgo.isScoped(mem.local_player_addr))
     multiplier = angle_multiplier_scoped;
