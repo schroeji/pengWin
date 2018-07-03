@@ -184,19 +184,20 @@ MouseMovement Aimer::default_calcMouseMovement(QAngle curr_angle, Vector dist, b
   // curr_angle and target angle are in format {pitch, yaw, 0}
   QAngle target_angle = {asin(-dist.y), atan2(dist.x, dist.z), 0};
   target_angle = radian_to_degree(target_angle);
-  if (sgn(target_angle.y) != sgn(curr_angle.y)) {
-    if (target_angle.y < 0)
-      target_angle.y += 360.;
-    else if(curr_angle.y < 0)
-      target_angle.y -= 360.;
-  }
   if (settings.debug) printf("curr_angle: %f, %f\n", curr_angle.x, curr_angle.y);
   if (settings.debug) printf("target_angle: %f, %f\n", target_angle.x, target_angle.y);
   QAngle missing_angle = target_angle - curr_angle;
+  if (missing_angle.y > 180)
+    missing_angle.y -= 360;
+  else if (missing_angle.y < -180)
+    missing_angle.y += 360;
   if (settings.debug) printf("missing angles: x:%f y:%f\n", missing_angle.x, missing_angle.y);
-  // cout << settings.aim_fov << endl;
-  // assert(fabs(degree_to_radian(missing_angle.x)) < settings.aim_fov);
-  // assert(fabs(degree_to_radian(missing_angle.y)) < settings.aim_fov);
+  cout << settings.aim_fov << endl;
+  cout << degree_to_radian(missing_angle.x) << endl;
+  cout << degree_to_radian(missing_angle.y) << endl;
+
+  assert(fabs(degree_to_radian(missing_angle.x)) < settings.aim_fov);
+  assert(fabs(degree_to_radian(missing_angle.y)) < settings.aim_fov);
   float multiplier = angle_multiplier;
   if (csgo.isScoped(mem.local_player_addr))
     multiplier = angle_multiplier_scoped;

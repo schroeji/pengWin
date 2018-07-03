@@ -162,7 +162,7 @@ enum Weapon {
 	NEGEV = 28,
 	SAWEDOFF = 29,
 	TEC9 = 30,
-	TASER = 31,
+	ZEUS = 31,
 	HKP2000 = 32,
 	MP7 = 33,
 	MP9 = 34,
