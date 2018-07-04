@@ -5,6 +5,9 @@
 #include <string>
 #include <iostream>
 #include <math.h>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/lu.hpp>
 
 using namespace std;
 
@@ -56,4 +59,11 @@ Vector cross_prod(Vector* a, Vector* b) {
 
 float sgn(float val) {
   return (0.0 < val) - (val < 0.0);
+}
+
+using namespace boost::numeric::ublas;
+void solve(matrix<float>* A, boost::numeric::ublas::vector<float>* b) {
+  permutation_matrix<size_t> pm(A->size1());
+  lu_factorize(*A, pm);
+  lu_substitute(*A, pm, *b);
 }

@@ -5,6 +5,7 @@
 #include <math.h>
 #include <vector>
 #include <iostream>
+#include <boost/numeric/ublas/matrix.hpp>
 
 // according to http://counterstrike.wikia.com/wiki/Smoke_Grenade
 // radius should be 144 we use less because edges are not straight
@@ -81,6 +82,7 @@ float scalar_prod(Vector*, Vector*);
 float scalar_prod(Vector2D*, Vector2D*);
 Vector cross_prod(Vector*, Vector*);
 float sgn(float);
+void solve(boost::numeric::ublas::matrix<float>*, boost::numeric::ublas::vector<float>*);
 
 inline float degree_to_radian(float x) {
   return x*0.01745329;
@@ -110,6 +112,7 @@ inline int len(MouseMovement move) {
   // manhatten distance
   return abs(move.x) + abs(move.y);
 }
+
 
 inline bool lineSphereIntersection(Vector line_start, Vector line_end,
                                    Vector sphere_center, float sphere_radius) {

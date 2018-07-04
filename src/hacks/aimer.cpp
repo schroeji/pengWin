@@ -177,6 +177,65 @@ MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist, boo
 
 }
 
+MouseMovement Aimer::spline_calcMouseMovement(QAngle curr_angle, Vector dist, bool use_smooth, unsigned int i) {
+  normalize_vector(&dist);
+  if (settings.debug) printf("dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
+
+  // curr_angle and target angle are in format {pitch, yaw, 0}
+  QAngle target_angle = {asin(-dist.y), atan2(dist.x, dist.z), 0};
+  target_angle = radian_to_degree(target_angle);
+  if (sgn(target_angle.y) != sgn(curr_angle.y)) {
+    if (target_angle.y < 0)
+      target_angle.y += 360.;
+    else if(curr_angle.y < 0)
+      target_angle.y -= 360.;
+  }
+  if (settings.debug) printf("curr_angle: %f, %f\n", curr_angle.x, curr_angle.y);
+  if (settings.debug) printf("target_angle: %f, %f\n", target_angle.x, target_angle.y);
+  QAngle missing_angle = target_angle - curr_angle;
+  QAngle support_angle = {curr_angle.x + 0.25*missing_angle.x, curr_angle.y + 0.75*missing_angle.y, 0};
+  if (settings.debug) printf("missing angles: x:%f y:%f\n", missing_angle.x, missing_angle.y);
+  // spline interpolation see:
+  // https://en.wikipedia.org/wiki/Spline_interpolation
+  // curr_angle = x_0, y_0, support_angle = x_1, y_1, target_angle = x_2, y_2
+  boost::numeric::ublas::matrix<float> matrix(3, 3);
+  boost::numeric::ublas::vector b(3);
+  // setting up matrix
+  matrix(0, 0) = 2 / (support_angle.x - curr_angle.x);
+  matrix(0, 1) = 1 / (support_angle.x - curr_angle.x);
+  matrix(0, 2) = 0;
+  matrix(1, 0) = matrix(0, 1);
+  matrix(1, 2) = 1 / (target_angle.x - support_angle.x);
+  matrix(1, 1) = 2 * (matrix(0, 1) + matrix(1, 2));
+  matrix(2, 0) = 0;
+  matrix(2, 1) = matrix(1, 2);
+  matrix(2, 2) = 2 / (target_angle.x - support_angle.x);
+  // setting up vector
+  float squared_diff1 = (support_angle.x - curr_angle.x) * (support_angle.x - curr_angle.x);
+  float squared_diff2 = (target_angle.x - support_angle.x) * (target_angle.x - support_angle.x);
+  b(0) = 3 * (support_angle.y - curr_angle.y) / squared_diff1;
+  b(2) = 3 * (target_angle.y - support_angle.y) / squared_diff2;
+  b(1) = b(0) + b(2);
+  // solve
+  cout << matrix << endl;
+  cout << b << endl;
+  solve(&matrix, &b);
+  cout << b << endl;
+  // cout << settings.aim_fov << endl;
+  // assert(fabs(degree_to_radian(missing_angle.x)) < settings.aim_fov);
+  // assert(fabs(degree_to_radian(missing_angle.y)) < settings.aim_fov);
+  float multiplier = angle_multiplier;
+  if (csgo.isScoped(mem.local_player_addr))
+    multiplier = angle_multiplier_scoped;
+  float smooth = use_smooth ? settings.smoothing_factor : 1.0;
+  // because format is {pitch, yaw, roll} the y and x have to be swapped
+  int mouseAngle_x = static_cast<int>(-missing_angle.y * multiplier * inverse_sens * smooth);
+  int mouseAngle_y = static_cast<int>(missing_angle.x * multiplier * inverse_sens * smooth);
+  return {mouseAngle_x, mouseAngle_y};
+}
+
+
+
 MouseMovement Aimer::default_calcMouseMovement(QAngle curr_angle, Vector dist, bool use_smooth) {
   normalize_vector(&dist);
   if (settings.debug) printf("dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
