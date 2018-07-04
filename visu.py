@@ -66,7 +66,7 @@ def weapon(wid):
   if wid == 30:
     return "TEC9"
   if wid == 31:
-    return "TASER"
+    return "ZEUS"
   if wid == 32:
     return "P2000"
   if wid == 33:
