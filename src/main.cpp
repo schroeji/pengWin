@@ -3,6 +3,7 @@
 #include "misc/manager.hpp"
 #include "misc/settings.hpp"
 #include "misc/hotkey.hpp"
+#include "misc/util.hpp"
 #include "hacks/radar.hpp"
 #include "hacks/trigger.hpp"
 #include "hacks/aimer.hpp"
@@ -15,7 +16,6 @@
 #include <chrono>
 #include <thread>
 #include <unistd.h>
-
 using namespace std;
 
 void printUsage(const string& name, const string& config_file) {

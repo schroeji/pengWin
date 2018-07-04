@@ -22,6 +22,7 @@ private:
   std::pair<EntityType*, Vector> zeusTarget(Vector, float);
   MouseMovement mouseMovementDispatcher(QAngle, Vector, bool);
   MouseMovement default_calcMouseMovement(QAngle, Vector, bool);
+  MouseMovement spline_calcMouseMovement(QAngle, Vector, bool, unsigned int);
 
 public:
   Aimer(GameManager& csgo);
