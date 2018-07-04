@@ -8,10 +8,14 @@
 
 // according to http://counterstrike.wikia.com/wiki/Smoke_Grenade
 // radius should be 144 we use less because edges are not straight
-#define smokeRadius 135.0
+#define smokeRadius 135.0f
 // no aimbot adjustment if current view vectorintersects a sphere with this radius
 // around one of the target bones
 #define BONE_RADIUS 4.5f
+// range of zeus for aimbot
+// http://counterstrike.wikia.com/wiki/Zeus_x27
+#define ZEUS_RANGE 200.0f
+
 
 enum Team {
   CT = 3,
@@ -66,8 +70,7 @@ struct QAngle {
     return {a.x + x, a.y + y, a.z + z};
   }
   inline QAngle operator-(QAngle a) {
-    return {x - a.x, y - a.y, z - a.z};
-  }
+    return {x - a.x, y - a.y, z - a.z};}
   inline QAngle operator*(float a) {
     return {a*x, a*y, a*z};
   }

@@ -17,7 +17,9 @@ private:
   const float angle_multiplier_scoped = 1 / 0.0127111077308654;
   Vector getView(bool);
   Vector predictPositionOffset(EntityType*);
-  std::pair<EntityType*, Vector> closestTargetInFov(Vector view);
+  std::pair<EntityType*, Vector> findTargetDispatcher(Vector);
+  std::pair<EntityType*, Vector> closestTargetInFov(Vector, float);
+  std::pair<EntityType*, Vector> zeusTarget(Vector, float);
   MouseMovement mouseMovementDispatcher(QAngle, Vector, bool);
   MouseMovement default_calcMouseMovement(QAngle, Vector, bool);
 

@@ -100,7 +100,7 @@ void Aimer::aimCheck(unsigned int i) {
     local_player = csgo.getLocalPlayer();
     // don't recoil compensate for tap shooting
     view = getView(i > 200/settings.aim_sleep);
-    pair<EntityType*, Vector> temp = closestTargetInFov(view);
+    pair<EntityType*, Vector> temp = findTargetDispatcher(view);
     enemy = temp.first;
     target_pos = temp.second;
   } catch(const runtime_error& e) {
@@ -174,7 +174,6 @@ MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist, boo
   default:
     return default_calcMouseMovement(curr_angle, dist, use_smooth);
   }
-
 }
 
 MouseMovement Aimer::default_calcMouseMovement(QAngle curr_angle, Vector dist, bool use_smooth) {
@@ -252,7 +251,93 @@ Vector Aimer::getView(bool rcs) {
   return {v1, v2, v3};
 }
 
-pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
+
+pair<EntityType*, Vector> Aimer::findTargetDispatcher(Vector view) {
+  Weapon weapon = csgo.getWeapon(mem.local_player_addr);
+  switch(weapon) {
+  case Weapon::ZEUS:
+    return zeusTarget(view, settings.aim_fov);
+  default:
+    return closestTargetInFov(view, settings.aim_fov);
+  }
+
+}
+
+/**
+   like the default Target finding function.
+   Except targets that are too far away.
+   Not just those that are not in the FOV.
+ */
+pair<EntityType*, Vector> Aimer::zeusTarget(Vector view, float fov) {
+  EntityType* local_player;
+  int local_player_index = csgo.getLocalPlayerIndex();
+  Vector bone_pos;
+  try {
+    local_player = csgo.getLocalPlayer();
+  } catch (const runtime_error& e) {
+    throw e;
+  }
+  Vector player_pos = {local_player->m_vecOrigin.x,
+                       local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
+                       local_player->m_vecOrigin.z};
+  vector<EntityType*> players = csgo.getPlayers();
+  if (players.size() < 2)
+    throw runtime_error("Only one player.");
+  EntityType* closestPlayer = nullptr;
+  float closestAngle = fov;
+  Vector closestBone = {0, 0, 0};
+  Team team = csgo.getTeam(mem.local_player_addr);
+  if (settings.debug) cout << "Player count:" << players.size() << endl;
+  if (settings.debug) cout << "Local player index:" << local_player_index << endl;
+  int enemy_index = -1;
+  for (EntityType* enemy : players) {
+    enemy_index++;
+    if (enemy_index == local_player_index || (!settings.aim_teammates && enemy->m_iTeamNum == team))
+      continue;
+    if (settings.smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
+      continue;
+    addr_type enemy_addr = csgo.getPlayerAddr(enemy);
+    BoneInfo* boneMatrix = mem.getBoneMatrix(enemy_addr);
+    for (unsigned int boneID : settings.bone_ids) {
+      // cout << "bone ID:" << boneID << endl;
+      try {
+        bone_pos = {boneMatrix[boneID].y, boneMatrix[boneID].z, boneMatrix[boneID].x};
+        // printf("bone: %f, %f, %f \n", bone_pos.x, bone_pos.z, bone_pos.z);
+      } catch(const runtime_error& e) {
+        if (settings.debug) cout << e.what() << endl;;
+      }
+      // find angle between player and target
+      Vector distVec = getDist(&player_pos, &bone_pos);
+      if (len(distVec) > ZEUS_RANGE)
+        continue;
+      normalize_vector(&distVec);
+      float angle = acos(distVec * view);
+      if (angle > fov / 2.)
+        continue;
+      if (closestPlayer == nullptr) {
+        closestPlayer = enemy;
+        closestAngle = angle;
+        closestBone = bone_pos;
+      } else if (closestAngle > angle) {
+        closestPlayer = enemy;
+        closestAngle = angle;
+        closestBone = bone_pos;
+      }
+    }
+    delete boneMatrix;
+  }
+  if (closestPlayer == nullptr)
+    throw runtime_error("No player in FOV");
+  // draw spherical hitboxes around the bone
+  // and ignore adjustments if already aiming at part of this hitbox
+  Vector distVec = getDist(&player_pos, &closestBone);
+  Vector target = player_pos + view*len(distVec);
+  if (lineSphereIntersection(player_pos, target, closestBone, BONE_RADIUS))
+    throw runtime_error("No adjustment needed");
+  return pair<EntityType*, Vector>(closestPlayer, closestBone);
+}
+
+pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view, float fov) {
   EntityType* local_player;
   int local_player_index = csgo.getLocalPlayerIndex();
   Vector bone_pos;
@@ -269,7 +354,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
   if (players.size() < 2)
     throw runtime_error("Only one player.");
   EntityType* closestPlayer = nullptr;
-  float closestAngle = settings.aim_fov;
+  float closestAngle = fov;
   Vector closestBone = {0, 0, 0};
   Team team = csgo.getTeam(mem.local_player_addr);
   if (settings.debug) cout << "Player count:" << players.size() << endl;
@@ -295,7 +380,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view) {
       Vector distVec = getDist(&player_pos, &bone_pos);
       normalize_vector(&distVec);
       float angle = acos(distVec * view);
-      if (angle > (settings.aim_fov / 2.))
+      if (angle > fov / 2.)
         continue;
       if (closestPlayer == nullptr) {
         closestPlayer = enemy;
