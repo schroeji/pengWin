@@ -20,10 +20,15 @@ private:
   std::pair<EntityType*, Vector> findTargetDispatcher(Vector);
   std::pair<EntityType*, Vector> closestTargetInFov(Vector, float);
   std::pair<EntityType*, Vector> zeusTarget(Vector, float);
-  MouseMovement mouseMovementDispatcher(QAngle, Vector, bool);
+  MouseMovement mouseMovementDispatcher(QAngle, Vector, bool, unsigned int i);
   MouseMovement default_calcMouseMovement(QAngle, Vector, bool);
-  MouseMovement spline_calcMouseMovement(QAngle, Vector, bool, unsigned int);
-
+  MouseMovement spline_calcMouseMovement(QAngle, Vector, unsigned int);
+  float spline_a[2] = {0, 0};
+  float spline_b[2] = {0, 0};
+  float spline_x_len;
+  float spline_last_x;
+  QAngle spline_start_angle;
+  QAngle spline_supp_angle;
 public:
   Aimer(GameManager& csgo);
   ~Aimer();

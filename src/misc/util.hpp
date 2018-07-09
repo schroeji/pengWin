@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
 
 // according to http://counterstrike.wikia.com/wiki/Smoke_Grenade
 // radius should be 144 we use less because edges are not straight

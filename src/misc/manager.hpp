@@ -38,6 +38,7 @@ private:
   // number of the local_player in players
   int local_player_index = -1;
   EntityType* local_player = new EntityType;
+  bool connected = false;
   GlowObjectManager_t manager;
   GlowObjectDefinition_t g_glow[1024];
 };

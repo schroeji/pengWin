@@ -167,8 +167,11 @@ MemoryAccess& GameManager::getMemoryAccess() {
 
 EntityType* GameManager::getLocalPlayer() {
   mem.updateLocalPlayerAddr();
-  if (!mem.read((void*) mem.local_player_addr, (void*) local_player, sizeof(EntityType)))
-      throw runtime_error("No local player");
+  if (!mem.read((void*) mem.local_player_addr, (void*) local_player, sizeof(EntityType))) {
+    connected = false;
+    throw runtime_error("No local player");
+  }
+  connected = true;
   return local_player;
 }
 
@@ -181,11 +184,14 @@ bool GameManager::gameRunning() {
 }
 
 bool GameManager::isOnServer() {
-  char buf;
-  // cout << hex << mem.isConnected_addr << endl;
-  if(!mem.read((void*) mem.isConnected_addr, &buf, sizeof(buf)))
-    return false;
-  return (buf == 1);
+  if (!connected) {
+    try {
+      getLocalPlayer();
+    } catch(const runtime_error& e) {
+      return false;
+    }
+  }
+  return connected;
 }
 
 addr_type GameManager::getPlayerAddr(EntityType* player) {

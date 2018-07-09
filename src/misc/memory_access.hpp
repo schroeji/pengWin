@@ -43,9 +43,9 @@ public:
   addr_type m_iCrosshairIndex = 0xBBB8;
   addr_type m_iTeamNum = 0x12C;
   addr_type m_dwBoneMatrix = 0x2C70;
-  addr_type m_bIsScoped = 0x4144;
+  addr_type m_bIsScoped = 0x4156;
   addr_type m_Local = 0x36f0;
-  addr_type m_bIsDefusing = 0x4150;
+  addr_type m_bIsDefusing = 0x4160;
   addr_type m_hActiveWeapon = 0x3628;
   //ofsets to player + m_Local
   addr_type m_viewPunchAngle = 0x68;
@@ -60,6 +60,7 @@ public:
   Addr_Range getClientRange();
   Addr_Range getEngineRange();
   addr_type getCallAddress(void*);
+  addr_type getAbsoluteAddress(void*, int, int);
   addr_type find_pattern(const char*, const char*, Addr_Range);
   void updateLocalPlayerAddr();
   BoneInfo* getBoneMatrix(addr_type);

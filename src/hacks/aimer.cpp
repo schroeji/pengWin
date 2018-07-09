@@ -121,7 +121,7 @@ void Aimer::aimCheck(unsigned int i) {
     return;
   bool use_smooth = settings.aim_smooth_first_shot || i != 0;
   QAngle aimPunch = csgo.getAimPunch(mem.local_player_addr) * 2.0;
-  MouseMovement move = mouseMovementDispatcher(local_player->m_angNetworkAngles + aimPunch, dist, use_smooth);
+  MouseMovement move = mouseMovementDispatcher(local_player->m_angNetworkAngles + aimPunch, dist, use_smooth, i);
   if (settings.debug) cout << dec << "move angle x: " << move.x << endl;
   if (settings.debug) cout << dec << "move angle y: " << move.y << endl;
   if (move.x == 0 && move.y == 0) {
@@ -138,24 +138,29 @@ void Aimer::aimCheck(unsigned int i) {
   this_thread::sleep_for(chrono::milliseconds(settings.aim_sleep));
 }
 
-MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist, bool use_smooth) {
+MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist, bool use_smooth, unsigned int i) {
   Weapon weapon = csgo.getWeapon(mem.local_player_addr);
   switch(weapon) {
   // pistols
   case Weapon::DEAGLE:
+    // return spline_calcMouseMovement(curr_angle, dist, i);
   case Weapon::GLOCK:
   case Weapon::USP_SILENCER:
   case Weapon::FIVESEVEN:
   case Weapon::HKP2000:
   case Weapon::P250:
   case Weapon::TEC9:
-    return default_calcMouseMovement(curr_angle, dist, use_smooth);
+    if (i == 0)
+      return default_calcMouseMovement(curr_angle, dist, false);
+    break;
   case Weapon::REVOLVER:
-    return default_calcMouseMovement(curr_angle, dist, use_smooth);
+    return default_calcMouseMovement(curr_angle, dist, false);
     // snipers
   case Weapon::AWP:
   case Weapon::SSG08:
-    return default_calcMouseMovement(curr_angle, dist, false);
+    if (i == 0)
+      return default_calcMouseMovement(curr_angle, dist, use_smooth);
+    break;
     // auto snipers
   case Weapon::G3SG1:
   case Weapon::SCAR20:
@@ -174,62 +179,121 @@ MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist, boo
   default:
     return default_calcMouseMovement(curr_angle, dist, use_smooth);
   }
+  return {0, 0};
 }
 
-MouseMovement Aimer::spline_calcMouseMovement(QAngle curr_angle, Vector dist, bool use_smooth, unsigned int i) {
+MouseMovement Aimer::spline_calcMouseMovement(QAngle curr_angle, Vector dist, unsigned int i) {
   normalize_vector(&dist);
   if (settings.debug) printf("dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
 
   // curr_angle and target angle are in format {pitch, yaw, 0}
   QAngle target_angle = {asin(-dist.y), atan2(dist.x, dist.z), 0};
   target_angle = radian_to_degree(target_angle);
-  if (sgn(target_angle.y) != sgn(curr_angle.y)) {
-    if (target_angle.y < 0)
-      target_angle.y += 360.;
-    else if(curr_angle.y < 0)
-      target_angle.y -= 360.;
-  }
   if (settings.debug) printf("curr_angle: %f, %f\n", curr_angle.x, curr_angle.y);
   if (settings.debug) printf("target_angle: %f, %f\n", target_angle.x, target_angle.y);
   QAngle missing_angle = target_angle - curr_angle;
-  QAngle support_angle = {curr_angle.x + 0.25*missing_angle.x, curr_angle.y + 0.75*missing_angle.y, 0};
+  if (missing_angle.y > 180)
+    missing_angle.y -= 360;
+  else if (missing_angle.y < -180)
+    missing_angle.y += 360;
   if (settings.debug) printf("missing angles: x:%f y:%f\n", missing_angle.x, missing_angle.y);
-  // spline interpolation see:
-  // https://en.wikipedia.org/wiki/Spline_interpolation
-  // curr_angle = x_0, y_0, support_angle = x_1, y_1, target_angle = x_2, y_2
-  boost::numeric::ublas::matrix<float> matrix(3, 3);
-  boost::numeric::ublas::vector b(3);
-  // setting up matrix
-  matrix(0, 0) = 2 / (support_angle.x - curr_angle.x);
-  matrix(0, 1) = 1 / (support_angle.x - curr_angle.x);
-  matrix(0, 2) = 0;
-  matrix(1, 0) = matrix(0, 1);
-  matrix(1, 2) = 1 / (target_angle.x - support_angle.x);
-  matrix(1, 1) = 2 * (matrix(0, 1) + matrix(1, 2));
-  matrix(2, 0) = 0;
-  matrix(2, 1) = matrix(1, 2);
-  matrix(2, 2) = 2 / (target_angle.x - support_angle.x);
-  // setting up vector
-  float squared_diff1 = (support_angle.x - curr_angle.x) * (support_angle.x - curr_angle.x);
-  float squared_diff2 = (target_angle.x - support_angle.x) * (target_angle.x - support_angle.x);
-  b(0) = 3 * (support_angle.y - curr_angle.y) / squared_diff1;
-  b(2) = 3 * (target_angle.y - support_angle.y) / squared_diff2;
-  b(1) = b(0) + b(2);
-  // solve
-  cout << matrix << endl;
-  cout << b << endl;
-  solve(&matrix, &b);
-  cout << b << endl;
+  if (i == 0) {
+    QAngle support_angle = {(float)curr_angle.x + (float)0.25*missing_angle.x,
+                            (float)curr_angle.y + (float)0.75*missing_angle.y,
+                            0};
+    // spline interpolation see:
+    // https://en.wikipedia.org/wiki/Spline_interpolation
+    // curr_angle = x_0, y_0, support_angle = x_1, y_1, target_angle = x_2, y_2
+    boost::numeric::ublas::matrix<float> matrix(3, 3);
+    boost::numeric::ublas::vector<float> y(3);
+    // setting up matrix
+    matrix(0, 0) = 2 / (support_angle.y - curr_angle.y);
+    matrix(0, 1) = 1 / (support_angle.y - curr_angle.y);
+    matrix(0, 2) = 0;
+    matrix(1, 0) = matrix(0, 1);
+    matrix(1, 2) = 1 / (target_angle.y - support_angle.y);
+    matrix(1, 1) = 2 * (matrix(0, 1) + matrix(1, 2));
+    matrix(2, 0) = 0;
+    matrix(2, 1) = matrix(1, 2);
+    matrix(2, 2) = 2 / (target_angle.y - support_angle.y);
+    // setting up vector
+    float squared_diff1 = (support_angle.y - curr_angle.y) * (support_angle.y - curr_angle.y);
+    float squared_diff2 = (target_angle.y - support_angle.y) * (target_angle.y - support_angle.y);
+    y(0) = 3 * (support_angle.x - curr_angle.x) / squared_diff1;
+    y(2) = 3 * (target_angle.x - support_angle.x) / squared_diff2;
+    y(1) = y(0) + y(2);
+    // solve
+    cout << matrix << endl;
+    cout << y << endl;
+    solve(&matrix, &y);
+    // y is now k
+    cout << y << endl;
+    // calculate coefficients
+    spline_a[0] = y[0]*(support_angle.y - curr_angle.y) - (support_angle.x - curr_angle.x);
+    spline_a[1] = y[1]*(target_angle.y - support_angle.y) - (target_angle.x - support_angle.x);
+    spline_b[0] = -y[1]*(support_angle.y - curr_angle.y) + (support_angle.x - curr_angle.x);
+    spline_b[1] = -y[2]*(target_angle.y - support_angle.y) + (target_angle.x - support_angle.x);
+    spline_x_len = missing_angle.y;
+    spline_start_angle = curr_angle;
+    spline_supp_angle = support_angle;
+    spline_last_x = 0;
+  }
+  float steps = 10.;
+  int section;
+  float q;
+  float t;
+  // start debug only blockl
+  for (int j = 0; j <= (int) steps; j++) {
+    float test_x =  ((float) j / steps) * spline_x_len + spline_start_angle.y;
+    if (j < steps / 2) {
+      section = 0;
+      t = (test_x - spline_start_angle.y) / (spline_supp_angle.y - spline_start_angle.y);
+      q = (1 - t) * spline_start_angle.x + t * spline_supp_angle.x + t*(1-t) * (spline_a[section]*(1-t) + spline_b[section]*t);
+    } else {
+      section = 1;
+      t = (test_x - spline_supp_angle.y) / (target_angle.y - spline_supp_angle.y);
+      q = (1 - t) * spline_supp_angle.x + t * target_angle.x + t*(1-t) * (spline_a[section]*(1-t) + spline_b[section]*t);
+    }
+    cout << "test_x: " << test_x << endl;
+    cout << "q: " << q << endl;
+    cout << "q_rel: " << q - spline_start_angle.x << endl;
+  }
+  if (i >= steps)
+    return {0, 0};
+  // end debug only blockl
+  float relative_x = ((float) (i + 1) / steps) * spline_x_len;
+  float x = spline_start_angle.y + relative_x;
+  spline_last_x = relative_x;
+  // evaluate spline
+  // 1. find section
+  if ((i + 1) < steps / 2){
+    section = 0;
+    t = (x - spline_start_angle.y) / (spline_supp_angle.y - spline_start_angle.y);
+    q = (1 - t) * spline_start_angle.x + t * spline_supp_angle.x + t*(1-t) * (spline_a[section]*(1-t) + spline_b[section]*t);
+  } else {
+    section = 1;
+    t = (x - spline_supp_angle.y) / (target_angle.y - spline_supp_angle.y);
+    q = (1 - t) * spline_supp_angle.x + t * target_angle.x + t*(1-t) * (spline_a[section]*(1-t) + spline_b[section]*t);
+  }
+  q -= curr_angle.x;
+  cout << "section: " << section << endl;
+  cout << "t: " << t << endl;
+  cout << "x_len: " << spline_x_len << endl;
+  cout << "x: " << x << endl;
+  cout << "relative_x :" << relative_x << endl;
+  cout << "q: " << q << endl;
+  cout << "curr_angle: " << curr_angle.y << endl;
+  cout << "start_angle: " << spline_start_angle.y << endl;
+  printf("start angle: x:%f y:%f\n", spline_start_angle.x, spline_start_angle.y);
+  printf("supp angle: x:%f y:%f\n", spline_supp_angle.x, spline_supp_angle.y);
   // cout << settings.aim_fov << endl;
   // assert(fabs(degree_to_radian(missing_angle.x)) < settings.aim_fov);
   // assert(fabs(degree_to_radian(missing_angle.y)) < settings.aim_fov);
   float multiplier = angle_multiplier;
   if (csgo.isScoped(mem.local_player_addr))
     multiplier = angle_multiplier_scoped;
-  float smooth = use_smooth ? settings.smoothing_factor : 1.0;
-  // because format is {pitch, yaw, roll} the y and x have to be swapped
-  int mouseAngle_x = static_cast<int>(-missing_angle.y * multiplier * inverse_sens * smooth);
-  int mouseAngle_y = static_cast<int>(missing_angle.x * multiplier * inverse_sens * smooth);
+  int mouseAngle_x = static_cast<int>((-1/steps)*spline_x_len * multiplier * inverse_sens);
+  int mouseAngle_y = static_cast<int>(q * multiplier * inverse_sens);
   return {mouseAngle_x, mouseAngle_y};
 }
 
@@ -254,8 +318,8 @@ MouseMovement Aimer::default_calcMouseMovement(QAngle curr_angle, Vector dist, b
   cout << degree_to_radian(missing_angle.x) << endl;
   cout << degree_to_radian(missing_angle.y) << endl;
 
-  assert(fabs(degree_to_radian(missing_angle.x)) < settings.aim_fov);
-  assert(fabs(degree_to_radian(missing_angle.y)) < settings.aim_fov);
+  // assert(fabs(degree_to_radian(missing_angle.x)) <= settings.aim_fov);
+  // assert(fabs(degree_to_radian(missing_angle.y)) <= settings.aim_fov);
   float multiplier = angle_multiplier;
   if (csgo.isScoped(mem.local_player_addr))
     multiplier = angle_multiplier_scoped;
@@ -265,6 +329,7 @@ MouseMovement Aimer::default_calcMouseMovement(QAngle curr_angle, Vector dist, b
   int mouseAngle_y = static_cast<int>(missing_angle.x * multiplier * inverse_sens * smooth);
   return {mouseAngle_x, mouseAngle_y};
 }
+
 
 void Aimer::moveAim(MouseMovement move) {
   int dx = move.x;

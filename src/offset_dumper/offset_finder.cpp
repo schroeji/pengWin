@@ -84,12 +84,12 @@ int main(int argc, char** argv) {
   const char glowPointerCall_pattern[] = "x????xxx????xxxxxx";
   const char local_player_addr_data[] = "\x48\x89\xe5\x74\x0e\x48\x8d\x05\x00\x00\x00\x00";
   const char local_player_addr_pattern[] = "xxxxxxxx????";
-  const char atk_mov_data[] = "\x44\x89\xe8\x83\xe0\x01\xf7\xd8\x83\xe8\x03\x45\x84\xe4\x74\x00\x21\xd0";
-  const char atk_mov_pattern[] = "xxxxxxxxxxxxxxx?xx";
+  const char atk_mov_data[] = "\x89\xd8\x83\xc8\x01\xf6\xc2\x03\x0f\x45\xd8\x44\x89\x00\x83\xe0\x01\xf7\xd8\x83\e8\x03";
+  const char atk_mov_pattern[] = "xxxxxxxxxxxxx?xxxxxxxx";
   const char map_name_data[] = "\xBA\x04\x01\x00\x00\x48\x0F\x45\xF7\x48\x8D\x3D\x1C\x1F\xE0\x00";
   const char map_name_pattern[] = "xxxxxxxxxxxx????";
-  const char force_jump_data[] = "\x44\x89\xe8\xc1\xe0\x1d\xc1\xf8\x1f\x83\xe8\x03\x45\x84\xe4\x74\x08\x21\xd0";
-  const char force_jump_pattern[] = "xxxxxxxxxxxxxxxx?xx";
+  // const char force_jump_data[] = "\x44\x89\xe8\xc1\xe0\x1d\xc1\xf8\x1f\x83\xe8\x03\x45\x84\xe4\x74\x08\x21\xd0";
+  // const char force_jump_pattern[] = "xxxxxxxxxxxxxxxx?xx";
   const char split_screen_data[] = "\x55\x89\xFE\x48\x8D\x3D\x00\x00\x00\x00\x48\x89\xE5\x5D\xE9\xAD\xFF\xFF\xFF";
   const char split_screen_pattern[] = "xxxxxx????xxxxxxxxx";
   const char isConnectedMove_data[] = "\x48\x8b\x05\x00\x00\x00\x00\xC6\x05\x00\x00\x00\x00\x00\x48\x8b\x10";
@@ -99,16 +99,21 @@ int main(int argc, char** argv) {
   vector<string> offset_names;
   char offset_buf[64];
 
+  cout << "-- Glow Pointer --" << endl;
   addr_type glowPointerCall = mem.find_pattern(glowPointerCall_data, glowPointerCall_pattern, clientRange);
   addr_type glowFunctionCall = mem.getCallAddress((void*) glowPointerCall);
-  unsigned int glowOffset;
-	mem.read((void*) (glowFunctionCall + 0x10), &glowOffset, sizeof(int));
-  addr_type glowManAddr = glowFunctionCall + 0x10 + glowOffset + 0x4;
+  // unsigned int glowOffset;
+	// mem.read((void*) (glowFunctionCall + 0x10), &glowOffset, sizeof(int));
+  // addr_type glowManAddr = glowFunctionCall + 0x10 + glowOffset + 0x4;
+  addr_type glowManAddr = mem.getAbsoluteAddress((void*) (glowFunctionCall + 0x9), 3, 7);
   addr_type glow_offset = glowManAddr - clientRange.first;
+  // addr_type glow_offset = glowManAddr;
   sprintf(offset_buf, "0x%lx", glow_offset);
   offset_names.push_back("glow_offset");
   offsets.push_back(string(offset_buf));
 
+
+  cout << "-- Local Player --" << endl;
   addr_type localPlayerFunction = mem.find_pattern(local_player_addr_data, local_player_addr_pattern, clientRange);
   addr_type local_player_addr = mem.getCallAddress((void*) (localPlayerFunction + 0x7));
   addr_type local_player_offset = local_player_addr - clientRange.first;
@@ -116,12 +121,15 @@ int main(int argc, char** argv) {
   offset_names.push_back("local_player_offset");
   offsets.push_back(string(offset_buf));
 
+
+  cout << "-- Attack --" << endl;
   addr_type attack_addr = mem.find_pattern(atk_mov_data, atk_mov_pattern, clientRange);
   addr_type atk_offset = attack_addr - clientRange.first;
   sprintf(offset_buf, "0x%lx", atk_offset);
   offset_names.push_back("attack_offset");
   offsets.push_back(string(offset_buf));
 
+  cout << "-- Map Name --" << endl;
   addr_type map_name_call = mem.find_pattern(map_name_data, map_name_pattern, engineRange);
   addr_type map_name_addr = mem.getCallAddress((void*) (map_name_call + 0xB));
   // example: "maps/de_dust2.bsp"
@@ -130,13 +138,16 @@ int main(int argc, char** argv) {
   offset_names.push_back("map_name_offset");
   offsets.push_back(string(offset_buf));
 
-  addr_type force_jump_call = mem.find_pattern(force_jump_data, force_jump_pattern, clientRange);
-  addr_type force_jump_addr = mem.getCallAddress((void*) (force_jump_call + 0x1A));
-  addr_type force_jump_offset = force_jump_addr - clientRange.first;
-  sprintf(offset_buf, "0x%lx", force_jump_offset);
-  offset_names.push_back("force_jump_offset");
-  offsets.push_back(string(offset_buf));
+  // cout << "-- Force Jump --" << endl;
+  // addr_type force_jump_call = mem.find_pattern(force_jump_data, force_jump_pattern, clientRange);
+  // addr_type force_jump_addr = mem.getCallAddress((void*) (force_jump_call + 0x1A));
+  // addr_type force_jump_offset = force_jump_addr - clientRange.first;
+  // sprintf(offset_buf, "0x%lx", force_jump_offset);
+  // offset_names.push_back("force_jump_offset");
+  // offsets.push_back(string(offset_buf));
 
+
+  cout << "-- is Connected --" << endl;
   addr_type isConnected_call = mem.find_pattern(isConnectedMove_data, isConnectedMove_pattern, engineRange);
   addr_type isConnected_addr = mem.getCallAddress((void*) (isConnected_call + 0x8)) + 1;
   addr_type isConnected_offset = isConnected_addr - engineRange.first;
@@ -151,4 +162,4 @@ int main(int argc, char** argv) {
   write_offsets(offset_names, offsets, "settings.cfg");
   print_offsets(offset_names, offsets);
   write_settings("settings.cfg");
-}
+} //

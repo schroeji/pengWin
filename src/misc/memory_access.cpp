@@ -152,6 +152,14 @@ addr_type MemoryAccess::getCallAddress(void* addr) {
   return 0;
 }
 
+addr_type MemoryAccess::getAbsoluteAddress(void* addr, int offset, int size) {
+  unsigned int jump_len;
+  if (read((char*) addr + offset, &jump_len, sizeof(unsigned int))) {
+    return jump_len + (unsigned long) addr + size;
+  }
+  return 0;
+}
+
 void MemoryAccess::updateLocalPlayerAddr() {
   if (!read((void*) local_player_addr_location, &local_player_addr, sizeof(local_player_addr)))
     if (settings->debug) cout << "WARNING: could not get localplayer" << endl;
