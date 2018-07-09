@@ -314,9 +314,9 @@ MouseMovement Aimer::default_calcMouseMovement(QAngle curr_angle, Vector dist, b
   else if (missing_angle.y < -180)
     missing_angle.y += 360;
   if (settings.debug) printf("missing angles: x:%f y:%f\n", missing_angle.x, missing_angle.y);
-  cout << settings.aim_fov << endl;
-  cout << degree_to_radian(missing_angle.x) << endl;
-  cout << degree_to_radian(missing_angle.y) << endl;
+  // cout << settings.aim_fov << endl;
+  // cout << degree_to_radian(missing_angle.x) << endl;
+  // cout << degree_to_radian(missing_angle.y) << endl;
 
   // assert(fabs(degree_to_radian(missing_angle.x)) <= settings.aim_fov);
   // assert(fabs(degree_to_radian(missing_angle.y)) <= settings.aim_fov);
