@@ -152,6 +152,8 @@ MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist, boo
   case Weapon::TEC9:
     if (i == 0)
       return default_calcMouseMovement(curr_angle, dist, false);
+    else
+      if(settings.debug) cout << "Aiming disabled for holding." << endl;
     break;
   case Weapon::REVOLVER:
     return default_calcMouseMovement(curr_angle, dist, false);
@@ -160,6 +162,8 @@ MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist, boo
   case Weapon::SSG08:
     if (i == 0)
       return default_calcMouseMovement(curr_angle, dist, use_smooth);
+    else
+      if(settings.debug) cout << "Aiming disabled for holding." << endl;
     break;
     // auto snipers
   case Weapon::G3SG1:
@@ -175,6 +179,7 @@ MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist, boo
   case Weapon::C4:
   case Weapon::KNIFE:
   case Weapon::KNIFE_T:
+    if(settings.debug) cout << "Aiming disabled for this weapon." << endl;
     return {0, 0};
   default:
     return default_calcMouseMovement(curr_angle, dist, use_smooth);
@@ -379,8 +384,10 @@ Vector Aimer::getView(bool rcs) {
 pair<EntityType*, Vector> Aimer::findTargetDispatcher(Vector view) {
   Weapon weapon = csgo.getWeapon(mem.local_player_addr);
   switch(weapon) {
+  case Weapon::DEAGLE:
+    return closestTargetInFov(view, 1.1*settings.aim_fov);
   case Weapon::ZEUS:
-    return zeusTarget(view, settings.aim_fov);
+    return zeusTarget(view, degree_to_radian(20));
   default:
     return closestTargetInFov(view, settings.aim_fov);
   }
@@ -432,17 +439,15 @@ pair<EntityType*, Vector> Aimer::zeusTarget(Vector view, float fov) {
       }
       // find angle between player and target
       Vector distVec = getDist(&player_pos, &bone_pos);
-      if (len(distVec) > ZEUS_RANGE)
+      if (len(distVec) > ZEUS_RANGE){
+        if(settings.debug) cout << "target too far for zeus with " << len(distVec) << endl;
         continue;
+      }
       normalize_vector(&distVec);
       float angle = acos(distVec * view);
       if (angle > fov / 2.)
         continue;
-      if (closestPlayer == nullptr) {
-        closestPlayer = enemy;
-        closestAngle = angle;
-        closestBone = bone_pos;
-      } else if (closestAngle > angle) {
+      if (closestPlayer == nullptr || closestAngle > angle) {
         closestPlayer = enemy;
         closestAngle = angle;
         closestBone = bone_pos;
@@ -506,11 +511,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view, float fov) {
       float angle = acos(distVec * view);
       if (angle > fov / 2.)
         continue;
-      if (closestPlayer == nullptr) {
-        closestPlayer = enemy;
-        closestAngle = angle;
-        closestBone = bone_pos;
-      } else if (closestAngle > angle) {
+      if (closestPlayer == nullptr || closestAngle > angle) {
         closestPlayer = enemy;
         closestAngle = angle;
         closestBone = bone_pos;
