@@ -17,6 +17,9 @@
 // range of zeus for aimbot
 // http://counterstrike.wikia.com/wiki/Zeus_x27
 #define ZEUS_RANGE 200.0f
+// revolver cock time in ms
+// http://counterstrike.wikia.com/wiki/R8_Revolver
+#define R8_COCK_TIME 200.0f
 
 
 enum Team {

@@ -386,6 +386,9 @@ pair<EntityType*, Vector> Aimer::findTargetDispatcher(Vector view) {
   switch(weapon) {
   case Weapon::DEAGLE:
     return closestTargetInFov(view, 1.1*settings.aim_fov);
+  case Weapon:REVOLVER:
+    this_thread::sleep_for(chrono::milliseconds(R8_COCK_TIME * 0.95));
+    return closestTargetInFov(view, settings.aim_fov);
   case Weapon::ZEUS:
     return zeusTarget(view, degree_to_radian(20));
   default:
