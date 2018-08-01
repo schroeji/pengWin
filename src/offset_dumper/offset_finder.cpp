@@ -85,9 +85,9 @@ int main(int argc, char** argv) {
   const char local_player_addr_data[] = "\x48\x89\xe5\x74\x0e\x48\x8d\x05\x00\x00\x00\x00";
   const char local_player_addr_pattern[] = "xxxxxxxx????";
   const char atk_mov_data[] = "\x89\xd8\x83\xc8\x01\xf6\xc2\x03\x0f\x45\xd8\x44\x89\x00\x83\xe0\x01\xf7\xd8\x83\e8\x03";
-  const char atk_mov_pattern[] = "xxxxxxxxxxxxx?xxxxxxxx";
-  const char map_name_data[] = "\xBA\x04\x01\x00\x00\x48\x0F\x45\xF7\x48\x8D\x3D\x1C\x1F\xE0\x00";
-  const char map_name_pattern[] = "xxxxxxxxxxxx????";
+  const char atk_mov_pattern[] = "xxxxxxxxxxxxx?xxxxxxxx"; //
+  const char map_name_data[] = "\x48\x89\xC7\x44\x89\x9D\xB4\xFE\xFF\xFF\x48\x8D\x35\x44\x98\xB8\x00";
+  const char map_name_pattern[] = "xxxxxxxxxxxxx????";
   // const char force_jump_data[] = "\x44\x89\xe8\xc1\xe0\x1d\xc1\xf8\x1f\x83\xe8\x03\x45\x84\xe4\x74\x08\x21\xd0";
   // const char force_jump_pattern[] = "xxxxxxxxxxxxxxxx?xx";
   const char split_screen_data[] = "\x55\x89\xFE\x48\x8D\x3D\x00\x00\x00\x00\x48\x89\xE5\x5D\xE9\xAD\xFF\xFF\xFF";
@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
 
   cout << "-- Map Name --" << endl;
   addr_type map_name_call = mem.find_pattern(map_name_data, map_name_pattern, engineRange);
-  addr_type map_name_addr = mem.getCallAddress((void*) (map_name_call + 0xB));
+  addr_type map_name_addr = mem.getCallAddress((void*) (map_name_call + 0xC));
   // example: "maps/de_dust2.bsp"
   addr_type map_name_offset = map_name_addr - engineRange.first + 0x5; // add 5 because of "maps/"
   sprintf(offset_buf, "0x%lx", map_name_offset);
