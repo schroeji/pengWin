@@ -17,12 +17,17 @@ private:
   const float angle_multiplier_scoped = 1 / 0.0127111077308654;
   Vector getView(bool);
   Vector predictPositionOffset(EntityType*);
-  std::pair<EntityType*, Vector> findTargetDispatcher(Vector);
+  // dispatches to the correct target finding function based on weaponType and other factors
+  std::pair<EntityType*, Vector> findTargetDispatcher(Vector, unsigned int);
+  // default target finding function good for most weapons
   std::pair<EntityType*, Vector> closestTargetInFov(Vector, float);
   std::pair<EntityType*, Vector> zeusTarget(Vector, float);
+  // dispatches to the correct calcMouseMovement function based on weaponType and other factors
   MouseMovement mouseMovementDispatcher(QAngle, Vector, bool, unsigned int i);
+  // default calcMouseMovement good for most weapons
   MouseMovement default_calcMouseMovement(QAngle, Vector, bool);
   MouseMovement spline_calcMouseMovement(QAngle, Vector, unsigned int);
+  // store variables for spline_calcMouseMovement so they don't have to be recalculated in every call
   float spline_a[2] = {0, 0};
   float spline_b[2] = {0, 0};
   float spline_x_len;
@@ -32,6 +37,8 @@ private:
 public:
   Aimer(GameManager& csgo);
   ~Aimer();
+  // Routine to call by thread; unsigned int i is the number of the call
   void aimCheck(unsigned int);
+  // move the mouse by MouseMovement
   void moveAim(MouseMovement);
 };

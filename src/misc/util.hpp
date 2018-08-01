@@ -53,6 +53,11 @@ struct Vector {
 	float x;
 	float y;
 	float z;
+  inline void operator+=(Vector a) {
+    x += a.x;
+    y += a.y;
+    z += a.z;
+  }
   inline Vector operator+(Vector a) {
     return {a.x + x, a.y + y, a.z + z};
   }

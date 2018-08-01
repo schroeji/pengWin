@@ -12,7 +12,8 @@
 
 using namespace std;
 
-GameManager::GameManager(MemoryAccess& mem) : mem(mem) {
+GameManager::GameManager(MemoryAccess& mem) : mem(mem),
+                                             settings(Settings::getInstance()) {
   bool fresh_launch = false;
   while (!mem.getPid()) {  // wait until game has launched
     if (!fresh_launch)
@@ -249,11 +250,18 @@ bool GameManager::isDefusing(addr_type player_addr) {
   return (bool) buf;
 }
 
+QAngle GameManager::getNetworkAngles(addr_type player_addr) {
+  QAngle ang;
+  if(!mem.read((void*) (player_addr + 0x160), &ang, sizeof(ang)))
+    throw runtime_error("Could not get NetworkAngles.");
+  return ang;
+}
+
 Weapon GameManager::getWeapon(addr_type player_addr) {
   unsigned int activeWeaponID;
   if(!mem.read((void*) (player_addr + mem.m_hActiveWeapon), &activeWeaponID, sizeof(int)))
     return Weapon::NONE;
-  cout << "Active weaponID:" << activeWeaponID << endl;
+  if(settings.debug) cout << "Active weaponID:" << activeWeaponID << endl;
   activeWeaponID &= 0xFFF;
   unsigned int weaponID = 0;
   EntityType currentEntity;
@@ -263,11 +271,11 @@ Weapon GameManager::getWeapon(addr_type player_addr) {
     if (!mem.read(g_glow[i].m_pEntity, &currentEntity, sizeof(EntityType)))
       continue;
     if (currentEntity.m_iEntityId == activeWeaponID){ // found entity for weapon
-      cout << "Found entity" << endl;
+      if(settings.debug) cout << "Found entity" << endl;
       // get weapon type
       mem.read((void *)((addr_type)g_glow[i].m_pEntity + mem.m_AttributeManager60 + mem.m_iItemDefinitionIndex), &weaponID, sizeof(int));
       weaponID &= 0xFFF;
-      cout << "weaponID:" << weaponID << endl;
+      if(settings.debug) cout << "weaponID:" << weaponID << endl;
       break;
     }
   }

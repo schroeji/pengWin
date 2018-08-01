@@ -95,12 +95,14 @@ void Aimer::aimCheck(unsigned int i) {
   EntityType* enemy;
   Vector target_pos;
   Vector view;
+  // recoil compensate after 180ms of holding
+  // (pistols have an addidtional check for holding see mouseMOvementDispatcher)
+  bool rcs = i > 180/settings.aim_sleep;
   try {
     if(settings.debug) cout << "--- Aim Check ---" << endl;
     local_player = csgo.getLocalPlayer();
-    // don't recoil compensate for tap shooting
-    view = getView(i > 200/settings.aim_sleep);
-    pair<EntityType*, Vector> temp = findTargetDispatcher(view);
+    view = getView(rcs);
+    pair<EntityType*, Vector> temp = findTargetDispatcher(view, i);
     enemy = temp.first;
     target_pos = temp.second;
   } catch(const runtime_error& e) {
@@ -111,17 +113,23 @@ void Aimer::aimCheck(unsigned int i) {
   Vector player_pos = {local_player->m_vecOrigin.x,
                        local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
                        local_player->m_vecOrigin.z};
+  player_pos += predictPositionOffset(local_player);
+  target_pos += predictPositionOffset(enemy);
   Vector dist = getDist(&player_pos, &target_pos);
 
-  dist = dist + predictPositionOffset(enemy);
   if (settings.debug) printf("distance vector: %f, %f, %f\n", dist.x, dist.y, dist.z);
   if (settings.debug) printf("player_pos %f, %f, %f\n", player_pos.x, player_pos.y, player_pos.z);
   if (settings.debug) printf("target_pos %f, %f, %f\n", target_pos.x, target_pos.y, target_pos.z);
   if (dist.x == 0 && dist.y == 0 && dist.z == 0)
     return;
   bool use_smooth = settings.aim_smooth_first_shot || i != 0;
-  QAngle aimPunch = csgo.getAimPunch(mem.local_player_addr) * 2.0;
-  MouseMovement move = mouseMovementDispatcher(local_player->m_angNetworkAngles + aimPunch, dist, use_smooth, i);
+
+  QAngle aimPunch;
+  if (rcs)
+    aimPunch = csgo.getAimPunch(mem.local_player_addr) * 2.0;
+  else
+    aimPunch = {0, 0};
+  MouseMovement move = mouseMovementDispatcher(csgo.getNetworkAngles(mem.local_player_addr) + aimPunch, dist, use_smooth, i);
   if (settings.debug) cout << dec << "move angle x: " << move.x << endl;
   if (settings.debug) cout << dec << "move angle y: " << move.y << endl;
   if (move.x == 0 && move.y == 0) {
@@ -161,7 +169,7 @@ MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist, boo
   case Weapon::AWP:
   case Weapon::SSG08:
     if (i == 0)
-      return default_calcMouseMovement(curr_angle, dist, use_smooth);
+      return default_calcMouseMovement(curr_angle, dist, false);
     else
       if(settings.debug) cout << "Aiming disabled for holding." << endl;
     break;
@@ -181,6 +189,13 @@ MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist, boo
   case Weapon::KNIFE_T:
     if(settings.debug) cout << "Aiming disabled for this weapon." << endl;
     return {0, 0};
+    break;
+  case Weapon::ZEUS:
+    if (i == 0)
+      return default_calcMouseMovement(curr_angle, dist, false);
+    else
+      if(settings.debug) cout << "Aiming disabled for holding." << endl;
+    break;
   default:
     return default_calcMouseMovement(curr_angle, dist, use_smooth);
   }
@@ -328,7 +343,9 @@ MouseMovement Aimer::default_calcMouseMovement(QAngle curr_angle, Vector dist, b
   float multiplier = angle_multiplier;
   if (csgo.isScoped(mem.local_player_addr))
     multiplier = angle_multiplier_scoped;
-  float smooth = use_smooth ? settings.smoothing_factor : 1.0;
+  // not usign 1.0 because: prevents overshooting when player moves mouse;
+  // and  not perfectly hitting the center of the bone is less obvious
+  float smooth = use_smooth ? settings.smoothing_factor : 0.98;
   // because format is {pitch, yaw, roll} the y and x have to be swapped
   int mouseAngle_x = static_cast<int>(-missing_angle.y * multiplier * inverse_sens * smooth);
   int mouseAngle_y = static_cast<int>(missing_angle.x * multiplier * inverse_sens * smooth);
@@ -360,13 +377,7 @@ void Aimer::moveAim(MouseMovement move) {
 }
 
 Vector Aimer::getView(bool rcs) {
-  EntityType* local_player;
-  try {
-    local_player = csgo.getLocalPlayer();
-  } catch (const runtime_error& e) {
-    throw e;
-  }
-  QAngle currAngle = local_player->m_angNetworkAngles;
+  QAngle currAngle = csgo.getNetworkAngles(mem.local_player_addr);
   // times two because of weapon_recoil_scale convar
   QAngle aimPunch = csgo.getAimPunch(mem.local_player_addr) * 2.0;
   if (rcs)
@@ -381,16 +392,13 @@ Vector Aimer::getView(bool rcs) {
 }
 
 
-pair<EntityType*, Vector> Aimer::findTargetDispatcher(Vector view) {
+pair<EntityType*, Vector> Aimer::findTargetDispatcher(Vector view, unsigned int i) {
   Weapon weapon = csgo.getWeapon(mem.local_player_addr);
   switch(weapon) {
   case Weapon::DEAGLE:
     return closestTargetInFov(view, 1.1*settings.aim_fov);
-  case Weapon:REVOLVER:
-    this_thread::sleep_for(chrono::milliseconds(R8_COCK_TIME * 0.95));
-    return closestTargetInFov(view, settings.aim_fov);
   case Weapon::ZEUS:
-    return zeusTarget(view, degree_to_radian(20));
+    return zeusTarget(view, degree_to_radian(4));
   default:
     return closestTargetInFov(view, settings.aim_fov);
   }
