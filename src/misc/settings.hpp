@@ -36,6 +36,7 @@ public:
   //radar settings
   bool find_map = false;
   long int radar_sleep = 200;
+  bool radar_generic = false;
 
   //aimbot settings
   float aim_fov;
