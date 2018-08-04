@@ -80,8 +80,9 @@ int main(int argc, char** argv) {
   Addr_Range engineRange = mem.getEngineRange();
   cout << hex << "Client size: " << clientRange.second - clientRange.first << endl;
   cout << "Engine size: " << engineRange.second - engineRange.first << endl;
-  const char glowPointerCall_data[] = "\xE8\x00\x00\x00\x00\x48\x8b\x3d\x00\x00\x00\x00\xBE\x01\x00\x00\x00\xC7";
-  const char glowPointerCall_pattern[] = "x????xxx????xxxxxx";
+  // const char glowPointerCall_data[] = "\xE8\x00\x00\x00\x00\x48\x8b\x3d\x00\x00\x00\x00\xBE\x01\x00\x00\x00\xC7";
+  // const char glowPointerCall_pattern[] = "x????xxx????xxxxxx";
+  const string glowPointerCall_pattern = "E8 ?? ?? ?? ?? 48 8B 3D ?? ?? ?? ?? BE 01 00 00 00 C7";
   const char local_player_addr_data[] = "\x48\x89\xe5\x74\x0e\x48\x8d\x05\x00\x00\x00\x00";
   const char local_player_addr_pattern[] = "xxxxxxxx????";
   const char atk_mov_data[] = "\x89\xd8\x83\xc8\x01\xf6\xc2\x03\x0f\x45\xd8\x44\x89\x00\x83\xe0\x01\xf7\xd8\x83\e8\x03";
@@ -100,7 +101,7 @@ int main(int argc, char** argv) {
   char offset_buf[64];
 
   cout << "-- Glow Pointer --" << endl;
-  addr_type glowPointerCall = mem.find_pattern(glowPointerCall_data, glowPointerCall_pattern, clientRange);
+  addr_type glowPointerCall = mem.find_pattern(glowPointerCall_pattern, clientRange);
   addr_type glowFunctionCall = mem.getCallAddress((void*) glowPointerCall);
   // unsigned int glowOffset;
 	// mem.read((void*) (glowFunctionCall + 0x10), &glowOffset, sizeof(int));
@@ -113,52 +114,52 @@ int main(int argc, char** argv) {
   offsets.push_back(string(offset_buf));
 
 
-  cout << "-- Local Player --" << endl;
-  addr_type localPlayerFunction = mem.find_pattern(local_player_addr_data, local_player_addr_pattern, clientRange);
-  addr_type local_player_addr = mem.getCallAddress((void*) (localPlayerFunction + 0x7));
-  addr_type local_player_offset = local_player_addr - clientRange.first;
-  sprintf(offset_buf, "0x%lx", local_player_offset);
-  offset_names.push_back("local_player_offset");
-  offsets.push_back(string(offset_buf));
-
-
-  cout << "-- Attack --" << endl;
-  addr_type attack_addr = mem.find_pattern(atk_mov_data, atk_mov_pattern, clientRange);
-  addr_type atk_offset = attack_addr - clientRange.first;
-  sprintf(offset_buf, "0x%lx", atk_offset);
-  offset_names.push_back("attack_offset");
-  offsets.push_back(string(offset_buf));
-
-  cout << "-- Map Name --" << endl;
-  addr_type map_name_call = mem.find_pattern(map_name_data, map_name_pattern, engineRange);
-  addr_type map_name_addr = mem.getCallAddress((void*) (map_name_call + 0xC));
-  // example: "maps/de_dust2.bsp"
-  addr_type map_name_offset = map_name_addr - engineRange.first + 0x5; // add 5 because of "maps/"
-  sprintf(offset_buf, "0x%lx", map_name_offset);
-  offset_names.push_back("map_name_offset");
-  offsets.push_back(string(offset_buf));
-
-  // cout << "-- Force Jump --" << endl;
-  // addr_type force_jump_call = mem.find_pattern(force_jump_data, force_jump_pattern, clientRange);
-  // addr_type force_jump_addr = mem.getCallAddress((void*) (force_jump_call + 0x1A));
-  // addr_type force_jump_offset = force_jump_addr - clientRange.first;
-  // sprintf(offset_buf, "0x%lx", force_jump_offset);
-  // offset_names.push_back("force_jump_offset");
+  // cout << "-- Local Player --" << endl;
+  // addr_type localPlayerFunction = mem.find_pattern(local_player_addr_data, local_player_addr_pattern, clientRange);
+  // addr_type local_player_addr = mem.getCallAddress((void*) (localPlayerFunction + 0x7));
+  // addr_type local_player_offset = local_player_addr - clientRange.first;
+  // sprintf(offset_buf, "0x%lx", local_player_offset);
+  // offset_names.push_back("local_player_offset");
   // offsets.push_back(string(offset_buf));
 
 
-  cout << "-- is Connected --" << endl;
-  addr_type isConnected_call = mem.find_pattern(isConnectedMove_data, isConnectedMove_pattern, engineRange);
-  addr_type isConnected_addr = mem.getCallAddress((void*) (isConnected_call + 0x8)) + 1;
-  addr_type isConnected_offset = isConnected_addr - engineRange.first;
-  sprintf(offset_buf, "0x%lx",isConnected_offset);
-  offset_names.push_back("isConnected_offset");
-  offsets.push_back(string(offset_buf));
+  // cout << "-- Attack --" << endl;
+  // addr_type attack_addr = mem.find_pattern(atk_mov_data, atk_mov_pattern, clientRange);
+  // addr_type atk_offset = attack_addr - clientRange.first;
+  // sprintf(offset_buf, "0x%lx", atk_offset);
+  // offset_names.push_back("attack_offset");
+  // offsets.push_back(string(offset_buf));
+
+  // cout << "-- Map Name --" << endl;
+  // addr_type map_name_call = mem.find_pattern(map_name_data, map_name_pattern, engineRange);
+  // addr_type map_name_addr = mem.getCallAddress((void*) (map_name_call + 0xC));
+  // // example: "maps/de_dust2.bsp"
+  // addr_type map_name_offset = map_name_addr - engineRange.first + 0x5; // add 5 because of "maps/"
+  // sprintf(offset_buf, "0x%lx", map_name_offset);
+  // offset_names.push_back("map_name_offset");
+  // offsets.push_back(string(offset_buf));
+
+  // // cout << "-- Force Jump --" << endl;
+  // // addr_type force_jump_call = mem.find_pattern(force_jump_data, force_jump_pattern, clientRange);
+  // // addr_type force_jump_addr = mem.getCallAddress((void*) (force_jump_call + 0x1A));
+  // // addr_type force_jump_offset = force_jump_addr - clientRange.first;
+  // // sprintf(offset_buf, "0x%lx", force_jump_offset);
+  // // offset_names.push_back("force_jump_offset");
+  // // offsets.push_back(string(offset_buf));
 
 
-  // cout << "Test1: " << test1 << endl;
-  // cout << "Test2: " << test2 << endl;
-  // cout << viewAngels << endl;
+  // cout << "-- is Connected --" << endl;
+  // addr_type isConnected_call = mem.find_pattern(isConnectedMove_data, isConnectedMove_pattern, engineRange);
+  // addr_type isConnected_addr = mem.getCallAddress((void*) (isConnected_call + 0x8)) + 1;
+  // addr_type isConnected_offset = isConnected_addr - engineRange.first;
+  // sprintf(offset_buf, "0x%lx",isConnected_offset);
+  // offset_names.push_back("isConnected_offset");
+  // offsets.push_back(string(offset_buf));
+
+
+  // // cout << "Test1: " << test1 << endl;
+  // // cout << "Test2: " << test2 << endl;
+  // // cout << viewAngels << endl;
   write_offsets(offset_names, offsets, "settings.cfg");
   print_offsets(offset_names, offsets);
   write_settings("settings.cfg");

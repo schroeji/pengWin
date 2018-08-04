@@ -61,7 +61,7 @@ public:
   Addr_Range getEngineRange();
   addr_type getCallAddress(void*);
   addr_type getAbsoluteAddress(void*, int, int);
-  addr_type find_pattern(const char*, const char*, Addr_Range);
+  addr_type find_pattern(const std::string&, Addr_Range);
   void updateLocalPlayerAddr();
   BoneInfo* getBoneMatrix(addr_type);
   void printBlock(addr_type, size_t);
