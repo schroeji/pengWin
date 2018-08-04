@@ -14,7 +14,7 @@ SEPERATOR = "|"
 matplotlib.rcParams['toolbar'] = 'None'
 fig, ax = plt.subplots()
 xdata, ydata = [], []
-ln = plt.scatter([], [], marker=(3,0,0), animated=True)
+ln = plt.scatter([], [], animated=True)
 # ln.set_offsets([[0.5], [0.4]])
 # print(ln.get_offsets())
 # location_file = "/tmp/locs.csv"
@@ -137,30 +137,41 @@ def getData(i):
   if(len(data) == 0):
     return ln,
   if(len(data.shape) == 1):
-    data = data.reshape((1, 7))
+    data = data.reshape((1, 9))
   local_player_index = int(data[0,0])
+  rotation = int(data[0,8])
   data = data[1:]
   # data = data[data[:, 1] != 0]
-  xs = data[:, -3]
+  xs = data[:, -4]
   player_count = len(xs)
-  # ys = []
-  zs = data[:, -1]
+  # ys = data[:, -3]
+  zs = data[:, -2]
   cs = [ 'b' if c == 3 else 'r' for c in data[:,2]]
+  # homogenous coordinates for easier translation
+  vecs = np.dstack((zs, xs))[0]
+  if generic and local_player_index != -1 and local_player_index < len(data):
+    # center around local player
+    vecs -= vecs[local_player_index]
+    # rotate according to rotation
+    angle = np.radians(rotation - 90)
+    rotation_matrix = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+    vecs = np.dot(vecs, rotation_matrix)
+
   if (local_player_index != -1 and local_player_index < len(data)):
     cs[local_player_index] = 'g'
+
   hps = data[:, 1].astype(int, copy=False)
   weapons = data[:, 3]
   defusings = (data[:, 4] == 1)
-  ln.set_offsets(list(zip(zs, xs)))
+  ln.set_offsets(vecs[:,:2])
   ln.set_color(cs)
-  ln.set_markers
   strings = []
   for i in range(player_count):
     strings.append(str(hps[i]))
     strings[-1] += " " + weapon(weapons[i])
     if defusings[i]:
       strings[-1] += " def"
-  txt = [ax.annotate(strings[i], (zs[i], xs[i]), color=cs[i]) for i in range(player_count)]
+  txt = [ax.annotate(strings[i], vecs[i], color=cs[i]) for i in range(player_count)]
   txt.insert(0, ln)
   # return ln,
   return tuple(txt)
@@ -191,7 +202,7 @@ def blit_init():
     xlims = (-3453, 3750)
     ylims = (-4290, 2887)
   else:
-    xlims = (-2000, 2000)
+    xlims = (-4000, 4000)
     ylims = (-2000, 2000)
   ax.imshow(img, extent=[ax.get_xlim()[0], ax.get_xlim()[1], ax.get_ylim()[0], ax.get_ylim()[1]])
   ax.set_xlim(xlims)
@@ -222,12 +233,12 @@ has_plotted = False
 while(not has_plotted):
   time.sleep(1)
   has_plotted = True
-  if map_name == "generic":
-    blue = [0, 0, 255]
-    img = np.array([blue*4]*4)
-    img = img.reshape((4,4,3))
-    print(img)
-  else:
+  try:
     img = plt.imread("overviews/{}_radar.jpg".format(map_name))
+  except:
+    white = [255, 255, 255]
+    img = np.array([white*400]*400)
+    img = img.reshape((400,400,3))
+    generic = True
   ani = animation.FuncAnimation(fig, getData, init_func=blit_init, interval=interval, blit=True)
   plt.show()

@@ -21,6 +21,8 @@ void Radar::start() {
   string map_name = "";
   if (settings.find_map) {
     if (settings.debug) cout << "Scanning for map..." << endl;
+    if(settings.radar_generic)
+      map_name = "generic";
     while (map_name == "") {
       map_name = csgo.getMapName();
       this_thread::sleep_for(chrono::milliseconds(1000));
@@ -57,7 +59,8 @@ void Radar::writeFunc() {
     if (players.empty())
       continue;
     // print local player index into array[0,0]
-    string first_line = to_string(csgo.getLocalPlayerIndex()) + ",0,0,0,0,0,0,0,0";
+    string first_line = to_string(csgo.getLocalPlayerIndex()) + ",0,0,0,0,0,0,0," +
+      to_string(csgo.getLocalPlayer()->m_angNetworkAngles.y);
     fputs(first_line.c_str(), handle);
     // Format: number,hp,team,weapon,defusing,x,y,z,rotation
     int i = 0;
@@ -73,7 +76,7 @@ void Radar::writeFunc() {
       os << player->m_vecOrigin.x << ",";
       os << player->m_vecOrigin.y << ",";
       os << player->m_vecOrigin.z << ",";
-      os << player->m_angNetworkAngles.x;
+      os << player->m_angNetworkAngles.y;
       fputs(os.str().c_str(), handle);
       i++;
     }

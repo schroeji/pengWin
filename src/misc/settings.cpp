@@ -20,8 +20,7 @@ Settings& Settings::getInstance() {
 }
 
 void Settings::load(const string& file) {
-  ifstream settings_file (file);
-  string line;
+  ifstream settings_file (file); string line;
   vector<string> splits;
   if (settings_file.is_open()) {
     while (getline(settings_file, line)) {
@@ -64,6 +63,8 @@ void Settings::load(const string& file) {
           find_map = (splits[1] == "true");
         else if (splits[0] == "radar_sleep")
           radar_sleep = strtol(splits[1].c_str(), NULL, 10);
+        else if (splits[0] == "radar_generic")
+          radar_generic = (splits[1] == "true");
         else if (splits[0] == "debug")
           debug = (splits[1] == "true");
         else if (splits[0] == "aim_fov")
@@ -138,5 +139,6 @@ void Settings::print() {
   cout << endl << "[Radar]" << endl;
   cout << "find_map: " << find_map << endl;
   cout << "radar_sleep: " << radar_sleep << endl;
+  cout << "radar_generic: " << radar_generic << endl;
   cout << "------------------------" << endl;
 }
