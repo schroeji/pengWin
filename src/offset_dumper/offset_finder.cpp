@@ -82,13 +82,13 @@ int main(int argc, char** argv) {
   cout << "Engine size: " << engineRange.second - engineRange.first << endl;
   // const char glowPointerCall_data[] = "\xE8\x00\x00\x00\x00\x48\x8b\x3d\x00\x00\x00\x00\xBE\x01\x00\x00\x00\xC7";
   // const char glowPointerCall_pattern[] = "x????xxx????xxxxxx";
-  const string glowPointerCall_pattern = "E8 ?? ?? ?? ?? 48 8B 3D ?? ?? ?? ?? BE 01 00 00 00 C7";
-  const char local_player_addr_pattern[] = "48 89 e5 74 0e 48 8d 05 ?? ?? ?? ??";
-  const char atk_mov_pattern[] = "89 D8 83 C8 01 F6 C2 03 0F 45 D8 44 89 ?? 83 E0 01 F7 D8 83 E8 03";
+  const string glowPointerCall_pattern = "E8 ?? ?? ?? ?? 49 8B 7D 00 C7 40 38 00 00 00 00 48 8B 07 FF 90";
+  const string local_player_addr_pattern = "48 89 e5 74 0e 48 8d 05 ?? ?? ?? ??";
+  const string atk_mov_pattern = "89 D8 83 C8 01 F6 C2 03 0F 45 D8 44 89 ?? 83 E0 01 F7 D8 83 E8 03";
   const string map_name_pattern = "48 89 C7 44 89 9D B4 FE FF FF 48 8D 35 ?? ?? ?? ??";
-  // const char force_jump_data[] = "44 89 e8 c1 e0 1d c1 f8 1f 83 e8 03 45 84 e4 74 08 21 d0";
-  const char split_screen_pattern[] = "55 89 FE 48 8D 3D ?? ?? ?? ?? 48 89 E5 5D E9 AD FF FF FF";
-  const char isConnectedMove_pattern[] = "48 8b 05 ?? ?? ?? ?? C6 05 ?? ?? ?? ?? 00 48 8b 10";
+  const string force_jump_data = "44 89 e8 c1 e0 1d c1 f8 1f 83 e8 03 45 84 e4 74 08 21 d0";
+  const string split_screen_pattern = "55 89 FE 48 8D 3D ?? ?? ?? ?? 48 89 E5 5D E9 AD FF FF FF";
+  const string isConnectedMove_pattern = "48 8b 05 ?? ?? ?? ?? C6 05 ?? ?? ?? ?? 00 48 8b 10";
 
   vector<string> offsets;
   vector<string> offset_names;
