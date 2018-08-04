@@ -125,15 +125,17 @@ addr_type MemoryAccess::find_pattern(const string& pattern, Addr_Range range) {
     bzero(buffer, blocksize);
     if (read((void*) readaddr, buffer, readsize)) {
       for (size_t b = 0; b < readsize; b++) {
+        // iterator for pattern string
         size_t i = 0;
+        // number of matched bytes s
         size_t matches = 0;
         char byte = (char) strtol(pattern.substr(i, 2).c_str(), NULL, 16);
         while (buffer[b + matches] == byte || pattern.substr(i, 2) == "??") {
-          matches++; // skip over two bytes plus space
-          if (matches >= len) {
+          matches++; // one matched byte
+          i += 3; // skip over two characters plus space
+          if (i >= len) {
             return (addr_type) (readaddr + b);
           }
-          i += 3;
           byte = (char) strtol(pattern.substr(i, 2).c_str(), NULL, 16);
         }
       }
@@ -144,38 +146,6 @@ addr_type MemoryAccess::find_pattern(const string& pattern, Addr_Range range) {
   cout << "WARNING: no match for pattern" << endl;
   return 0x0;
 }
-
-// addr_type MemoryAccess::find_pattern(const char* data, const char* pattern, Addr_Range range) {
-//   size_t begin = range.first;
-//   size_t end = range.second;
-//   char buffer[4096];
-//   size_t len = strlen(pattern);
-//   size_t blocksize = sizeof(buffer);
-//   size_t totalsize = end - begin;
-//   size_t chunknum = 0;
-
-//   while (totalsize > 0) {
-//     size_t readsize = min(totalsize, blocksize);
-//     size_t readaddr = begin + (blocksize * chunknum);
-//     bzero(buffer, blocksize);
-//     if (read((void*) readaddr, buffer, readsize)) {
-//       for (size_t b = 0; b < readsize; b++) {
-//         size_t matches = 0;
-
-//         while (buffer[b + matches] == data[matches] || pattern[matches] != 'x') {
-//           matches++;
-//           if (matches == len) {
-//             return (addr_type) (readaddr + b);
-//           }
-//         }
-//       }
-//     }
-//     totalsize -= readsize;
-//     chunknum++;
-//   }
-//   cout << "WARNING: no match for pattern" << endl;
-//   return 0x0;
-// }
 
 addr_type MemoryAccess::getCallAddress(void* addr) {
   unsigned int jump_len;
