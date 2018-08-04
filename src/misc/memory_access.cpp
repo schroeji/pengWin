@@ -125,14 +125,16 @@ addr_type MemoryAccess::find_pattern(const string& pattern, Addr_Range range) {
     bzero(buffer, blocksize);
     if (read((void*) readaddr, buffer, readsize)) {
       for (size_t b = 0; b < readsize; b++) {
+        size_t i = 0;
         size_t matches = 0;
-        char byte = (char) strtol(pattern.substr(matches, 2).c_str(), NULL, 16);
-        while (buffer[b + matches] == byte || pattern.substr(matches, 2) == "??") {
-          matches += 3; // skip over two bytes plus space
+        char byte = (char) strtol(pattern.substr(i, 2).c_str(), NULL, 16);
+        while (buffer[b + matches] == byte || pattern.substr(i, 2) == "??") {
+          matches++; // skip over two bytes plus space
           if (matches >= len) {
             return (addr_type) (readaddr + b);
           }
-          byte = (char) strtol(pattern.substr(matches, 2).c_str(), NULL, 16);
+          i += 3;
+          byte = (char) strtol(pattern.substr(i, 2).c_str(), NULL, 16);
         }
       }
     }
