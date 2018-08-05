@@ -1,7 +1,8 @@
 #include "settings.hpp"
-#include "typedef.hpp"
+#include "util.hpp"
 
 #include <string>
+#include <vector>
 #include <fstream>
 #include <iostream>
 #include <X11/keysymdef.h>
@@ -14,13 +15,12 @@ Settings::Settings(const string& file) {
   instance = this;
 }
 
-Settings Settings::getInstance() {
+Settings& Settings::getInstance() {
   return *instance;
 }
 
 void Settings::load(const string& file) {
-  ifstream settings_file (file);
-  string line;
+  ifstream settings_file (file); string line;
   vector<string> splits;
   if (settings_file.is_open()) {
     while (getline(settings_file, line)) {
@@ -46,6 +46,8 @@ void Settings::load(const string& file) {
           map_name_offset = strtoul(splits[1].c_str(), NULL, 16);
         else if (splits[0] == "force_jump_offset")
           force_jump_offset = strtoul(splits[1].c_str(), NULL, 16);
+        else if (splits[0] == "isConnected_offset")
+          isConnected_offset = strtoul(splits[1].c_str(), NULL, 16);
         // settings
         else if (splits[0] == "main_loop_sleep")
           main_loop_sleep = strtol(splits[1].c_str(), NULL, 10);
@@ -55,28 +57,43 @@ void Settings::load(const string& file) {
           trigger_delay = strtol(splits[1].c_str(), NULL, 10);
         else if (splits[0] == "trigger_use_random")
           trigger_use_random = (splits[1] == "true");
-        else if (splits[0] == "trigger_key") {
+        else if (splits[0] == "trigger_key")
           trigger_key = splits[1];
-        } else if (splits[0] == "find_map")
+        else if (splits[0] == "find_map")
           find_map = (splits[1] == "true");
         else if (splits[0] == "radar_sleep")
           radar_sleep = strtol(splits[1].c_str(), NULL, 10);
+        else if (splits[0] == "radar_generic")
+          radar_generic = (splits[1] == "true");
         else if (splits[0] == "debug")
           debug = (splits[1] == "true");
         else if (splits[0] == "aim_fov")
           aim_fov = degree_to_radian(strtof(splits[1].c_str(), NULL));
-        else if (splits[0] == "bhop_key") {
+        else if (splits[0] == "bhop_key")
           bhop_key = splits[1];
-        } else if (splits[0] == "aim_key") {
+        else if (splits[0] == "aim_key")
           aim_key = splits[1];
-        } else if (splits[0] == "aim_sleep")
+        else if (splits[0] == "aim_sleep")
           aim_sleep = strtol(splits[1].c_str(), NULL, 10);
         else if (splits[0] == "smoothing_factor")
           smoothing_factor = strtof(splits[1].c_str(), NULL);
+        else if (splits[0] == "sensitivity")
+          sensitivity = strtof(splits[1].c_str(), NULL);
         else if (splits[0] == "aim_autoshoot")
           aim_autoshoot = (splits[1] == "true");
         else if (splits[0] == "aim_smooth_first_shot")
           aim_smooth_first_shot = (splits[1] == "true");
+        else if (splits[0] == "smoke_check")
+          smoke_check = (splits[1] == "true");
+        else if (splits[0] == "aim_teammates")
+          aim_teammates = (splits[1] == "true");
+        else if (splits[0] == "bone_ids"){
+          vector<string> bones = split_string(splits[1], ",");
+          for (string bone : bones)
+            bone_ids.push_back(stoi(bone));
+        }
+        else if (splits[0] == "panic_key")
+          panic_key = splits[1];
       }
     }
   }
@@ -90,21 +107,38 @@ void Settings::print() {
   cout << "local player offset: " << local_player_offset << endl;
   cout << "map_name_offset: " << map_name_offset << endl;
   cout << "force_jump_offset: " << force_jump_offset << endl;
+  cout << "isConnected_offset: " << isConnected_offset << endl;
 
   cout << "--------- Settings ---------" << endl;
+  cout << "[General]" << endl;
   cout << dec << "main_loop_sleep: " << main_loop_sleep << endl;
   cout << "Mouse file: " << mouse_file << endl;
   cout << "trigger_delay: " << trigger_delay << endl;
   cout << "trigger_use_random: " << trigger_use_random << endl;
+  cout << "sensitivity: " << sensitivity << endl;
+
+  cout << endl << "[Keys]" << endl;
   cout << "Trigger Key: " << trigger_key << endl;
   cout << "Bhop Key: " << bhop_key << endl;
   cout << "Aim Key: " << aim_key << endl;
-  cout << "Aimbot FOV: " << radian_to_degree(aim_fov) << endl;
+  cout << "Panic Key: " << panic_key << endl;
+
+  cout << endl << "[Aimbot]" << endl;
+  cout << "smoothing_factor: " << smoothing_factor << endl;
+  cout << "aim_fov: " << radian_to_degree(aim_fov) << endl;
   cout << "aim_sleep: " << aim_sleep << endl;
   cout << "aim_autoshoot: " << aim_autoshoot << endl;
   cout << "aim_smooth_first_shot: " << aim_smooth_first_shot << endl;
-  cout << "smoothing_factor: " << smoothing_factor << endl;
+  cout << "smoke_check: " << smoke_check << endl;
+  cout << "aim_teammates: " << aim_teammates << endl;
+  cout << "bone_ids: ";
+  for (unsigned int bone : bone_ids)
+    cout << bone << " ";
+  cout << endl;
+
+  cout << endl << "[Radar]" << endl;
   cout << "find_map: " << find_map << endl;
   cout << "radar_sleep: " << radar_sleep << endl;
+  cout << "radar_generic: " << radar_generic << endl;
   cout << "------------------------" << endl;
 }

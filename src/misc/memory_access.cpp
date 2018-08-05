@@ -1,12 +1,15 @@
 #include "memory_access.hpp"
 #include "typedef.hpp"
 #include "settings.hpp"
+#include "util.hpp"
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <string.h>
 #include <sys/uio.h>
 #include <stdlib.h>
+#include <vector>
 
 using namespace std;
 
@@ -17,14 +20,15 @@ MemoryAccess::MemoryAccess(Settings* settings) : settings(settings) {
     local_player_offset = settings->local_player_offset;
     map_name_offset = settings->map_name_offset;
     force_jump_offset = settings->force_jump_offset;
+    isConnected_offset = settings->isConnected_offset;
     debug = settings->debug;
   }
 }
 
 void MemoryAccess::updateAddrs() {
   local_player_addr_location = client_range.first + local_player_offset;
-  if(!read((void*) local_player_addr_location, &local_player_addr, sizeof(local_player_addr)))
-    if(settings->debug) cout << "WARNING: could not get local_player" << endl;
+  if (!read((void*) local_player_addr_location, &local_player_addr, sizeof(local_player_addr)))
+    if (settings != nullptr && settings->debug) cout << "WARNING: could not get local_player" << endl;
 
   glow_addr = client_range.first + glow_offset;
   if (debug) cout << hex << "glow_addr: " << glow_addr << endl;
@@ -36,17 +40,18 @@ void MemoryAccess::updateAddrs() {
       if (settings->debug) cout << "WARNING: could not get attack_addr" << endl;
   }
 
-  map_name_addr = engine_range.first + map_name_offset;
   force_jump_addr = client_range.first + force_jump_offset;
+  map_name_addr = engine_range.first + map_name_offset;
+  isConnected_addr = engine_range.first + isConnected_offset;
 }
 
 pid_t MemoryAccess::getPid() {
-  pid = 0;
   FILE* in;
-  char buf[128];
+  char buf[128] = {0};
   string cmd = "pidof -s " + GAME_NAME;
   // when the pid has been found it might take some additional time
   // until all modules are laoded
+  pid = 0;
   in = popen(cmd.c_str(), "r");
   fgets(buf, 128, in);
   pclose(in);
@@ -105,11 +110,11 @@ bool MemoryAccess::write(void* addr, void* buff, size_t size) {
 }
 
 
-addr_type MemoryAccess::find_pattern(const char* data, const char* pattern, Addr_Range range) {
+addr_type MemoryAccess::find_pattern(const string& pattern, Addr_Range range) {
   size_t begin = range.first;
   size_t end = range.second;
   char buffer[4096];
-  size_t len = strlen(pattern);
+  size_t len = pattern.size();
   size_t blocksize = sizeof(buffer);
   size_t totalsize = end - begin;
   size_t chunknum = 0;
@@ -120,13 +125,18 @@ addr_type MemoryAccess::find_pattern(const char* data, const char* pattern, Addr
     bzero(buffer, blocksize);
     if (read((void*) readaddr, buffer, readsize)) {
       for (size_t b = 0; b < readsize; b++) {
+        // iterator for pattern string
+        size_t i = 0;
+        // number of matched bytes s
         size_t matches = 0;
-
-        while (buffer[b + matches] == data[matches] || pattern[matches] != 'x') {
-          matches++;
-          if (matches == len) {
+        char byte = (char) strtol(pattern.substr(i, 2).c_str(), NULL, 16);
+        while (buffer[b + matches] == byte || pattern.substr(i, 2) == "??") {
+          matches++; // one matched byte
+          i += 3; // skip over two characters plus space
+          if (i >= len) {
             return (addr_type) (readaddr + b);
           }
+          byte = (char) strtol(pattern.substr(i, 2).c_str(), NULL, 16);
         }
       }
     }
@@ -147,22 +157,67 @@ addr_type MemoryAccess::getCallAddress(void* addr) {
   return 0;
 }
 
+addr_type MemoryAccess::getAbsoluteAddress(void* addr, int offset, int size) {
+  unsigned int jump_len;
+  if (read((char*) addr + offset, &jump_len, sizeof(unsigned int))) {
+    return jump_len + (unsigned long) addr + size;
+  }
+  return 0;
+}
+
 void MemoryAccess::updateLocalPlayerAddr() {
   if (!read((void*) local_player_addr_location, &local_player_addr, sizeof(local_player_addr)))
     if (settings->debug) cout << "WARNING: could not get localplayer" << endl;
 }
 
-Vector MemoryAccess::getBone(addr_type player, unsigned int boneid) {
+BoneInfo* MemoryAccess::getBoneMatrix(addr_type player) {
   if(player == 0)
-    throw runtime_error("getBone: Player is nullptr.");
+    throw runtime_error("getBoneMatrix: Player is nullptr.");
   addr_type boneMatrix_addr;
-
   if (!read((void*) (player + m_dwBoneMatrix), &boneMatrix_addr, sizeof(boneMatrix_addr)))
-    throw runtime_error("Could not get BoneMatrix.");
-  BoneInfo bone;
-  if (!read((void*) (boneMatrix_addr + 0x30 * boneid), &bone, sizeof(bone)))
-    throw runtime_error("Could not get BoneInfo.");
-  // bone location vectors have a different order than m_vecOrigin
-  // printf("bone: %f, %f, %f\n", bone.y, bone.z, bone.x);
-  return {bone.y, bone.z, bone.x};
+    throw runtime_error("Could not get BoneMatrix address.");
+  BoneInfo* boneMatrix = new BoneInfo[MAX_BONES];
+  if (!read((void*) boneMatrix_addr, boneMatrix, sizeof(BoneInfo) * MAX_BONES))
+    throw runtime_error("Could not get BoneMatrix");
+  return boneMatrix;
+}
+
+// Vector MemoryAccess::getBone(BoneInfo* boneMatrix, unsigned int boneID) {
+
+//   BoneInfo bone;
+//   if (!read((void*) (boneMatrix_addr + sizeof(BoneInfo) * boneID), &bone, sizeof(bone)))
+//     throw runtime_error("Could not get BoneInfo.");
+//   // bone location vectors have a different order than m_vecOrigin
+//   // printf("bone: %f, %f, %f\n", bone.y, bone.z, bone.x);
+//   return {bone.y, bone.z, bone.x};
+// }
+
+void MemoryAccess::printBlock(addr_type addr, size_t size) {
+  unsigned char buffer[size];
+  read((void*) addr, buffer, size);
+  for (size_t i = 0; i < size; i++) {
+    if (i % 16 == 0)
+      cout << hex << endl << addr + i << ":";
+    cout << hex << setw(2) << setfill('0') << (unsigned int)buffer[i] << " ";
+  }
+  cout << endl;
+}
+
+vector<int> MemoryAccess::diffMem(addr_type addr, size_t size) {
+  vector<int> result;
+  if (diffBuffer == nullptr) {
+    diffBuffer = (unsigned char*) malloc(size);
+    read((void*) addr, diffBuffer, size);
+    return result;
+  }
+  unsigned char buffer[size];
+  read((void*) addr, buffer, size);
+  for (size_t i = 0; i < size; i++) {
+    if (diffBuffer[i] != buffer[i]) {
+      result.push_back(i);
+    }
+  }
+  if (result.size() > 0)
+    memcpy(diffBuffer, buffer, size);
+  return result;
 }

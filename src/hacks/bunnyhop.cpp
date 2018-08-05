@@ -31,15 +31,15 @@ void BunnyHopper::jump() {
 
 void BunnyHopper::jumpCheck(unsigned int i) {
   EntityType* localPlayer;
-  unsigned int onGround;
+  bool onGround;
   try {
     localPlayer = csgo.getLocalPlayer();
-  } catch (exception e){
+  } catch (const exception& e){
     return;
   }
-  onGround = localPlayer->m_fFlags & 1;
+  onGround = (bool) localPlayer->m_fFlags & FL_ONGROUND;
   // fix seg faults
-  if (onGround == 1) {
+  if (onGround) {
     jump();
   } else {
     // cout << "air" << endl;

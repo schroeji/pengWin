@@ -1,11 +1,13 @@
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import matplotlib
-import numpy as np
-import sys
 import os
+import sys
 import time
 from select import select
+
+import matplotlib
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import numpy as np
+
 # import _thread
 
 SEPERATOR = "|"
@@ -16,6 +18,100 @@ ln = plt.scatter([], [], animated=True)
 # ln.set_offsets([[0.5], [0.4]])
 # print(ln.get_offsets())
 # location_file = "/tmp/locs.csv"
+
+
+def weapon(wid):
+  if wid == 0:
+    return "NONE"
+  if wid == 1:
+    return "DEAGLE"
+  if wid == 2:
+    return "DUALS"
+  if wid == 3:
+    return "FIVE7"
+  if wid == 4:
+    return "GLOCK"
+  if wid == 7:
+    return "AK47"
+  if wid == 8:
+    return "AUG"
+  if wid == 9:
+    return "AWP"
+  if wid == 10:
+    return "FAMAS"
+  if wid == 11:
+    return "G3SG1"
+  if wid == 13:
+    return "GALIL"
+  if wid == 14:
+    return "M249"
+  if wid == 16:
+    return "M4A4"
+  if wid == 17:
+    return "MAC10"
+  if wid == 19:
+    return "P90"
+  if wid == 24:
+    return "UMP"
+  if wid == 25:
+    return "XM1014"
+  if wid == 26:
+    return "BIZON"
+  if wid == 27:
+    return "MAG7"
+  if wid == 28:
+    return "NEGEV"
+  if wid == 29:
+    return "SAWED"
+  if wid == 30:
+    return "TEC9"
+  if wid == 31:
+    return "ZEUS"
+  if wid == 32:
+    return "P2000"
+  if wid == 33:
+    return "MP7"
+  if wid == 34:
+    return "MP9"
+  if wid == 35:
+    return "NOVA"
+  if wid == 36:
+    return "P250"
+  if wid == 38:
+    return "SCAR"
+  if wid == 39:
+    return "SG556"
+  if wid == 40:
+    return "SCOUT"
+  if wid == 42:
+    return "KNIFE"
+  if wid == 43:
+    return "FLASH"
+  if wid == 44:
+    return "HE"
+  if wid == 45:
+    return "SMOKE"
+  if wid == 46:
+    return "MOLO"
+  if wid == 47:
+    return "DEC"
+  if wid == 48:
+    return "INC"
+  if wid == 49:
+    return "C4"
+  if wid == 59:
+    return "KNIFE"
+  if wid == 60:
+    return "M4A1"
+  if wid == 61:
+    return "USP"
+  if wid == 63:
+    return "CZ75"
+  if wid == 64:
+    return "REV"
+  if wid in range(500, 520):
+    return "KNIFE"
+  return "UNK"
 
 def readFromInput():
   ready, _, _ = select([sys.stdin], [], [])
@@ -34,35 +130,56 @@ def readFromInput():
 
 def getData(i):
   try :
-    #Format: id,hp,team,x,y,z
+    #Format: id,hp,team,weapon,defusing,x,y,z,rotation
     data = readFromInput()
   except:
     return ln,
   if(len(data) == 0):
     return ln,
   if(len(data.shape) == 1):
-    data = data.reshape((1, 6))
+    data = data.reshape((1, 9))
   local_player_index = int(data[0,0])
+  rotation = int(data[0,8])
   data = data[1:]
   # data = data[data[:, 1] != 0]
-  xs = data[:, 3]
-  # ys = []
-  zs = data[:, 5]
+  xs = data[:, -4]
+  player_count = len(xs)
+  # ys = data[:, -3]
+  zs = data[:, -2]
   cs = [ 'b' if c == 3 else 'r' for c in data[:,2]]
+  # homogenous coordinates for easier translation
+  vecs = np.dstack((zs, xs))[0]
+  if generic and local_player_index != -1 and local_player_index < len(data):
+    # center around local player
+    vecs -= vecs[local_player_index]
+    # rotate according to rotation
+    angle = np.radians(rotation - 90)
+    rotation_matrix = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+    vecs = np.dot(vecs, rotation_matrix)
+
   if (local_player_index != -1 and local_player_index < len(data)):
     cs[local_player_index] = 'g'
+
   hps = data[:, 1].astype(int, copy=False)
-  ln.set_offsets(list(zip(zs, xs)))
+  weapons = data[:, 3]
+  defusings = (data[:, 4] == 1)
+  ln.set_offsets(vecs[:,:2])
   ln.set_color(cs)
-  txt = [ax.annotate(str(hps[i]),(zs[i], xs[i]), color=cs[i]) for i in range(len(xs))]
+  strings = []
+  for i in range(player_count):
+    strings.append(str(hps[i]))
+    strings[-1] += " " + weapon(weapons[i])
+    if defusings[i]:
+      strings[-1] += " def"
+  txt = [ax.annotate(strings[i], vecs[i], color=cs[i]) for i in range(player_count)]
   txt.insert(0, ln)
   # return ln,
   return tuple(txt)
 
 def blit_init():
   if(map_name == "de_dust2"):
-    xlims = (-2400, 1954)
-    ylims = (-1155, 3383)
+    xlims = (-2400, 2040)
+    ylims = (-1287, 3232)
   elif(map_name == "de_inferno"):
     xlims = (-2087, 2950)
     ylims = (-1140, 3870)
@@ -84,6 +201,9 @@ def blit_init():
   elif(map_name == "de_nuke"):
     xlims = (-3453, 3750)
     ylims = (-4290, 2887)
+  else:
+    xlims = (-1000, 1000)
+    ylims = (-1000, 1000)
   ax.imshow(img, extent=[ax.get_xlim()[0], ax.get_xlim()[1], ax.get_ylim()[0], ax.get_ylim()[1]])
   ax.set_xlim(xlims)
   ax.set_ylim(ylims)
@@ -98,7 +218,6 @@ def catch_term_sig():
     if (inp == "quit"):
       plt.close()
       break
-
 # map_name = "de_dust2"
 # map_name = "de_inferno"
 # map_name = "de_mirage"
@@ -114,6 +233,12 @@ has_plotted = False
 while(not has_plotted):
   time.sleep(1)
   has_plotted = True
-  img = plt.imread("overviews/{}_radar.jpg".format(map_name))
+  try:
+    img = plt.imread("overviews/{}_radar.jpg".format(map_name))
+  except:
+    white = [255, 255, 255]
+    img = np.array([white*400]*400)
+    img = img.reshape((400,400,3))
+    generic = True
   ani = animation.FuncAnimation(fig, getData, init_func=blit_init, interval=interval, blit=True)
   plt.show()

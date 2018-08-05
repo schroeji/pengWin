@@ -10,7 +10,10 @@ public:
   HotkeyManager(GameManager&);
   ~HotkeyManager();
   void bind(string, boost::function<void(unsigned int)>);
+  void unbind(string);
   void startListen();
+  void stopListen();
+  bool isListening();
 
 private:
   boost::thread keyListener;
@@ -20,14 +23,16 @@ private:
   boost::thread keyPressListener;
   boost::thread mousePressListener;
   const unsigned int mouseListOffset = 0x160;
+  bool listening;
 
   Display* display;
   Window rootWindow;
   Window csWindow;
   GameManager& csgo;
-  Settings settings;
+  Settings& settings;
 
   Window findCSWindow();
+  Window activeWindow();
   Window findWindowRecursive(Window);
   void callLoop(unsigned int, boost::function<void(unsigned int)>);
   void keyPressListen();

@@ -26,8 +26,8 @@ Trigger::Trigger(GameManager& csgo) : csgo(csgo),
 Trigger::~Trigger() {}
 
 void Trigger::triggerCheck(unsigned int) {
-  Team ownTeam = csgo.getTeam();
-  unsigned int crosshairTarget = csgo.getCrosshairTarget();
+  Team ownTeam = csgo.getTeam(mem.local_player_addr);
+  unsigned int crosshairTarget = csgo.getCrosshairTarget(mem.local_player_addr);
   // if (settings.debug) cout << "crosshairTarget: " << crosshairTarget << endl;
   if (!crosshairTarget)
     return;

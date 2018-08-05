@@ -1,74 +1,12 @@
 #pragma once
 
-#include <stdio.h>
-#include <stdint.h>
-#include <vector>
-#include <string>
-#include <math.h>
-
-struct Vector2D {
-  float x;
-  float y;
-  inline Vector2D operator+(Vector2D a) {
-    return {a.x + x, a.y + y};
-  }
-  inline float operator*(Vector2D a) {
-    return a.x * x + a.y * y;
-  }
-  inline Vector2D operator*(float a) {
-    return {a*x, a*y};
-  }
-};
-
-struct Vector {
-	float x;
-	float y;
-	float z;
-  inline Vector operator+(Vector a) const {
-    return {a.x + x, a.y + y, a.z + z};
-  }
-  inline Vector operator+=(Vector a) {
-    x += a.x;
-    y += a.y;
-    z += a.z;
-    return *this;
-  }
-  inline float operator*(const Vector a) const {
-    return a.x * x + a.y * y + a.z * z;
-  }
-  inline Vector operator-(const Vector a) const {
-    return {x - a.x, y - a.y, z - a.z};
-  }
-  inline Vector operator*(float a) const {
-    return {a*x, a*y, a*z};
-  }
-  inline Vector operator/(float a) {
-    return {x/a, y/a, z/a};
-  }
-};
-
-struct QAngle {
-	float x; // Pitch
-	float y; // Yaw
-	float z; // Roll
-  inline QAngle operator+(QAngle a) {
-    return {a.x + x, a.y + y, a.z + z};
-  }
-  inline QAngle operator-(QAngle a) {
-    return {x - a.x, y - a.y, z - a.z};
-  }
-  inline QAngle operator*(float a) {
-    return {a*x, a*y, a*z};
-  }
-};
-
+#include "util.hpp"
+// definitions for the SDK
 struct EntityType {
 	char __buf_0x00[0x88]; // 0x0
 	int m_bIsAutoaimTarget; // 0x88
   char __buf_0x8c[0x8]; // 0x8C
   unsigned int m_iEntityId; //0x94
-	// unsigned int m_iEntityId; // 0x8C
-	// char __buf_0x8C[0x10]; // 0x90
   char __buf_0x98[0x8]; //0x98
 	int m_clrRender; // 0xA0
 	int m_cellbits; // 0xA4
@@ -112,7 +50,7 @@ public:
   unsigned int DataPtrBack; // 0010 (054612D0)
 };
 
-struct ObjectType {
+struct GlowObjectDefinition_t {
   void* m_pEntity;
   float m_flGlowRed;
   float m_flGlowGreen;
@@ -132,6 +70,8 @@ struct ObjectType {
   static const int ENTRY_IN_USE = -2;
 }; // sizeof() == 0x34
 
+#define MAX_BONES 128
+
 struct BoneInfo {
 	char __pad0x0[0xA];
 	float x;
@@ -141,20 +81,10 @@ struct BoneInfo {
 	float z;
 };
 
-enum Team {
-  CT = 3,
-  T = 2
-};
-
-struct MouseMovement {
-  int x;
-  int y;
-};
-
-class ObjectManager
+class GlowObjectManager_t
 {
 public:
-  CUtlVector<ObjectType> objects; // 0000
+  CUtlVector<GlowObjectDefinition_t> objects; // 0000
   int m_nFirstFreeSlot; // 0014 (054612D4)
   unsigned int unk1; // 0018 (054612D8)
   unsigned int unk2; // 001C (054612DC)
@@ -163,29 +93,140 @@ public:
   unsigned int unk5; // 0028 (054612E8)
 };
 
-typedef std::pair<unsigned long int, unsigned long int> Addr_Range;
-typedef unsigned long int addr_type;
+enum Bone {
+  PELVIS = 0,
+  ORIGIN = 1,
+  BACK_NECK = 2,
+	SPINE0 = 3,
+	SPINE1 = 4,
+	SPINE2 = 5,
+	SPINE3 = 6,
+	NECK = 7,
+	HEAD0 = 8,
+	HEAD1 = 9,
+	NECK_FRONT = 10,
+	LEFT_SHOULDER = 11,
+	LEFT_ELBOW = 12,
+	LEFT_LOWER_ARM = 13,
+	LEFT_HAND = 14,
+  // for dust2 T
+  RIGHT_SHOULDER = 39,
+  RIGHT_ELBOW = 40,
+  RIGHT_LOWER_ARM = 41,
+  RIGHT_HAND = 42,
 
-std::vector<std::string> split_string(const std::string&, const std::string&);
+  LEFT_FOOT = 70,
+  LEFT_THIGH = 71,
+  LEFT_KNEE = 72,
 
-void normalize_vector(Vector*);
-void normalize_vector(Vector2D*);
-Vector getDist(Vector*, Vector*);
-float scalar_prod(const Vector*, const Vector*);
-float scalar_prod(Vector2D*, Vector2D*);
+  RIGHT_FOOT = 77,
+  RIGHT_THIGH = 78,
+  RIGHT_KNEE = 79,
 
+  // for dust 2 CT
+  // RIGHT_SHOULDER = 41,
+  // RIGHT_ELBOW = 42,
+  // RIGHT_LOWER_ARM = 43,
+  // RIGHT_HAND = 44
 
-inline float degree_to_radian(float x) {
-  return x*0.01745329;
-}
-inline float radian_to_degree(float x) {
-  return x/0.01745329;
-}
+  // LEFT_THIGH = 70,
+  // LEFT_KNEE = 71,
+  // LEFT_FOOT = 72,
 
-inline float len(Vector2D vec) {
-  return sqrt(vec.x * vec.x + vec.y * vec.y);
-}
+  // RIGHT_THIGH = 77,
+  // RIGHT_KNEE = 78,
+  // RIGHT_FOOT = 79,
 
-inline float len(Vector vec) {
-  return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
-}
+};
+
+enum Weapon {
+  NONE = 0,
+  DEAGLE = 1,
+	ELITE = 2,
+	FIVESEVEN = 3,
+	GLOCK = 4,
+	AK47 = 7,
+	AUG = 8,
+	AWP = 9,
+	FAMAS = 10,
+	G3SG1 = 11,
+	GALILAR = 13,
+	M249 = 14,
+	M4A1 = 16,
+	MAC10 = 17,
+	P90 = 19,
+	UMP45 = 24,
+	XM1014 = 25,
+	BIZON = 26,
+	MAG7 = 27,
+	NEGEV = 28,
+	SAWEDOFF = 29,
+	TEC9 = 30,
+	ZEUS = 31,
+	HKP2000 = 32,
+	MP7 = 33,
+	MP9 = 34,
+	NOVA = 35,
+	P250 = 36,
+	SCAR20 = 38,
+	SG556 = 39,
+	SSG08 = 40,
+	KNIFE = 42,
+	FLASHBANG = 43,
+	HEGRENADE = 44,
+	SMOKEGRENADE = 45,
+	MOLOTOV = 46,
+	DECOY = 47,
+	INCGRENADE = 48,
+	C4 = 49,
+	KNIFE_T = 59,
+	M4A1_SILENCER = 60,
+	USP_SILENCER = 61,
+	CZ75A = 63,
+	REVOLVER = 64,
+	KNIFE_BAYONET = 500,
+	KNIFE_FLIP = 505,
+	KNIFE_GUT = 506,
+	KNIFE_KARAMBIT = 507,
+	KNIFE_M9_BAYONET = 508,
+	KNIFE_TACTICAL = 509,
+	KNIFE_FALCHION = 512,
+	KNIFE_SURVIVAL_BOWIE = 514,
+	KNIFE_BUTTERFLY = 515,
+	KNIFE_PUSH = 516
+};
+
+// m_fFlags
+// source: https://github.com/pmrowla/hl2sdk-csgo/blob/master/public/const.h#L110
+#define	FL_ONGROUND				(1<<0)	// At rest / on the ground
+#define FL_DUCKING				(1<<1)	// Player flag -- Player is fully crouched
+#define	FL_WATERJUMP			(1<<3)	// player jumping out of water
+#define FL_ONTRAIN				(1<<4) // Player is _controlling_ a train, so movement commands should be ignored on client during prediction.
+#define FL_INRAIN				(1<<5)	// Indicates the entity is standing in rain
+#define FL_FROZEN				(1<<6) // Player is frozen for 3rd person camera
+#define FL_ATCONTROLS			(1<<7) // Player can't move, but keeps key inputs for controlling another entity
+#define	FL_CLIENT				(1<<8)	// Is a player
+#define FL_FAKECLIENT			(1<<9)	// Fake client, simulated server side; don't send network messages to them
+#define	FL_INWATER				(1<<10)	// In water
+// NON-PLAYER SPECIFIC (i.e., not used by GameMovement or the client .dll ) -- Can still be applied to players, though
+#define	FL_FLY					(1<<11)	// Changes the SV_Movestep() behavior to not need to be on ground
+#define	FL_SWIM					(1<<12)	// Changes the SV_Movestep() behavior to not need to be on ground (but stay in water)
+#define	FL_CONVEYOR				(1<<13)
+#define	FL_NPC					(1<<14)
+#define	FL_GODMODE				(1<<15)
+#define	FL_NOTARGET				(1<<16)
+#define	FL_AIMTARGET			(1<<17)	// set if the crosshair needs to aim onto the entity
+#define	FL_PARTIALGROUND		(1<<18)	// not all corners are valid
+#define FL_STATICPROP			(1<<19)	// Eetsa static prop!
+#define FL_GRAPHED				(1<<20) // worldgraph has this ent listed as something that blocks a connection
+#define FL_GRENADE				(1<<21)
+#define FL_STEPMOVEMENT			(1<<22)	// Changes the SV_Movestep() behavior to not do any processing
+#define FL_DONTTOUCH			(1<<23)	// Doesn't generate touch functions, generates Untouch() for anything it was touching when this flag was set
+#define FL_BASEVELOCITY			(1<<24)	// Base velocity has been applied this frame (used to convert base velocity into momentum)
+#define FL_WORLDBRUSH			(1<<25)	// Not moveable/removeable brush entity (really part of the world, but represented as an entity for transparency or something)
+#define FL_OBJECT				(1<<26) // Terrible name. This is an object that NPCs should see. Missiles, for example.
+#define FL_KILLME				(1<<27)	// This entity is marked for death -- will be freed by game DLL
+#define FL_ONFIRE				(1<<28)	// You know...
+#define FL_DISSOLVING			(1<<29) // We're dissolving!
+#define FL_TRANSRAGDOLL			(1<<30) // In the process of turning into a client side ragdoll.
+#define FL_UNBLOCKABLE_BY_PLAYER (1<<31)

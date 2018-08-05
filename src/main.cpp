@@ -3,7 +3,7 @@
 #include "misc/manager.hpp"
 #include "misc/settings.hpp"
 #include "misc/hotkey.hpp"
-#include "misc/BSPMap.hpp"
+#include "misc/util.hpp"
 #include "hacks/radar.hpp"
 #include "hacks/trigger.hpp"
 #include "hacks/aimer.hpp"
@@ -16,10 +16,23 @@
 #include <chrono>
 #include <thread>
 #include <unistd.h>
-
 using namespace std;
 
+void printUsage(const string& name, const string& config_file) {
+  cout << "usage: ";
+  cout << name << " [options]" << endl;
+  cout << "Possible options:" << endl;
+  cout << "-a, --aimbot    Enable Aimbot" << endl;
+  cout << "-b, --bhop      Enable Bunnyhop" << endl;
+  cout << "-d, --debug     Enable debugging" << endl;
+  cout << "-r, --radar     Enable external Radar" << endl;
+  cout << "-t, --trigger   Enable Triggerbot" << endl;
+  cout << endl;
+  cout << "For advanced configuration use: " << config_file << endl;;
+}
+
 int main(int argc, char** argv) {
+  string config_file = "settings.cfg";
   if (getuid() != 0){
     cout << "Not root" << endl;
     return 0;
@@ -29,36 +42,42 @@ int main(int argc, char** argv) {
   bool use_aimbot = false;
   bool debug = false;
   bool use_bhop = false;
+  bool panicked = false;
+
   for (int i = 1; i < argc; i++) {
-    if (!strcmp(argv[i], "-radar")) {
+    if (!strcmp(argv[i], "--radar") || !strcmp(argv[i], "-r")) {
       cout << "Enabled: Radar" << endl;
       use_radar = true;
     }
-    else if (!strcmp(argv[i], "-trigger")) {
+    else if (!strcmp(argv[i], "--trigger") || !strcmp(argv[i], "-t")) {
       cout << "Enabled: Trigger" << endl;
       use_trigger = true;
     }
-    else if (!strcmp(argv[i], "-debug")) {
+    else if (!strcmp(argv[i], "--debug") || !strcmp(argv[i], "-d")) {
       debug = true;
       cout << "Enabled: Debugging" << endl;
     }
-    else if (!strcmp(argv[i], "-aimbot")) {
+    else if (!strcmp(argv[i], "--aimbot") || !strcmp(argv[i], "-a")) {
       use_aimbot = true;
       cout << "Enabled: Aimbot" << endl;
     }
-    else if (!strcmp(argv[i], "-bhop")) {
+    else if (!strcmp(argv[i], "--bhop") || !strcmp(argv[i], "-b")) {
       use_bhop = true;
       cout << "Enabled: Bunnyhop" << endl;
     }
   }
+  if(! (use_aimbot || use_bhop || debug || use_trigger || use_radar)) {
+    cout << "Please give at least one valid argument." << endl;
+    printUsage(string(argv[0]), config_file);
+    return 0;
+  }
 
-  Settings settings("settings.cfg");
+  Settings settings(config_file.c_str());
   debug = debug || settings.debug;
   settings.debug = debug;
   settings.print();
   MemoryAccess mem(&settings);
   GameManager csgo = GameManager(mem);
-
 
   Trigger trigger(csgo);
   Aimer aimer(csgo);
@@ -72,10 +91,10 @@ int main(int argc, char** argv) {
   cout << "Load:" << bspmap.load(cs_path.c_str(), "de_dust2.bsp") << endl;
   bspmap.DisplayInfo();
 
-  while (csgo.gameRunning()) {
+  while (!panicked && csgo.gameRunning()) {
     if (debug) cout << "Waiting until connected..." << endl;
-    while (!csgo.isOnServer()) {
-      if (!csgo.gameRunning())
+    while (csgo.gameRunning()) {
+      if (csgo.isOnServer())
         break;
       this_thread::sleep_for(chrono::milliseconds(3000));
     }
@@ -84,21 +103,7 @@ int main(int argc, char** argv) {
 
     if (debug) cout << "Connected to a server..." << endl;
 
-    if (use_radar) {
-      string map_name = "";
-      if (settings.find_map) {
-        if (debug) cout << "Scanning for map..." << endl;
-        while (map_name == "") {
-          map_name = csgo.getMapName();
-          this_thread::sleep_for(chrono::milliseconds(1000));
-        }
-      } else {
-        cout << "Map detection deactivated. Please choose map:" << endl;
-        cin >> map_name;
-      }
-      cout << "Found Map: " << map_name << endl;
-      radar.start(map_name);
-    }
+    if (use_radar) radar.start();
 
     if (use_bhop) {
       boost::function<void(unsigned int)> bhopFunc = boost::bind(&BunnyHopper::jumpCheck, &bhopper, _1);
@@ -112,13 +117,22 @@ int main(int argc, char** argv) {
       boost::function<void(unsigned int)> aimFunc = boost::bind(&Aimer::aimCheck, &aimer, _1);
       hotkeyMan.bind(settings.aim_key, aimFunc);
     }
+    // function for panic key to stop everything
+    boost::function<void(unsigned int)> stop = [&hotkeyMan, &radar, &panicked](unsigned int x) {
+      hotkeyMan.stopListen();
+      radar.stop();
+      if (x == 0)
+        panicked = true;
+    };
+    hotkeyMan.bind(settings.panic_key, stop);
     hotkeyMan.startListen();
 
     // main loop
-    while (csgo.isOnServer()) {
+    while (!panicked && csgo.isOnServer()) {
       csgo.grabPlayers();
       if (debug) {
         // csgo.printPlayers();
+<<<<<<< HEAD
         Vector one = {csgo.getLocalPlayer()->m_vecOrigin.y,
                       csgo.getLocalPlayer()->m_vecOrigin.z + 50,
                       csgo.getLocalPlayer()->m_vecOrigin.x};
@@ -130,15 +144,19 @@ int main(int argc, char** argv) {
         printf("one x=%f y=%f z=%f\n", one.x, one.y, one.z);
         printf("two x=%f y=%f z=%f\n", two.x, two.y, two.z);
         cout << bspmap.Visible(one, two) << endl;
+=======
+        // csgo.printEntities();
+>>>>>>> master
       }
-      // if (use_radar)
-        // csgo.printPlayerLocationsToFile("/tmp/locs.csv");
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     }
-    if (use_radar) radar.stop();
-    if (debug) cout << "Not on a server. Entering sleep mode..." << endl;
+    if (debug) cout << "Not on a server. Stopping everything..." << endl;
+    if (!panicked) {
+      stop(1);
+    }
+    if (debug) cout << "Stopped everything. Entering sleep mode..." << endl;
   }
 
-  if (debug) cout << "Game closed. Terminating..." << endl;
+  if (debug) cout << "Game closed or panic key pressed. Terminating..." << endl;
   return 0;
 }
