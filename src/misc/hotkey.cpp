@@ -108,7 +108,7 @@ void HotkeyManager::mousePressListen() {
   struct input_event event;
 
   if((fd = open(settings.mouse_file.c_str(), O_RDONLY)) == -1) {
-    perror("opening device");
+    perror("Error while opening device");
     exit(EXIT_FAILURE);
   }
   while (listening && csgo.isOnServer()) {

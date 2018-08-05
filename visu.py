@@ -202,8 +202,8 @@ def blit_init():
     xlims = (-3453, 3750)
     ylims = (-4290, 2887)
   else:
-    xlims = (-4000, 4000)
-    ylims = (-2000, 2000)
+    xlims = (-1000, 1000)
+    ylims = (-1000, 1000)
   ax.imshow(img, extent=[ax.get_xlim()[0], ax.get_xlim()[1], ax.get_ylim()[0], ax.get_ylim()[1]])
   ax.set_xlim(xlims)
   ax.set_ylim(ylims)
