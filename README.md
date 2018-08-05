@@ -18,8 +18,6 @@ Unlike other external hacks it does not write to the games memory at all.
 - Sound ESP
 - BlockBot
 - Visibility check (BSP parsing)
-- Weapon dependent aimbot
-- overflick?
 
 # Building
 Dependencies:
@@ -28,7 +26,7 @@ Dependencies:
 - python3 + matplotlib + numpy
 
 Use the included Makefile to build.
-Then run `chmod 700 pengWin` and `chown root pengWin` to make the hack unaccessible for VAC.
+Then run `chmod 100 pengWin` and `chown root pengWin` to make the hack unaccessible for VAC.
 
 # Usage
 `sudo ./pengWin [options]`
