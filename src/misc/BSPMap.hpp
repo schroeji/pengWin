@@ -5,20 +5,20 @@ enum Header
 {
 	LUMP_ENTITIES					= 0,
 	LUMP_PLANES						= 1,
-	LUMP_TEXTURES					= 2,
+	LUMP_TEXDATA          = 2,
 	LUMP_VERTICES					= 3,
-	LUMP_VISIBILITY					= 4,
+	LUMP_VISIBILITY	  		= 4,
 	LUMP_NODES						= 5,
 	LUMP_TEXINFO					= 6,
 	LUMP_FACES						= 7,
 	LUMP_LIGHTING					= 8,
-	LUMP_CLIPNODES					= 9,
+	LUMP_CLIPNODES				= 9,
 	LUMP_LEAVES						= 10,
-	LUMP_MARKSURFACES				= 11,
+	LUMP_MARKSURFACES			= 11,
 	LUMP_EDGES						= 12,
-	LUMP_SURFEDGES					= 13,
+	LUMP_SURFEDGES				= 13,
 	LUMP_MODELS						= 14,
-	HEADER_LUMPS					= 15
+	HEADER_LUMPS					= 64
 };
 
 enum Contents
@@ -132,7 +132,7 @@ public:
 	dplane_t* getPlaneLump();
 	dleaf_t* getLeafLump();
 	dleaf_t* GetLeafFromPoint( const Vector point );
-	bool Visible( const Vector &vStart, const Vector &vEnd );
+	bool Visible(Vector& vStart, Vector& vEnd );
 
 private:
 	char m_path[ 255 ];

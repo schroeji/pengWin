@@ -143,8 +143,7 @@ dplane_t* BSPMap::getPlaneLump()
 	return m_plane;
 }
 
-dleaf_t* BSPMap::GetLeafFromPoint( const Vector point )
-{
+dleaf_t* BSPMap::GetLeafFromPoint(Vector point) {
 	int nodenum = 0;
 	dnode_t* node;
 	dplane_t* plane;
@@ -164,8 +163,7 @@ dleaf_t* BSPMap::GetLeafFromPoint( const Vector point )
 	return &m_leaf[ -nodenum - 1 ];
 }
 
-bool BSPMap::Visible( const Vector &vStart, const Vector &vEnd ) // added in const so it won't try to refresh the same value
-{
+bool BSPMap::Visible(Vector &vStart, Vector &vEnd ) {
 	if( IsNull() ) {
     cout << "isnull" << endl;
 		return false;
@@ -176,11 +174,11 @@ bool BSPMap::Visible( const Vector &vStart, const Vector &vEnd ) // added in con
 
   int steps = static_cast<int>(len(direction));
 
-  // cout << "steps:" << steps << endl;
+  cout << "steps:" << steps << endl;
 
 	if( steps > 4000 ){
     // performence issue when checking long distances, 2000 too short
-    // cout << "too far" << endl;
+    cout << "too far" << endl;
 		return false;   // we'll assume we can't see someone at great lengths
   }
 
@@ -191,11 +189,10 @@ bool BSPMap::Visible( const Vector &vStart, const Vector &vEnd ) // added in con
 	while( steps ) {
 		point += direction;
 		leaf = GetLeafFromPoint( point );
-    // printf("point x=%f y=%f z=%f\n", point.x, point.y, point.z);
+    printf("point x=%f y=%f z=%f\n", point.x, point.y, point.z);
 		// Tried differenent masks, none seem to work :/ becauce ur a bitch tbh tbf fam
-    // cout << "contents: " << hex << leaf->contents << endl;
-		if(!(leaf->contents & CONTENTS_SOLID)) {
-      // cout << "steps: " << steps << endl;
+    cout << "contents: " << hex << leaf->contents << endl;
+		if(leaf->contents & CONTENTS_SOLID) {
 			return false;
     }
 

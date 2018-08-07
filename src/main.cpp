@@ -4,6 +4,7 @@
 #include "misc/settings.hpp"
 #include "misc/hotkey.hpp"
 #include "misc/util.hpp"
+#include "misc/BSPMap.hpp"
 #include "hacks/radar.hpp"
 #include "hacks/trigger.hpp"
 #include "hacks/aimer.hpp"
@@ -87,7 +88,7 @@ int main(int argc, char** argv) {
 
   BSPMap bspmap;
 
-  string cs_path("/home/hidden/.steam/steam/steamapps/common/Counter-Strike Global Offensive/");
+  string cs_path("/run/media/hidden/big/SteamLibrary/steamapps/common/Counter-Strike Global Offensive/");
   cout << "Load:" << bspmap.load(cs_path.c_str(), "de_dust2.bsp") << endl;
   bspmap.DisplayInfo();
 
@@ -132,21 +133,17 @@ int main(int argc, char** argv) {
       csgo.grabPlayers();
       if (debug) {
         // csgo.printPlayers();
-<<<<<<< HEAD
         Vector one = {csgo.getLocalPlayer()->m_vecOrigin.y,
-                      csgo.getLocalPlayer()->m_vecOrigin.z + 50,
+                      csgo.getLocalPlayer()->m_vecOrigin.z,
                       csgo.getLocalPlayer()->m_vecOrigin.x};
 
-        Vector two = {csgo.getPlayers()[1]->m_vecOrigin.y,
-                      csgo.getPlayers()[1]->m_vecOrigin.z + 50,
-                      csgo.getPlayers()[1]->m_vecOrigin.x};
+        Vector two = {csgo.getPlayers()[1]->m_vecOrigin.y + 30,
+                      csgo.getPlayers()[1]->m_vecOrigin.z + 30,
+                      csgo.getPlayers()[1]->m_vecOrigin.x + 30};
 
         printf("one x=%f y=%f z=%f\n", one.x, one.y, one.z);
         printf("two x=%f y=%f z=%f\n", two.x, two.y, two.z);
-        cout << bspmap.Visible(one, two) << endl;
-=======
-        // csgo.printEntities();
->>>>>>> master
+        cout << "visible:" << bspmap.Visible(one, two) << endl;
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     }
