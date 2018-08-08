@@ -53,6 +53,9 @@ void write_settings(const string& file_name) {
   file << "aim_key=mouse1" << endl;
   file << "aim_sleep=20" << endl;
   file << "aim_fov=1.9" << endl;
+  file << "# you can set additional weapon specific fovs like this:" << endl;
+  file << "# aim_deagle_fov=2.0" << endl;
+  file << "# aim_m4a4_fov=1.5" << endl;
   file << "aim_autoshoot=false" << endl;
   file << "#bone_ids=3,4,5,6,7,8,10,11,12,13,14,39,40,41,42,70,71,72,77,78,79" << endl;
   file << "bone_ids=3,4,5,6,7,8" << endl;

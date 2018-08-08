@@ -394,13 +394,14 @@ Vector Aimer::getView(bool rcs) {
 
 pair<EntityType*, Vector> Aimer::findTargetDispatcher(Vector view, unsigned int i) {
   Weapon weapon = csgo.getWeapon(mem.local_player_addr);
+  float fov = settings.aim_fov;
+  if (!(settings.weapon_fovs.find(weapon) == settings.weapon_fovs.end())) // special fov is set
+    fov = settings.weapon_fovs[weapon];
   switch(weapon) {
-  case Weapon::DEAGLE:
-    return closestTargetInFov(view, 1.1*settings.aim_fov);
   case Weapon::ZEUS:
-    return zeusTarget(view, degree_to_radian(4));
+    return zeusTarget(view, fov);
   default:
-    return closestTargetInFov(view, settings.aim_fov);
+    return closestTargetInFov(view, fov);
   }
 
 }

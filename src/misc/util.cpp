@@ -8,6 +8,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/lu.hpp>
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 
@@ -62,8 +63,9 @@ float sgn(float val) {
 }
 
 Weapon getWeaponByName(std::string weapon_name){
+  boost::to_upper(weapon_name);
   if (weapon_name == "DEAGLE")
-    return Weapon::ELITE;
+    return Weapon::DEAGLE;
   if (weapon_name == "ELITE")
     return Weapon::ELITE;
   if (weapon_name == "FIVESEVEN")
@@ -174,7 +176,7 @@ Weapon getWeaponByName(std::string weapon_name){
 std::string getWeaponName(Weapon w) {
   switch(w) {
   case Weapon::DEAGLE:
-    return "ELITE";
+    return "DEAGLE";
   case Weapon::ELITE:
     return "ELITE";
   case Weapon::FIVESEVEN:

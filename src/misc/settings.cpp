@@ -22,6 +22,7 @@ Settings& Settings::getInstance() {
 void Settings::load(const string& file) {
   ifstream settings_file (file); string line;
   vector<string> splits;
+  vector<string> name_splits;
   if (settings_file.is_open()) {
     while (getline(settings_file, line)) {
       // remove comments in file
@@ -35,8 +36,9 @@ void Settings::load(const string& file) {
           cout << line << endl;
           continue;
         }
+        name_splits = split_string(splits[0], "_");
         // offsets
-        else if (splits[0] == "glow_offset")
+        if (splits[0] == "glow_offset")
           glow_offset = strtoul(splits[1].c_str(), NULL, 16);
         else if (splits[0] == "attack_offset")
           attack_offset = strtoul(splits[1].c_str(), NULL, 16);
@@ -87,13 +89,19 @@ void Settings::load(const string& file) {
           smoke_check = (splits[1] == "true");
         else if (splits[0] == "aim_teammates")
           aim_teammates = (splits[1] == "true");
-        else if (splits[0] == "bone_ids"){
+        else if (splits[0] == "bone_ids") {
           vector<string> bones = split_string(splits[1], ",");
           for (string bone : bones)
             bone_ids.push_back(stoi(bone));
-        }
-        else if (splits[0] == "panic_key")
+        } else if (splits[0] == "panic_key") {
           panic_key = splits[1];
+        } else {
+          // weapon specific fov settings
+          if(name_splits[0] == "aim" && name_splits[2] == "fov") {
+            Weapon w = getWeaponByName(name_splits[1]);
+            weapon_fovs[w] = degree_to_radian(strtof(splits[1].c_str(), NULL));
+          }
+        }
       }
     }
   }
@@ -135,6 +143,10 @@ void Settings::print() {
   for (unsigned int bone : bone_ids)
     cout << bone << " ";
   cout << endl;
+  cout <<  "Weapon fovs:" << endl;
+  for (pair<Weapon, float> p : weapon_fovs)
+    cout << "aim_" << getWeaponName(p.first) << "_fov: " << radian_to_degree(p.second) << endl;
+
 
   cout << endl << "[Radar]" << endl;
   cout << "find_map: " << find_map << endl;

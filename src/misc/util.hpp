@@ -78,7 +78,8 @@ enum Weapon {
   KNIFE_PUSH = 516
 };
 
-std::string getWeaponName(Weapon w);
+std::string getWeaponName(Weapon);
+Weapon getWeaponByName(std::string);
 
 enum Team {
   CT = 3,
