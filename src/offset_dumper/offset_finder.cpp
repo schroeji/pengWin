@@ -17,7 +17,7 @@ void write_offsets(vector<string> names, vector<string> offsets, const string& f
     cout << "offset and name length not matching" << endl;
   }
   ofstream file(file_name);
-  file << "## offsets" << endl;
+  file << "[offsets]" << endl;
   for (size_t i = 0; i < names.size(); i++){
     file << names[i] << "=" << offsets[i] << endl;
   }
@@ -31,10 +31,14 @@ void print_offsets(vector<string> names, vector<string> offsets) {
   }
 }
 
+string read_settings(const string& file_name) {
+
+}
+
 void write_settings(const string& file_name) {
   ofstream file(file_name, ios_base::app);
   file << endl;
-  file << "## settings" << endl;
+  file <<  "[settings]" << endl;
   file << "# general settings" << endl;
   file << "main_loop_sleep=10" << endl;
   file << "debug=false" << endl;
@@ -78,6 +82,10 @@ int main(int argc, char** argv) {
     cout << "Not root" << endl;
     return 0;
   }
+  const string file_name = "settings.cfg";
+  bool retain_settings = false;
+  if (retain_settings)
+    string settings = read_settings(file_name);
   MemoryAccess mem(nullptr);
   mem.getPid();
   Addr_Range clientRange = mem.getClientRange();
@@ -159,7 +167,11 @@ int main(int argc, char** argv) {
   // // cout << "Test1: " << test1 << endl;
   // // cout << "Test2: " << test2 << endl;
   // // cout << viewAngels << endl;
-  write_offsets(offset_names, offsets, "settings.cfg");
+  write_offsets(offset_names, offsets, file_name);
   print_offsets(offset_names, offsets);
-  write_settings("settings.cfg");
-} //
+  if (retain_settings) {
+    // read and rewrite settings
+  } else {
+    write_settings(file_name);
+  }
+}
