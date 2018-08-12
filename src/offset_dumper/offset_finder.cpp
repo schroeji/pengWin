@@ -32,7 +32,32 @@ void print_offsets(vector<string> names, vector<string> offsets) {
 }
 
 string read_settings(const string& file_name) {
+  ifstream settings_file (file_name);
+  string line;
+  bool reading_settings = false;
+  // find length
+  settings_file.seekg (0, settings_file.end);
+  int length = settings_file.tellg();
+  // go back to start
+  settings_file.seekg (0, settings_file.beg);
+  int settings_start = 0;
 
+  if (settings_file.is_open()) {
+    while (getline(settings_file, line)) {
+      if (line == "[settings]") {
+        reading_settings = true;
+        settings_start = settings_file.tellg();
+        break;
+      }
+    }
+  } else {
+    cout << "No settings file found!" << endl;
+    return "";
+  }
+  char* buffer = new char [length - settings_start];
+  if (reading_settings)
+    settings_file.read(buffer, length - settings_start);
+  return "[settings]\n" + string(buffer);
 }
 
 void write_settings(const string& file_name) {
@@ -83,9 +108,13 @@ int main(int argc, char** argv) {
     return 0;
   }
   const string file_name = "settings.cfg";
-  bool retain_settings = false;
+  string settings = "";
+  bool retain_settings = true;
+  if (argc > 1)
+    if (!strcmp(argv[1], "--renew") || !strcmp(argv[1], "-r"))
+      retain_settings = false;
   if (retain_settings)
-    string settings = read_settings(file_name);
+    settings = read_settings(file_name);
   MemoryAccess mem(nullptr);
   mem.getPid();
   Addr_Range clientRange = mem.getClientRange();
@@ -169,8 +198,11 @@ int main(int argc, char** argv) {
   // // cout << viewAngels << endl;
   write_offsets(offset_names, offsets, file_name);
   print_offsets(offset_names, offsets);
-  if (retain_settings) {
-    // read and rewrite settings
+  if (retain_settings && settings != "") {
+    // rewrite settings
+    ofstream file(file_name, ios_base::app);
+    file.write(settings.c_str(), settings.size());
+    file.close();
   } else {
     write_settings(file_name);
   }
