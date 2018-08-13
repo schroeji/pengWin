@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
     while (!panicked && csgo.isOnServer()) {
       csgo.grabPlayers();
       if (debug) {
-        // csgo.printPlayers();
+        csgo.printPlayers();
         // csgo.printEntities();
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));

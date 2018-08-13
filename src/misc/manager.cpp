@@ -67,7 +67,7 @@ void GameManager::grabPlayers(){
     else
       new_nonPlayerEntities.push_back(entity);
   }
-  // copy new players and delete old ones after for thread safety
+  // copy new players and delete old ones afterwards for thread safety
   vector<EntityType*> old_players = players;
   players = new_players;
   player_addrs = new_player_addrs;
@@ -76,6 +76,12 @@ void GameManager::grabPlayers(){
     delete player;
   for (EntityType* ent : new_nonPlayerEntities)
     delete ent;
+
+  // refresh helper variables
+  if (isFlashed(mem.local_player_addr))
+    local_player_flashed_timer += float(settings.main_loop_sleep) / 1000.;
+  else
+    local_player_flashed_timer = 0.0;
 }
 
 vector<EntityType*>& GameManager::getPlayers() {
@@ -101,9 +107,8 @@ void GameManager::printPlayers() {
     printf("Velocity: %f, %f, %f\n", player->m_vecVelocity.x,  player->m_vecVelocity.y, player->m_vecVelocity.z);
     printf("Aimpunch: %f, %f, %f\n", getAimPunch(mem.local_player_addr).x,  getAimPunch(mem.local_player_addr).y, getAimPunch(mem.local_player_addr).z);
     printf("Defusing: %d\n", isDefusing(player_addrs[i]));
-    printf("Weapon: %x\n", getWeapon(player_addrs[i]));
-    // Vector test = {200.0, 0, 0};
-    // lineThroughSmoke(player->m_vecOrigin, player->m_vecOrigin + test);
+    printf("Flashed: %d\n", isFlashed(player_addrs[i]));
+    printf("Weapon: %s\n", getWeaponName(getWeapon(player_addrs[i])).c_str());
     // vector<int> diffs = mem.diffMem(mem.local_player_addr + 0x3500, 0x200);
     // if (diffs.size() > 0) {
       // for (int i : diffs)
@@ -250,6 +255,17 @@ bool GameManager::isDefusing(addr_type player_addr) {
   return (bool) buf;
 }
 
+bool GameManager::isFlashed(addr_type player_addr) {
+  return getFlashDuration(player_addr) > 0.0;
+}
+
+float GameManager::getFlashDuration(addr_type player_addr) {
+  float buf;
+  if(!mem.read((void*) (player_addr + mem.m_flFlashDuration), &buf, sizeof(buf)))
+    return 0.0;
+  return  buf;
+}
+
 QAngle GameManager::getNetworkAngles(addr_type player_addr) {
   QAngle ang;
   if(!mem.read((void*) (player_addr + 0x160), &ang, sizeof(ang)))
@@ -271,11 +287,11 @@ Weapon GameManager::getWeapon(addr_type player_addr) {
     if (!mem.read(g_glow[i].m_pEntity, &currentEntity, sizeof(EntityType)))
       continue;
     if (currentEntity.m_iEntityId == activeWeaponID){ // found entity for weapon
-      if(settings.debug) cout << "Found entity" << endl;
+      // if(settings.debug) cout << "Found entity" << endl;
       // get weapon type
       mem.read((void *)((addr_type)g_glow[i].m_pEntity + mem.m_AttributeManager60 + mem.m_iItemDefinitionIndex), &weaponID, sizeof(int));
       weaponID &= 0xFFF;
-      if(settings.debug) cout << "weaponID:" << weaponID << endl;
+      // if(settings.debug) cout << "weaponID:" << weaponID << endl;
       break;
     }
   }
@@ -304,3 +320,7 @@ bool GameManager::lineThroughSmoke(Vector start, Vector end){
   }
   return false;
 }
+
+bool GameManager::isLocalPlayerFlashed() {
+  return getFlashDuration(mem.local_player_addr) - local_player_flashed_timer > FLASH_END_OFFSET;
+};

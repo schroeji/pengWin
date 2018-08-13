@@ -47,7 +47,8 @@ public:
   float sensitivity;
   bool aim_autoshoot = false;
   bool aim_smooth_first_shot = true;
-  bool smoke_check;
+  bool aim_smoke_check;
+  bool aim_flash_check;
   bool aim_teammates;
   map<Weapon, float> weapon_fovs;
   vector<unsigned int> bone_ids;

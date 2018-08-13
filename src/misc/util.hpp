@@ -20,6 +20,9 @@
 // revolver cock time in ms
 // http://counterstrike.wikia.com/wiki/R8_Revolver
 #define R8_COCK_TIME 200.0f
+// this defines how long before a flash bang ends a player is able to see again
+// i.e. bool flashed = total_flash_duration - flashed_time > FLASH_END_OFFSET
+#define FLASH_END_OFFSET 1.1f
 
 enum Weapon {
   NONE = 0,

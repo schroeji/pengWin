@@ -437,7 +437,7 @@ pair<EntityType*, Vector> Aimer::zeusTarget(Vector view, float fov) {
     enemy_index++;
     if (enemy_index == local_player_index || (!settings.aim_teammates && enemy->m_iTeamNum == team))
       continue;
-    if (settings.smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
+    if (settings.aim_smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
       continue;
     addr_type enemy_addr = csgo.getPlayerAddr(enemy);
     BoneInfo* boneMatrix = mem.getBoneMatrix(enemy_addr);
@@ -494,6 +494,8 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view, float fov) {
   // unsigned int boneIds[] = {3, 6, 7, 8, 66, 67, 73, 74};
   if (players.size() < 2)
     throw runtime_error("Only one player.");
+  if (settings.aim_flash_check && csgo.isLocalPlayerFlashed())
+    throw runtime_error("Player is flashed: not aiming.");
   EntityType* closestPlayer = nullptr;
   float closestAngle = fov;
   Vector closestBone = {0, 0, 0};
@@ -505,7 +507,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view, float fov) {
     enemy_index++;
     if (enemy_index == local_player_index || (!settings.aim_teammates && enemy->m_iTeamNum == team))
       continue;
-    if (settings.smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
+    if (settings.aim_smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
       continue;
     addr_type enemy_addr = csgo.getPlayerAddr(enemy);
     BoneInfo* boneMatrix = mem.getBoneMatrix(enemy_addr);
