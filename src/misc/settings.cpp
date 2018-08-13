@@ -20,14 +20,15 @@ Settings& Settings::getInstance() {
 }
 
 void Settings::load(const string& file) {
-  ifstream settings_file (file); string line;
+  ifstream settings_file (file);
+  string line;
   vector<string> splits;
   vector<string> name_splits;
   if (settings_file.is_open()) {
     while (getline(settings_file, line)) {
       // remove comments in file
       splits = split_string(line, "#");
-      if (splits[0] == "")
+      if (splits[0] == "" || splits[0] == "[offsets]" || splits[0] == "[settings]")
         continue;
       else {
         splits = split_string(splits[0], "=");
@@ -106,6 +107,8 @@ void Settings::load(const string& file) {
         }
       }
     }
+  } else {
+    cout << "Error could not open " << file << ". Please run offset_dumper first." << endl;
   }
   settings_file.close();
 }
