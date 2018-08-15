@@ -17,7 +17,7 @@ void write_offsets(vector<string> names, vector<string> offsets, const string& f
     cout << "offset and name length not matching" << endl;
   }
   ofstream file(file_name);
-  file << "## offsets" << endl;
+  file << "[offsets]" << endl;
   for (size_t i = 0; i < names.size(); i++){
     file << names[i] << "=" << offsets[i] << endl;
   }
@@ -31,10 +31,39 @@ void print_offsets(vector<string> names, vector<string> offsets) {
   }
 }
 
+string read_settings(const string& file_name) {
+  ifstream settings_file (file_name);
+  string line;
+  bool reading_settings = false;
+  // find length
+  settings_file.seekg (0, settings_file.end);
+  int length = settings_file.tellg();
+  // go back to start
+  settings_file.seekg (0, settings_file.beg);
+  int settings_start = 0;
+
+  if (settings_file.is_open()) {
+    while (getline(settings_file, line)) {
+      if (line == "[settings]") {
+        reading_settings = true;
+        settings_start = settings_file.tellg();
+        break;
+      }
+    }
+  } else {
+    cout << "No settings file found!" << endl;
+    return "";
+  }
+  char* buffer = new char [length - settings_start];
+  if (reading_settings)
+    settings_file.read(buffer, length - settings_start);
+  return "[settings]\n" + string(buffer);
+}
+
 void write_settings(const string& file_name) {
   ofstream file(file_name, ios_base::app);
   file << endl;
-  file << "## settings" << endl;
+  file <<  "[settings]" << endl;
   file << "# general settings" << endl;
   file << "main_loop_sleep=10" << endl;
   file << "debug=false" << endl;
@@ -53,13 +82,17 @@ void write_settings(const string& file_name) {
   file << "aim_key=mouse1" << endl;
   file << "aim_sleep=20" << endl;
   file << "aim_fov=1.9" << endl;
+  file << "# you can set additional weapon specific fovs like this:" << endl;
+  file << "# aim_deagle_fov=2.0" << endl;
+  file << "# aim_m4a4_fov=1.5" << endl;
   file << "aim_autoshoot=false" << endl;
   file << "#bone_ids=3,4,5,6,7,8,10,11,12,13,14,39,40,41,42,70,71,72,77,78,79" << endl;
   file << "bone_ids=3,4,5,6,7,8" << endl;
   file << "# enable / disable smoothing on first shot you may want to disable this for perfect flicks" << endl;
   file << "aim_smooth_first_shot=true" << endl;
   file << "smoothing_factor=0.25" << endl;
-  file << "smoke_check=true" << endl;
+  file << "aim_smoke_check=true" << endl;
+  file << "aim_flash_check=true" << endl;
   file << "aim_teammates=false" << endl;
   file << "# your ingame sensitivity (used for aim calculations)" << endl;
   file << "sensitivity=1.3" << endl;
@@ -75,6 +108,14 @@ int main(int argc, char** argv) {
     cout << "Not root" << endl;
     return 0;
   }
+  const string file_name = "settings.cfg";
+  string settings = "";
+  bool retain_settings = true;
+  if (argc > 1)
+    if (!strcmp(argv[1], "--renew") || !strcmp(argv[1], "-r"))
+      retain_settings = false;
+  if (retain_settings)
+    settings = read_settings(file_name);
   MemoryAccess mem(nullptr);
   mem.getPid();
   Addr_Range clientRange = mem.getClientRange();
@@ -156,7 +197,14 @@ int main(int argc, char** argv) {
   // // cout << "Test1: " << test1 << endl;
   // // cout << "Test2: " << test2 << endl;
   // // cout << viewAngels << endl;
-  write_offsets(offset_names, offsets, "settings.cfg");
+  write_offsets(offset_names, offsets, file_name);
   print_offsets(offset_names, offsets);
-  write_settings("settings.cfg");
-} //
+  if (retain_settings && settings != "") {
+    // rewrite settings
+    ofstream file(file_name, ios_base::app);
+    file.write(settings.c_str(), settings.size());
+    file.close();
+  } else {
+    write_settings(file_name);
+  }
+}

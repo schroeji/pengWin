@@ -394,13 +394,14 @@ Vector Aimer::getView(bool rcs) {
 
 pair<EntityType*, Vector> Aimer::findTargetDispatcher(Vector view, unsigned int i) {
   Weapon weapon = csgo.getWeapon(mem.local_player_addr);
+  float fov = settings.aim_fov;
+  if (!(settings.weapon_fovs.find(weapon) == settings.weapon_fovs.end())) // special fov is set
+    fov = settings.weapon_fovs[weapon];
   switch(weapon) {
-  case Weapon::DEAGLE:
-    return closestTargetInFov(view, 1.1*settings.aim_fov);
   case Weapon::ZEUS:
-    return zeusTarget(view, degree_to_radian(4));
+    return zeusTarget(view, fov);
   default:
-    return closestTargetInFov(view, settings.aim_fov);
+    return closestTargetInFov(view, fov);
   }
 
 }
@@ -436,7 +437,7 @@ pair<EntityType*, Vector> Aimer::zeusTarget(Vector view, float fov) {
     enemy_index++;
     if (enemy_index == local_player_index || (!settings.aim_teammates && enemy->m_iTeamNum == team))
       continue;
-    if (settings.smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
+    if (settings.aim_smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
       continue;
     addr_type enemy_addr = csgo.getPlayerAddr(enemy);
     BoneInfo* boneMatrix = mem.getBoneMatrix(enemy_addr);
@@ -493,6 +494,8 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view, float fov) {
   // unsigned int boneIds[] = {3, 6, 7, 8, 66, 67, 73, 74};
   if (players.size() < 2)
     throw runtime_error("Only one player.");
+  if (settings.aim_flash_check && csgo.isLocalPlayerFlashed())
+    throw runtime_error("Player is flashed: not aiming.");
   EntityType* closestPlayer = nullptr;
   float closestAngle = fov;
   Vector closestBone = {0, 0, 0};
@@ -504,7 +507,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view, float fov) {
     enemy_index++;
     if (enemy_index == local_player_index || (!settings.aim_teammates && enemy->m_iTeamNum == team))
       continue;
-    if (settings.smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
+    if (settings.aim_smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
       continue;
     addr_type enemy_addr = csgo.getPlayerAddr(enemy);
     BoneInfo* boneMatrix = mem.getBoneMatrix(enemy_addr);

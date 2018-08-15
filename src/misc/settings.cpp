@@ -20,13 +20,15 @@ Settings& Settings::getInstance() {
 }
 
 void Settings::load(const string& file) {
-  ifstream settings_file (file); string line;
+  ifstream settings_file (file);
+  string line;
   vector<string> splits;
+  vector<string> name_splits;
   if (settings_file.is_open()) {
     while (getline(settings_file, line)) {
       // remove comments in file
       splits = split_string(line, "#");
-      if (splits[0] == "")
+      if (splits[0] == "" || splits[0] == "[offsets]" || splits[0] == "[settings]")
         continue;
       else {
         splits = split_string(splits[0], "=");
@@ -35,8 +37,9 @@ void Settings::load(const string& file) {
           cout << line << endl;
           continue;
         }
+        name_splits = split_string(splits[0], "_");
         // offsets
-        else if (splits[0] == "glow_offset")
+        if (splits[0] == "glow_offset")
           glow_offset = strtoul(splits[1].c_str(), NULL, 16);
         else if (splits[0] == "attack_offset")
           attack_offset = strtoul(splits[1].c_str(), NULL, 16);
@@ -83,19 +86,29 @@ void Settings::load(const string& file) {
           aim_autoshoot = (splits[1] == "true");
         else if (splits[0] == "aim_smooth_first_shot")
           aim_smooth_first_shot = (splits[1] == "true");
-        else if (splits[0] == "smoke_check")
-          smoke_check = (splits[1] == "true");
+        else if (splits[0] == "aim_smoke_check")
+          aim_smoke_check = (splits[1] == "true");
+        else if (splits[0] == "aim_flash_check")
+          aim_flash_check = (splits[1] == "true");
         else if (splits[0] == "aim_teammates")
           aim_teammates = (splits[1] == "true");
-        else if (splits[0] == "bone_ids"){
+        else if (splits[0] == "bone_ids") {
           vector<string> bones = split_string(splits[1], ",");
           for (string bone : bones)
             bone_ids.push_back(stoi(bone));
-        }
-        else if (splits[0] == "panic_key")
+        } else if (splits[0] == "panic_key") {
           panic_key = splits[1];
+        } else {
+          // weapon specific fov settings
+          if(name_splits[0] == "aim" && name_splits[2] == "fov") {
+            Weapon w = getWeaponByName(name_splits[1]);
+            weapon_fovs[w] = degree_to_radian(strtof(splits[1].c_str(), NULL));
+          }
+        }
       }
     }
+  } else {
+    cout << "Error could not open " << file << ". Please run offset_dumper first." << endl;
   }
   settings_file.close();
 }
@@ -129,12 +142,17 @@ void Settings::print() {
   cout << "aim_sleep: " << aim_sleep << endl;
   cout << "aim_autoshoot: " << aim_autoshoot << endl;
   cout << "aim_smooth_first_shot: " << aim_smooth_first_shot << endl;
-  cout << "smoke_check: " << smoke_check << endl;
+  cout << "aim_smoke_check: " << aim_smoke_check << endl;
+  cout << "aim_flash_check: " << aim_flash_check << endl;
   cout << "aim_teammates: " << aim_teammates << endl;
   cout << "bone_ids: ";
   for (unsigned int bone : bone_ids)
     cout << bone << " ";
   cout << endl;
+  cout <<  "Weapon fovs:" << endl;
+  for (pair<Weapon, float> p : weapon_fovs)
+    cout << "aim_" << getWeaponName(p.first) << "_fov: " << radian_to_degree(p.second) << endl;
+
 
   cout << endl << "[Radar]" << endl;
   cout << "find_map: " << find_map << endl;

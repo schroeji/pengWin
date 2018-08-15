@@ -20,7 +20,69 @@
 // revolver cock time in ms
 // http://counterstrike.wikia.com/wiki/R8_Revolver
 #define R8_COCK_TIME 200.0f
+// this defines how long before a flash bang ends a player is able to see again
+// i.e. bool flashed = total_flash_duration - flashed_time > FLASH_END_OFFSET
+#define FLASH_END_OFFSET 1.1f
 
+enum Weapon {
+  NONE = 0,
+  DEAGLE = 1,
+  ELITE = 2,
+  FIVESEVEN = 3,
+  GLOCK = 4,
+  AK47 = 7,
+  AUG = 8,
+  AWP = 9,
+  FAMAS = 10,
+  G3SG1 = 11,
+  GALILAR = 13,
+  M249 = 14,
+  M4A1 = 16,
+  MAC10 = 17,
+  P90 = 19,
+  UMP45 = 24,
+  XM1014 = 25,
+  BIZON = 26,
+  MAG7 = 27,
+  NEGEV = 28,
+  SAWEDOFF = 29,
+  TEC9 = 30,
+  ZEUS = 31,
+  HKP2000 = 32,
+  MP7 = 33,
+  MP9 = 34,
+  NOVA = 35,
+  P250 = 36,
+  SCAR20 = 38,
+  SG556 = 39,
+  SSG08 = 40,
+  KNIFE = 42,
+  FLASHBANG = 43,
+  HEGRENADE = 44,
+  SMOKEGRENADE = 45,
+  MOLOTOV = 46,
+  DECOY = 47,
+  INCGRENADE = 48,
+  C4 = 49,
+  KNIFE_T = 59,
+  M4A1_SILENCER = 60,
+  USP_SILENCER = 61,
+  CZ75A = 63,
+  REVOLVER = 64,
+  KNIFE_BAYONET = 500,
+  KNIFE_FLIP = 505,
+  KNIFE_GUT = 506,
+  KNIFE_KARAMBIT = 507,
+  KNIFE_M9_BAYONET = 508,
+  KNIFE_TACTICAL = 509,
+  KNIFE_FALCHION = 512,
+  KNIFE_SURVIVAL_BOWIE = 514,
+  KNIFE_BUTTERFLY = 515,
+  KNIFE_PUSH = 516
+};
+
+std::string getWeaponName(Weapon);
+Weapon getWeaponByName(std::string);
 
 enum Team {
   CT = 3,
