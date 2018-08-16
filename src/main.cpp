@@ -4,7 +4,7 @@
 #include "misc/settings.hpp"
 #include "misc/hotkey.hpp"
 #include "misc/util.hpp"
-#include "misc/BSPMap.hpp"
+#include "ValveBSP/BSPParser.hpp"
 #include "hacks/radar.hpp"
 #include "hacks/trigger.hpp"
 #include "hacks/aimer.hpp"
@@ -86,11 +86,11 @@ int main(int argc, char** argv) {
   Radar radar(csgo);
   HotkeyManager hotkeyMan(csgo);
 
-  BSPMap bspmap;
+  Valve::BSPParser bspParser;
 
-  string cs_path("/run/media/hidden/big/SteamLibrary/steamapps/common/Counter-Strike Global Offensive/");
-  cout << "Load:" << bspmap.load(cs_path.c_str(), "de_dust2.bsp") << endl;
-  bspmap.DisplayInfo();
+  string maps_path("/run/media/hidden/big/SteamLibrary/steamapps/common/Counter-Strike Global Offensive/csgo/maps/");
+  cout << "parse:" << bspParser.parse_map(maps, "de_dust2.bsp") << endl;;
+  // cout << "Load:" << bspParser.parse_map(cs_path, "de_dust2.bsp") << endl;
 
   while (!panicked && csgo.gameRunning()) {
     if (debug) cout << "Waiting until connected..." << endl;
@@ -133,20 +133,22 @@ int main(int argc, char** argv) {
       csgo.grabPlayers();
       if (debug) {
         // csgo.printPlayers();
-        Vector one = {csgo.getLocalPlayer()->m_vecOrigin.z,
-                      csgo.getLocalPlayer()->m_vecOrigin.x,
-                      csgo.getLocalPlayer()->m_vecOrigin.y};
-        // one.z += csgo.getLocalPlayer()->m_vecViewOffset.y;
 
-        Vector two = {csgo.getPlayers()[1]->m_vecOrigin.z,
-                      csgo.getPlayers()[1]->m_vecOrigin.x,
-                      csgo.getPlayers()[1]->m_vecOrigin.y};
+        using Vector3 = Matrix< float, 3, 1 >;
+        std::array<float, 3> a = {csgo.getLocalPlayer()->m_vecOrigin.z,
+                                 csgo.getLocalPlayer()->m_vecOrigin.x,
+                                 csgo.getLocalPlayer()->m_vecOrigin.y};
 
-        // Vector two = one;
-        two.x -= 60;
-        printf("one x=%f y=%f z=%f\n", one.x, one.y, one.z);
-        printf("two x=%f y=%f z=%f\n", two.x, two.y, two.z);
-        bool vis =  bspmap.Visible(one, two);
+        std::array<float, 3> b = {csgo.getPlayers()[1]->m_vecOrigin.z,
+                                 csgo.getPlayers()[1]->m_vecOrigin.x,
+                                 csgo.getPlayers()[1]->m_vecOrigin.y};
+
+        const Vector3 one(a);
+        const Vector3 two(b);
+        printf("one x=%f y=%f z=%f\n", one(0), one(1), one(2));
+        printf("two x=%f y=%f z=%f\n", two(0), two(1), two(2));
+
+        bool vis =  bspParser.is_visible(one, two);
         cout << "visible:" << vis << endl;
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));

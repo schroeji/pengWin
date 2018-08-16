@@ -13,7 +13,7 @@ TARGET_DUMPER = offset_dumper
 #includes
 INC=-lX11 -lXtst -lboost_thread -lboost_system -pthread -I src/
 
-SRC=$(wildcard src/main.cpp src/misc/*.cpp src/hacks/*.cpp)
+SRC=$(wildcard src/main.cpp src/misc/*.cpp src/hacks/*.cpp src/ValveBSP/*.cpp)
 SRC_DUMPER = src/offset_dumper/offset_finder.cpp src/misc/*.cpp
 
 all: $(TARGET) $(TARGET_DUMPER)
