@@ -133,17 +133,21 @@ int main(int argc, char** argv) {
       csgo.grabPlayers();
       if (debug) {
         // csgo.printPlayers();
-        Vector one = {csgo.getLocalPlayer()->m_vecOrigin.y,
-                      csgo.getLocalPlayer()->m_vecOrigin.z,
-                      csgo.getLocalPlayer()->m_vecOrigin.x};
+        Vector one = {csgo.getLocalPlayer()->m_vecOrigin.z,
+                      csgo.getLocalPlayer()->m_vecOrigin.x,
+                      csgo.getLocalPlayer()->m_vecOrigin.y};
+        // one.z += csgo.getLocalPlayer()->m_vecViewOffset.y;
 
-        Vector two = {csgo.getPlayers()[1]->m_vecOrigin.y + 30,
-                      csgo.getPlayers()[1]->m_vecOrigin.z + 30,
-                      csgo.getPlayers()[1]->m_vecOrigin.x + 30};
+        Vector two = {csgo.getPlayers()[1]->m_vecOrigin.z,
+                      csgo.getPlayers()[1]->m_vecOrigin.x,
+                      csgo.getPlayers()[1]->m_vecOrigin.y};
 
+        // Vector two = one;
+        two.x -= 60;
         printf("one x=%f y=%f z=%f\n", one.x, one.y, one.z);
         printf("two x=%f y=%f z=%f\n", two.x, two.y, two.z);
-        cout << "visible:" << bspmap.Visible(one, two) << endl;
+        bool vis =  bspmap.Visible(one, two);
+        cout << "visible:" << vis << endl;
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     }

@@ -192,6 +192,7 @@ bool BSPMap::Visible(Vector &vStart, Vector &vEnd ) {
     printf("point x=%f y=%f z=%f\n", point.x, point.y, point.z);
 		// Tried differenent masks, none seem to work :/ becauce ur a bitch tbh tbf fam
     cout << "contents: " << hex << leaf->contents << endl;
+    cout << "water:" << leaf->leafWaterDataID << endl;
 		if(leaf->contents & CONTENTS_SOLID) {
 			return false;
     }
