@@ -60,7 +60,7 @@ pid_t MemoryAccess::getPid() {
 }
 
 Addr_Range MemoryAccess::getClientRange() {
-  client_range = getModule("client_client.so");
+  client_range = getModule("client_panorama_client.so");
   cout << hex << "Client Base: " << client_range.first << endl;
   updateAddrs();
   return client_range;

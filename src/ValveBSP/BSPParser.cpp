@@ -1,5 +1,6 @@
 #include "BSPParser.hpp"
 #include "TraceRay.hpp"
+#include "misc/util.hpp"
 
 bool BSPParser::parse_map( const std::string& bsp_directory, const std::string& bsp_file )
 {
@@ -18,10 +19,20 @@ bool BSPParser::parse_map( const std::string& bsp_directory, const std::string& 
     return false;
 }
 
-bool BSPParser::is_visible( const Vector3& origin, const Vector3& final )
+bool BSPParser::is_visible(const Vector& origin, const Vector& destination )
 {
     std::shared_lock< std::shared_timed_mutex > lock( m_mutex );
-    return TraceRay::is_visible( origin, final, &m_BSPFile );
+    std::array<float, 3> origin_array = {origin.z,
+                                        origin.x,
+                                        origin.y};
+
+    std::array<float, 3> dest_array = {destination.z,
+                                      destination.x,
+                                      destination.y};
+
+    const Vector3 origin_vec3(origin_array);
+    const Vector3 dest_vec3(dest_array);
+    return TraceRay::is_visible( origin_vec3, dest_vec3, &m_BSPFile );
 }
 
 BSPFile BSPParser::get_bsp( void ) const

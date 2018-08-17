@@ -8,6 +8,7 @@
 #pragma once
 #include "BSPFile.hpp"
 #include <shared_mutex>
+#include "misc/util.hpp"
 
 
 class BSPParser
@@ -30,11 +31,11 @@ public:
    * @brief      Determines if visible.
    *
    * @param[in]  origin     The origin
-   * @param[in]  final      The final position
+   * @param[in]  destination      The destination position
    *
    * @return     True if visible, False otherwise.
    */
-  bool is_visible( const Vector3& origin, const Vector3& final );
+  bool is_visible(const Vector& origin, const Vector& destination);
 
   /**
    * @brief      Gets the bsp file.
@@ -43,8 +44,15 @@ public:
    */
   BSPFile get_bsp( void ) const;
 
+  /**
+   * @brief      Returns if the last call to parse_map was succesful
+   *
+   */
+  bool is_valid(){ return valid; }
+
 private:
   BSPFile                 m_BSPFile;
   std::string             m_LastMap;
   std::shared_timed_mutex m_mutex;
+  bool valid;
 };

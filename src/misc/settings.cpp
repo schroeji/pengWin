@@ -92,6 +92,8 @@ void Settings::load(const string& file) {
           aim_smoke_check = (splits[1] == "true");
         else if (splits[0] == "aim_flash_check")
           aim_flash_check = (splits[1] == "true");
+        else if (splits[0] == "aim_vis_check")
+          aim_vis_check = (splits[1] == "true");
         else if (splits[0] == "aim_teammates")
           aim_teammates = (splits[1] == "true");
         else if (splits[0] == "bone_ids") {
@@ -147,6 +149,7 @@ void Settings::print() {
   cout << "aim_smooth_first_shot: " << aim_smooth_first_shot << endl;
   cout << "aim_smoke_check: " << aim_smoke_check << endl;
   cout << "aim_flash_check: " << aim_flash_check << endl;
+  cout << "aim_vis_check: " << aim_vis_check << endl;
   cout << "aim_teammates: " << aim_teammates << endl;
   cout << "bone_ids: ";
   for (unsigned int bone : bone_ids)

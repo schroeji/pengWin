@@ -3,6 +3,7 @@
 #include "misc/memory_access.hpp"
 #include "misc/clicker.hpp"
 #include "misc/settings.hpp"
+#include "ValveBSP/BSPParser.hpp"
 
 class Aimer {
 
@@ -14,6 +15,7 @@ private:
   Settings& settings;
   const float angle_multiplier = 1 / 0.0220031738281250;
   const float inverse_sens;
+  BSPParser& bspParser;
   const float angle_multiplier_scoped = 1 / 0.0127111077308654;
   Vector getView(bool);
   Vector predictPositionOffset(EntityType*);
@@ -35,7 +37,7 @@ private:
   QAngle spline_start_angle;
   QAngle spline_supp_angle;
 public:
-  Aimer(GameManager& csgo);
+  Aimer(GameManager& csgo, BSPParser&);
   ~Aimer();
   // Routine to call by thread; unsigned int i is the number of the call
   void aimCheck(unsigned int);

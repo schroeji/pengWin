@@ -48,6 +48,7 @@ public:
   float sensitivity;
   bool aim_autoshoot = false;
   bool aim_smooth_first_shot = true;
+  bool aim_vis_check;
   bool aim_smoke_check;
   bool aim_flash_check;
   bool aim_teammates;

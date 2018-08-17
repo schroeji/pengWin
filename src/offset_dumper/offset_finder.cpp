@@ -94,6 +94,7 @@ void write_settings(const string& file_name) {
   file << "smoothing_factor=0.25" << endl;
   file << "aim_smoke_check=true" << endl;
   file << "aim_flash_check=true" << endl;
+  file << "aim_vis_check=true" << endl;
   file << "aim_teammates=false" << endl;
   file << "# your ingame sensitivity (used for aim calculations)" << endl;
   file << "sensitivity=1.3" << endl;

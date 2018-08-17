@@ -80,12 +80,12 @@ int main(int argc, char** argv) {
   MemoryAccess mem(&settings);
   GameManager csgo = GameManager(mem);
 
+  BSPParser bspParser;
   Trigger trigger(csgo);
-  Aimer aimer(csgo);
+  Aimer aimer(csgo, bspParser);
   BunnyHopper bhopper(csgo);
   Radar radar(csgo);
   HotkeyManager hotkeyMan(csgo);
-  BSPParser bspParser;
 
   // string maps_path("/run/media/hidden/big/SteamLibrary/steamapps/common/Counter-Strike Global Offensive/csgo/maps/");
   // cout << "Load:" << bspParser.parse_map(cs_path, "de_dust2.bsp") << endl;
@@ -125,28 +125,19 @@ int main(int argc, char** argv) {
     };
     hotkeyMan.bind(settings.panic_key, stop);
     hotkeyMan.startListen();
+    if (settings.aim_vis_check) {
+      if (bspParser.parse_map(settings.maps_path, csgo.getMapName() + ".bsp")) {
+        cout << "Parsed map: " << csgo.getMapName() << endl;
+      } else {
+        cout << "WARNING: Could not parse: " << settings.maps_path << csgo.getMapName() + ".bsp" << endl;
+      }
+    }
 
     // main loop
     while (!panicked && csgo.isOnServer()) {
       csgo.grabPlayers();
       if (debug) {
         // csgo.printPlayers();
-
-        using Vector3 = Matrix< float, 3, 1 >;
-        std::array<float, 3> a = {csgo.getLocalPlayer()->m_vecOrigin.z,
-                                 csgo.getLocalPlayer()->m_vecOrigin.x,
-                                 csgo.getLocalPlayer()->m_vecOrigin.y};
-
-        std::array<float, 3> b = {csgo.getPlayers()[1]->m_vecOrigin.z,
-                                 csgo.getPlayers()[1]->m_vecOrigin.x,
-                                 csgo.getPlayers()[1]->m_vecOrigin.y};
-
-        const Vector3 one(a);
-        const Vector3 two(b);
-        printf("one x=%f y=%f z=%f\n", one(0), one(1), one(2));
-        printf("two x=%f y=%f z=%f\n", two(0), two(1), two(2));
-
-        // bool vis =  bspParser.is_visible(one, two);
         // cout << "visible:" << vis << endl;
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
