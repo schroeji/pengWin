@@ -124,8 +124,8 @@ int main(int argc, char** argv) {
   cout << "Engine size: " << engineRange.second - engineRange.first << endl;
   // const char glowPointerCall_data[] = "\xE8\x00\x00\x00\x00\x48\x8b\x3d\x00\x00\x00\x00\xBE\x01\x00\x00\x00\xC7";
   // const char glowPointerCall_pattern[] = "x????xxx????xxxxxx";
-  const string glowPointerCall_pattern = "E8 ?? ?? ?? ?? 48 8B 3d ?? ?? ?? ?? BE 01 00 00 00 C7";
-  // const string glowPointerCall_pattern = "E8 ?? ?? ?? ?? 49 8B 7D 00 C7 40 38 00 00 00 00 48 8B 07 FF 90";
+  const string glowPointerCall_pattern = "E8 ?? ?? ?? ?? 48 8B 3D ?? ?? ?? ?? BE 01 00 00 00 C7";
+  // const string glowPointerCall_pattern = "E8 ?? ?? ?? ?? 49 8B 7D 00 C7 40 38 ?? ?? ?? ?? 48 8B 07 FF 90";
   const string local_player_addr_pattern = "48 89 e5 74 0e 48 8d 05 ?? ?? ?? ??";
   const string atk_mov_pattern = "89 D8 83 C8 01 F6 C2 03 0F 45 D8 44 89 ?? 83 E0 01 F7 D8 83 E8 03";
   const string map_name_pattern = "48 89 C7 44 89 9D B4 FE FF FF 48 8D 35 ?? ?? ?? ??";

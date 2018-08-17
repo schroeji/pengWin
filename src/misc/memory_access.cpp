@@ -60,7 +60,7 @@ pid_t MemoryAccess::getPid() {
 }
 
 Addr_Range MemoryAccess::getClientRange() {
-  client_range = getModule("client_client.so");
+  client_range = getModule("client_panorama_client.so");
   cout << hex << "Client Base: " << client_range.first << endl;
   updateAddrs();
   return client_range;
@@ -113,7 +113,7 @@ bool MemoryAccess::write(void* addr, void* buff, size_t size) {
 addr_type MemoryAccess::find_pattern(const string& pattern, Addr_Range range) {
   size_t begin = range.first;
   size_t end = range.second;
-  char buffer[4096];
+  char buffer[8192];
   size_t len = pattern.size();
   size_t blocksize = sizeof(buffer);
   size_t totalsize = end - begin;
