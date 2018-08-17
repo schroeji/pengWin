@@ -45,6 +45,8 @@ void Settings::load(const string& file) {
           attack_offset = strtoul(splits[1].c_str(), NULL, 16);
         else if (splits[0] == "local_player_offset")
           local_player_offset = strtoul(splits[1].c_str(), NULL, 16);
+        else if (splits[0] == "maps_path")
+          maps_path = splits[1];
         else if (splits[0] == "map_name_offset")
           map_name_offset = strtoul(splits[1].c_str(), NULL, 16);
         else if (splits[0] == "force_jump_offset")
@@ -126,6 +128,7 @@ void Settings::print() {
   cout << "[General]" << endl;
   cout << dec << "main_loop_sleep: " << main_loop_sleep << endl;
   cout << "Mouse file: " << mouse_file << endl;
+  cout << "Maps path: " << maps_path << endl;
   cout << "trigger_delay: " << trigger_delay << endl;
   cout << "trigger_use_random: " << trigger_use_random << endl;
   cout << "sensitivity: " << sensitivity << endl;

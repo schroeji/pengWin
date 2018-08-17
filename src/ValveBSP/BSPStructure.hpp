@@ -8,12 +8,10 @@
 #include "BSPFlags.hpp"
 #include "Matrix.hpp"
 
-namespace Valve {
-    using std::array;
-    using Vector3 = Matrix< float, 3, 1 >;
-}
+using std::array;
+using Vector3 = Matrix< float, 3, 1 >;
 
-namespace Valve { namespace BSP {
+namespace BSP {
 
     enum eLumpIndex : size_t
     {
@@ -268,4 +266,4 @@ namespace Valve { namespace BSP {
         array< Vector3, MAX_SURFINFO_VERTS > m_Vec2D;
         int32_t                              m_Skip;
     };
-} }
+}

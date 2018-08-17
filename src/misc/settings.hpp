@@ -25,6 +25,7 @@ public:
   bool debug = false;
   string mouse_file;
   string panic_key;
+  string maps_path;
 
   // trigger settings
   long int trigger_delay;

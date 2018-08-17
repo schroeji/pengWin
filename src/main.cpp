@@ -85,11 +85,9 @@ int main(int argc, char** argv) {
   BunnyHopper bhopper(csgo);
   Radar radar(csgo);
   HotkeyManager hotkeyMan(csgo);
+  BSPParser bspParser;
 
-  Valve::BSPParser bspParser;
-
-  string maps_path("/run/media/hidden/big/SteamLibrary/steamapps/common/Counter-Strike Global Offensive/csgo/maps/");
-  cout << "parse:" << bspParser.parse_map(maps, "de_dust2.bsp") << endl;;
+  // string maps_path("/run/media/hidden/big/SteamLibrary/steamapps/common/Counter-Strike Global Offensive/csgo/maps/");
   // cout << "Load:" << bspParser.parse_map(cs_path, "de_dust2.bsp") << endl;
 
   while (!panicked && csgo.gameRunning()) {
@@ -148,8 +146,8 @@ int main(int argc, char** argv) {
         printf("one x=%f y=%f z=%f\n", one(0), one(1), one(2));
         printf("two x=%f y=%f z=%f\n", two(0), two(1), two(2));
 
-        bool vis =  bspParser.is_visible(one, two);
-        cout << "visible:" << vis << endl;
+        // bool vis =  bspParser.is_visible(one, two);
+        // cout << "visible:" << vis << endl;
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     }

@@ -1,6 +1,5 @@
 #include "BSPParser.hpp"
 #include "TraceRay.hpp"
-using namespace Valve;
 
 bool BSPParser::parse_map( const std::string& bsp_directory, const std::string& bsp_file )
 {

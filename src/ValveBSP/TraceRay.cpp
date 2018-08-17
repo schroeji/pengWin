@@ -3,7 +3,6 @@
 #include <cstring>
 #define FLT_EPSILON 1e-6
 
-using namespace Valve;
 using namespace BSP;
 
 bool TraceRay::is_visible( const Vector3& origin, const Vector3& final, BSPFile* pBSPFile )
@@ -24,7 +23,7 @@ void TraceRay::ray_cast( const Vector3& origin, const Vector3& final, BSPFile* p
         return;
     }
 
-    memset( pTrace, 0, sizeof(trace_t));
+    // ptrace->m_AllSolid = Fa;
     pTrace->m_Fraction          = 1.0f;
     pTrace->m_FractionLeftSolid = 0.f;
     ray_cast_node( pBSPFile, 0, 0.f, 1.f, origin, final, pTrace );
@@ -256,7 +255,7 @@ void TraceRay::ray_cast_surface( BSPFile* pBSPFile, const int32_t surface_index,
     const auto dot1 = pPlane->dist_to( origin );
     const auto dot2 = pPlane->dist_to( final );
 
-    if( dot1 > 0.f != dot2 > 0.f ) {
+    if( (dot1 > 0.f) != (dot2 > 0.f) ) {
         if( dot1 - dot2 < DIST_EPSILON ) {
             return;
         }

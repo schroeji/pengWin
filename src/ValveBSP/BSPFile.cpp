@@ -1,6 +1,5 @@
 #include "BSPFile.hpp"
 #include <iostream>
-using namespace Valve;
 using namespace BSP;
 
 BSPFile::BSPFile( const std::string& bsp_directory, const std::string& bsp_file )

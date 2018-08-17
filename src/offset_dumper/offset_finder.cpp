@@ -71,6 +71,7 @@ void write_settings(const string& file_name) {
   file << "# file for reading mouse clicks" << endl;
   file << "# usually /dev/input/event*" << endl;
   file << "mouse_file=/dev/input/event2" << endl;
+  file << "maps_path=~/.local/share/Steam/steamapps/common/Counter-Strike Global Offensive/csgo/maps/" << endl;
   file << "# trigger settings" << endl;
   file << "trigger_delay=10" << endl;
   file << "trigger_use_random=false" << endl;
