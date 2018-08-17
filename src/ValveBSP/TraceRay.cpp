@@ -5,19 +5,19 @@
 
 using namespace BSP;
 
-bool TraceRay::is_visible( const Vector3& origin, const Vector3& final, BSPFile* pBSPFile )
+bool TraceRay::is_visible( const Vector3& origin, const Vector3& destination, BSPFile* pBSPFile )
 {
     if( !pBSPFile ) {
         return false;
     }
 
     trace_t trace;
-    ray_cast( origin, final, pBSPFile, &trace );
+    ray_cast( origin, destination, pBSPFile, &trace );
 
     return !( trace.m_Fraction < 1.f );
 }
 
-void TraceRay::ray_cast( const Vector3& origin, const Vector3& final, BSPFile* pBSPFile, trace_t* pTrace )
+void TraceRay::ray_cast( const Vector3& origin, const Vector3& destination, BSPFile* pBSPFile, trace_t* pTrace )
 {
     if( pBSPFile->m_Planes.empty() ) {
         return;
@@ -26,19 +26,19 @@ void TraceRay::ray_cast( const Vector3& origin, const Vector3& final, BSPFile* p
     // ptrace->m_AllSolid = Fa;
     pTrace->m_Fraction          = 1.0f;
     pTrace->m_FractionLeftSolid = 0.f;
-    ray_cast_node( pBSPFile, 0, 0.f, 1.f, origin, final, pTrace );
+    ray_cast_node( pBSPFile, 0, 0.f, 1.f, origin, destination, pTrace );
 
     if( pTrace->m_Fraction < 1.0f ) {
         for( size_t i = 0; i < 3; ++i ) {
-            pTrace->m_EndPos( i ) = origin( i ) + pTrace->m_Fraction * ( final( i ) - origin( i ) );
+            pTrace->m_EndPos( i ) = origin( i ) + pTrace->m_Fraction * ( destination( i ) - origin( i ) );
         }
     }
     else {
-        pTrace->m_EndPos = final;
+        pTrace->m_EndPos = destination;
     }
 }
 
-void TraceRay::ray_cast_node( BSPFile* pBSPFile, const int32_t node_index, const float start_fraction, const float end_fraction, const Vector3& origin, const Vector3& final, trace_t* pTrace )
+void TraceRay::ray_cast_node( BSPFile* pBSPFile, const int32_t node_index, const float start_fraction, const float end_fraction, const Vector3& origin, const Vector3& destination, trace_t* pTrace )
 {
     if( pTrace->m_Fraction <= start_fraction ) {
         return;
@@ -56,7 +56,7 @@ void TraceRay::ray_cast_node( BSPFile* pBSPFile, const int32_t node_index, const
                 continue;
             }
 
-            ray_cast_brush( pBSPFile, pBrush, pTrace, origin, final );
+            ray_cast_brush( pBSPFile, pBrush, pTrace, origin, destination );
             if( !pTrace->m_Fraction ) {
                 return;
             }
@@ -68,7 +68,7 @@ void TraceRay::ray_cast_node( BSPFile* pBSPFile, const int32_t node_index, const
             return;
         }
         for( auto i = 0; i < static_cast< int32_t >( pLeaf->m_Numleaffaces ); ++i ) {
-            ray_cast_surface( pBSPFile, static_cast< int32_t >( pBSPFile->m_Leaffaces.at( pLeaf->m_Firstleafface + i ) ), pTrace, origin, final );
+            ray_cast_surface( pBSPFile, static_cast< int32_t >( pBSPFile->m_Leaffaces.at( pLeaf->m_Firstleafface + i ) ), pTrace, origin, destination );
         }
 
         return;
@@ -87,18 +87,18 @@ void TraceRay::ray_cast_node( BSPFile* pBSPFile, const int32_t node_index, const
 
     if( pPlane->m_Type < 3 ) {
         start_distance = origin( static_cast< size_t >( pPlane->m_Type ) ) - pPlane->m_Distance;
-        end_distance   = final( static_cast< size_t >( pPlane->m_Type ) ) - pPlane->m_Distance;
+        end_distance   = destination( static_cast< size_t >( pPlane->m_Type ) ) - pPlane->m_Distance;
     }
     else {
         start_distance = origin.dot( pPlane->m_Normal ) - pPlane->m_Distance;
-        end_distance   = final.dot( pPlane->m_Normal ) - pPlane->m_Distance;
+        end_distance   = destination.dot( pPlane->m_Normal ) - pPlane->m_Distance;
     }
 
     if( start_distance >= 0.f && end_distance >= 0.f ) {
-        ray_cast_node( pBSPFile, pNode->m_Children.at( 0 ), start_fraction, end_fraction, origin, final, pTrace );
+        ray_cast_node( pBSPFile, pNode->m_Children.at( 0 ), start_fraction, end_fraction, origin, destination, pTrace );
     }
     else if( start_distance < 0.f && end_distance < 0.f ) {
-        ray_cast_node( pBSPFile, pNode->m_Children.at( 1 ), start_fraction, end_fraction, origin, final, pTrace );
+        ray_cast_node( pBSPFile, pNode->m_Children.at( 1 ), start_fraction, end_fraction, origin, destination, pTrace );
     }
     else
     {
@@ -143,20 +143,20 @@ void TraceRay::ray_cast_node( BSPFile* pBSPFile, const int32_t node_index, const
 
         fraction_middle = start_fraction + ( end_fraction - start_fraction ) * fraction_first;
         for( size_t i = 0; i < 3; i++ ) {
-            middle( i ) = origin( i ) + fraction_first * ( final( i ) - origin( i ) );
+            middle( i ) = origin( i ) + fraction_first * ( destination( i ) - origin( i ) );
         }
 
         ray_cast_node( pBSPFile, pNode->m_Children.at( side_id ), start_fraction, fraction_middle, origin, middle, pTrace );
         fraction_middle = start_fraction + ( end_fraction - start_fraction ) * fraction_second;
         for( size_t i = 0; i < 3; i++ ) {
-            middle( i ) = origin( i ) + fraction_second * ( final( i ) - origin( i ) );
+            middle( i ) = origin( i ) + fraction_second * ( destination( i ) - origin( i ) );
         }
 
-        ray_cast_node( pBSPFile, pNode->m_Children.at( !side_id ), fraction_middle, end_fraction, middle, final, pTrace );
+        ray_cast_node( pBSPFile, pNode->m_Children.at( !side_id ), fraction_middle, end_fraction, middle, destination, pTrace );
     }
 }
 
-void TraceRay::ray_cast_brush( BSPFile* pBSPFile, dbrush_t *pBrush, trace_t *pTrace, const Vector3& origin, const Vector3& final )
+void TraceRay::ray_cast_brush( BSPFile* pBSPFile, dbrush_t *pBrush, trace_t *pTrace, const Vector3& origin, const Vector3& destination )
 {
     if( !pBrush->m_Numsides )
         return;
@@ -177,7 +177,7 @@ void TraceRay::ray_cast_brush( BSPFile* pBSPFile, dbrush_t *pBrush, trace_t *pTr
         }
 
         const auto start_distance = origin.dot( pPlane->m_Normal ) - pPlane->m_Distance;
-        const auto end_distance   = final.dot( pPlane->m_Normal ) - pPlane->m_Distance;
+        const auto end_distance   = destination.dot( pPlane->m_Normal ) - pPlane->m_Distance;
         if( start_distance > 0.f ) {
             starts_out = true;
             if( end_distance > 0.f ) {
@@ -244,7 +244,7 @@ void TraceRay::ray_cast_brush( BSPFile* pBSPFile, dbrush_t *pBrush, trace_t *pTr
     }
 }
 
-void TraceRay::ray_cast_surface( BSPFile* pBSPFile, const int32_t surface_index, trace_t *pTrace, const Vector3& origin, const Vector3& final )
+void TraceRay::ray_cast_surface( BSPFile* pBSPFile, const int32_t surface_index, trace_t *pTrace, const Vector3& origin, const Vector3& destination )
 {
     auto* pPolygon = &pBSPFile->m_Polygons.at( static_cast< size_t >( surface_index ) );
     if( !pPolygon ) {
@@ -253,7 +253,7 @@ void TraceRay::ray_cast_surface( BSPFile* pBSPFile, const int32_t surface_index,
 
     auto* pPlane    = &pPolygon->m_Plane;
     const auto dot1 = pPlane->dist_to( origin );
-    const auto dot2 = pPlane->dist_to( final );
+    const auto dot2 = pPlane->dist_to( destination );
 
     if( (dot1 > 0.f) != (dot2 > 0.f) ) {
         if( dot1 - dot2 < DIST_EPSILON ) {
@@ -266,7 +266,7 @@ void TraceRay::ray_cast_surface( BSPFile* pBSPFile, const int32_t surface_index,
         }
 
         size_t i;
-        auto intersection = origin + ( final - origin ) * t;
+        auto intersection = origin + ( destination - origin ) * t;
         for( i = 0; i < pPolygon->m_nVerts; ++i ) {
             auto* pEdgePlane = &pPolygon->m_EdgePlanes.at( i );
             if( pEdgePlane->m_Origin.empty() ) {

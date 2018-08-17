@@ -18,7 +18,7 @@ public:
   /// Time completed, 1.0 = didn't hit anything :)
   float          m_Fraction          = 1.f;
   float          m_FractionLeftSolid = 1.f;
-  /// Final trace position
+  /// Destination trace position
   Vector3        m_EndPos            = 0.f;
   BSP::cplane_t* m_pPlane            = nullptr;
   int32_t        m_Contents          = 0;
@@ -33,22 +33,22 @@ public:
    * @brief      Determines if visible.
    *
    * @param[in]  origin     The origin
-   * @param[in]  final      The final
+   * @param[in]  destination      The destination
    * @param      pBSPFile   The bsp file
    *
    * @return     True if visible, False otherwise.
    */
-  static bool is_visible( const Vector3& origin, const Vector3& final, BSPFile* pBSPFile );
+  static bool is_visible( const Vector3& origin, const Vector3& destination, BSPFile* pBSPFile );
 
   /**
    * @brief      Perform world trace.
    *
    * @param[in]  origin     The origin
-   * @param[in]  final      The final point
+   * @param[in]  destination      The destination point
    * @param      pBSPFile   The bsp file
    * @param      pTrace     The trace
    */
-  static void ray_cast( const Vector3& origin, const Vector3& final, BSPFile* pBSPFile, trace_t* pTrace );
+  static void ray_cast( const Vector3& origin, const Vector3& destination, BSPFile* pBSPFile, trace_t* pTrace );
 
 protected:
   /**
@@ -59,10 +59,10 @@ protected:
    * @param[in]  start_fraction  The start fraction
    * @param[in]  end_fraction    The end fraction
    * @param[in]  origin          The origin
-   * @param[in]  final           The final point
+   * @param[in]  destination           The destination point
    * @param      pTrace          The trace
    */
-  static void ray_cast_node( BSPFile* pBSPFile, const int32_t node_index, const float start_fraction, const float end_fraction, const Vector3& origin, const Vector3& final, trace_t* pTrace );
+  static void ray_cast_node( BSPFile* pBSPFile, const int32_t node_index, const float start_fraction, const float end_fraction, const Vector3& origin, const Vector3& destination, trace_t* pTrace );
 
   /**
    * @brief      Trace a bsp brush.
@@ -71,9 +71,9 @@ protected:
    * @param      pBrush     The brush
    * @param      pTrace     The trace
    * @param[in]  origin     The origin
-   * @param[in]  final      The final point
+   * @param[in]  destination      The destination point
    */
-  static void ray_cast_brush( BSPFile* pBSPFile, BSP::dbrush_t *pBrush, trace_t *pTrace, const Vector3& origin, const Vector3& final );
+  static void ray_cast_brush( BSPFile* pBSPFile, BSP::dbrush_t *pBrush, trace_t *pTrace, const Vector3& origin, const Vector3& destination );
 
   /**
    * @brief      Trace a bsp surfaces.
@@ -82,7 +82,7 @@ protected:
    * @param[in]  surface_index  The surface index
    * @param      pTrace         The trace
    * @param[in]  origin         The origin
-   * @param[in]  final          The final point
+   * @param[in]  destination          The destination point
    */
-  static void ray_cast_surface( BSPFile* pBSPFile, const int32_t surface_index, trace_t *pTrace, const Vector3& origin, const Vector3& final );
+  static void ray_cast_surface( BSPFile* pBSPFile, const int32_t surface_index, trace_t *pTrace, const Vector3& origin, const Vector3& destination );
 };
