@@ -23,6 +23,8 @@
 // this defines how long before a flash bang ends a player is able to see again
 // i.e. bool flashed = total_flash_duration - flashed_time > FLASH_END_OFFSET
 #define FLASH_END_OFFSET 1.1f
+// duration for spraying a full magazine used for FOV scaling on spray
+#define MAGAZINE_DURATION 3000.0f
 
 enum Weapon {
   NONE = 0,

@@ -11,6 +11,7 @@
 #include <linux/uinput.h>
 #include <iostream>
 #include <math.h>
+#include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -397,6 +398,12 @@ pair<EntityType*, Vector> Aimer::findTargetDispatcher(Vector view, unsigned int 
   float fov = settings.aim_fov;
   if (!(settings.weapon_fovs.find(weapon) == settings.weapon_fovs.end())) // special fov is set
     fov = settings.weapon_fovs[weapon];
+  // apply fov scaling on hold
+  if (settings.aim_fov_max_scale > 1.0) {
+    float t = min((i * settings.aim_sleep) / MAGAZINE_DURATION, 1.0f);
+    float scaling = 1 + t * (settings.aim_fov_max_scale - 1);
+    fov *= scaling;
+  }
   switch(weapon) {
   case Weapon::ZEUS:
     return zeusTarget(view, fov);
