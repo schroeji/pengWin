@@ -233,6 +233,7 @@ has_plotted = False
 while(not has_plotted):
   time.sleep(1)
   has_plotted = True
+  generic = False
   try:
     img = plt.imread("overviews/{}_radar.jpg".format(map_name))
   except:

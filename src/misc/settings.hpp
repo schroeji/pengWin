@@ -45,11 +45,14 @@ public:
   string aim_key;
   float smoothing_factor = 0.2;
   float sensitivity;
+  float aim_fov_max_scale;
   bool aim_autoshoot = false;
   bool aim_smooth_first_shot = true;
   bool aim_smoke_check;
   bool aim_flash_check;
   bool aim_teammates;
+  bool aim_fov_scale_on_spray;
+
   map<Weapon, float> weapon_fovs;
   vector<unsigned int> bone_ids;
 

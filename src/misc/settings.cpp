@@ -90,6 +90,10 @@ void Settings::load(const string& file) {
           aim_smoke_check = (splits[1] == "true");
         else if (splits[0] == "aim_flash_check")
           aim_flash_check = (splits[1] == "true");
+        else if (splits[0] == "aim_scale_fov_on_spray")
+          aim_fov_scale_on_spray = (splits[1] == "true");
+        else if (splits[0] == "aim_fov_max_scale")
+          aim_fov_max_scale = strtof(splits[2]);
         else if (splits[0] == "aim_teammates")
           aim_teammates = (splits[1] == "true");
         else if (splits[0] == "bone_ids") {
@@ -145,6 +149,8 @@ void Settings::print() {
   cout << "aim_smoke_check: " << aim_smoke_check << endl;
   cout << "aim_flash_check: " << aim_flash_check << endl;
   cout << "aim_teammates: " << aim_teammates << endl;
+  cout << "aim_fov_max_scale: " << aim_fov_max_scale << endl;
+  cout << "aim_fov_scale_on_spray: " << aim_fov_scale_on_spray << endl;
   cout << "bone_ids: ";
   for (unsigned int bone : bone_ids)
     cout << bone << " ";

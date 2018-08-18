@@ -94,6 +94,9 @@ void write_settings(const string& file_name) {
   file << "aim_smoke_check=true" << endl;
   file << "aim_flash_check=true" << endl;
   file << "aim_teammates=false" << endl;
+  file << "# if this is enabled your fov will increase linearly to a maxium factor of aim_fov_scale_max over 3 seconds" << endl;
+  file << "aim_fov_scale_on_spray=true" << endl;
+  file << "aim_fov_scale_max=3.4" << endl;
   file << "# your ingame sensitivity (used for aim calculations)" << endl;
   file << "sensitivity=1.3" << endl;
   file << "# radar settings" << endl;
