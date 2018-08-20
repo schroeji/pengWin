@@ -94,6 +94,8 @@ Weapon getWeaponByName(std::string weapon_name){
     return Weapon::P90;
   if (weapon_name == "UMP45")
     return Weapon::UMP45;
+  if (weapon_name == "MP5SD")
+    return Weapon::MP5SD;
   if (weapon_name == "XM1014")
     return Weapon::XM1014;
   if (weapon_name == "BIZON")
@@ -205,6 +207,8 @@ std::string getWeaponName(Weapon w) {
     return "P90";
   case Weapon::UMP45:
     return "UMP45";
+  case Weapon::MP5SD:
+    return "MP5SD";
   case Weapon::XM1014:
     return "XM1014";
   case Weapon::BIZON:

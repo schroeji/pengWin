@@ -51,6 +51,8 @@ def weapon(wid):
     return "MAC10"
   if wid == 19:
     return "P90"
+  if wid == 23:
+    return "MP5"
   if wid == 24:
     return "UMP"
   if wid == 25:

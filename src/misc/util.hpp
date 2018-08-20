@@ -42,6 +42,7 @@ enum Weapon {
   M4A1 = 16,
   MAC10 = 17,
   P90 = 19,
+  MP5SD = 23,
   UMP45 = 24,
   XM1014 = 25,
   BIZON = 26,
