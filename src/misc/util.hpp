@@ -125,7 +125,10 @@ struct Vector {
   inline Vector operator+(Vector a) {
     return {a.x + x, a.y + y, a.z + z};
   }
-  inline float operator*(Vector a) {
+  // inline float operator*(Vector a) {
+    // return a.x * x + a.y * y + a.z * z;
+  // }
+  inline float operator*(const Vector a) {
     return a.x * x + a.y * y + a.z * z;
   }
   inline Vector operator-(Vector a) {
@@ -133,6 +136,9 @@ struct Vector {
   }
   inline Vector operator*(float a) {
     return {a*x, a*y, a*z};
+  }
+  inline Vector operator/(float a) {
+    return {x/a, y/a, z/a};
   }
 };
 

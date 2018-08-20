@@ -45,6 +45,8 @@ void Settings::load(const string& file) {
           attack_offset = strtoul(splits[1].c_str(), NULL, 16);
         else if (splits[0] == "local_player_offset")
           local_player_offset = strtoul(splits[1].c_str(), NULL, 16);
+        else if (splits[0] == "maps_path")
+          maps_path = splits[1];
         else if (splits[0] == "map_name_offset")
           map_name_offset = strtoul(splits[1].c_str(), NULL, 16);
         else if (splits[0] == "force_jump_offset")
@@ -92,6 +94,8 @@ void Settings::load(const string& file) {
           aim_flash_check = (splits[1] == "true");
         else if (splits[0] == "aim_fov_max_scale")
           aim_fov_max_scale = strtof(splits[1].c_str(), NULL);
+        else if (splits[0] == "aim_vis_check")
+          aim_vis_check = (splits[1] == "true");
         else if (splits[0] == "aim_teammates")
           aim_teammates = (splits[1] == "true");
         else if (splits[0] == "bone_ids") {
@@ -128,6 +132,7 @@ void Settings::print() {
   cout << "[General]" << endl;
   cout << dec << "main_loop_sleep: " << main_loop_sleep << endl;
   cout << "Mouse file: " << mouse_file << endl;
+  cout << "Maps path: " << maps_path << endl;
   cout << "trigger_delay: " << trigger_delay << endl;
   cout << "trigger_use_random: " << trigger_use_random << endl;
   cout << "sensitivity: " << sensitivity << endl;
@@ -146,6 +151,7 @@ void Settings::print() {
   cout << "aim_smooth_first_shot: " << aim_smooth_first_shot << endl;
   cout << "aim_smoke_check: " << aim_smoke_check << endl;
   cout << "aim_flash_check: " << aim_flash_check << endl;
+  cout << "aim_vis_check: " << aim_vis_check << endl;
   cout << "aim_teammates: " << aim_teammates << endl;
   cout << "aim_fov_max_scale: " << aim_fov_max_scale << endl;
   cout << "bone_ids: ";

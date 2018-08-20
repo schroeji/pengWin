@@ -4,6 +4,7 @@
 #include "misc/settings.hpp"
 #include "misc/hotkey.hpp"
 #include "misc/util.hpp"
+#include "ValveBSP/BSPParser.hpp"
 #include "hacks/radar.hpp"
 #include "hacks/trigger.hpp"
 #include "hacks/aimer.hpp"
@@ -79,11 +80,15 @@ int main(int argc, char** argv) {
   MemoryAccess mem(&settings);
   GameManager csgo = GameManager(mem);
 
+  BSPParser bspParser;
   Trigger trigger(csgo);
-  Aimer aimer(csgo);
+  Aimer aimer(csgo, bspParser);
   BunnyHopper bhopper(csgo);
   Radar radar(csgo);
   HotkeyManager hotkeyMan(csgo);
+
+  // string maps_path("/run/media/hidden/big/SteamLibrary/steamapps/common/Counter-Strike Global Offensive/csgo/maps/");
+  // cout << "Load:" << bspParser.parse_map(cs_path, "de_dust2.bsp") << endl;
 
   while (!panicked && csgo.gameRunning()) {
     if (debug) cout << "Waiting until connected..." << endl;
@@ -120,6 +125,13 @@ int main(int argc, char** argv) {
     };
     hotkeyMan.bind(settings.panic_key, stop);
     hotkeyMan.startListen();
+    if (settings.aim_vis_check) {
+      if (bspParser.parse_map(settings.maps_path, csgo.getMapName() + ".bsp")) {
+        cout << "Parsed map: " << csgo.getMapName() << endl;
+      } else {
+        cout << "WARNING: Could not parse: " << settings.maps_path << csgo.getMapName() + ".bsp" << endl;
+      }
+    }
 
     // main loop
     while (!panicked && csgo.isOnServer()) {

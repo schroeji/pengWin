@@ -71,6 +71,7 @@ void write_settings(const string& file_name) {
   file << "# file for reading mouse clicks" << endl;
   file << "# usually /dev/input/event*" << endl;
   file << "mouse_file=/dev/input/event2" << endl;
+  file << "maps_path=~/.local/share/Steam/steamapps/common/Counter-Strike Global Offensive/csgo/maps/" << endl;
   file << "# trigger settings" << endl;
   file << "trigger_delay=10" << endl;
   file << "trigger_use_random=false" << endl;
@@ -93,6 +94,7 @@ void write_settings(const string& file_name) {
   file << "smoothing_factor=0.25" << endl;
   file << "aim_smoke_check=true" << endl;
   file << "aim_flash_check=true" << endl;
+  file << "aim_vis_check=true" << endl;
   file << "aim_teammates=false" << endl;
   file << "# if this > 1 your fov will increase linearly to a maxium factor of aim_fov_max_scale over 3 seconds" << endl;
   file << "aim_fov_max_scale=3.1" << endl;

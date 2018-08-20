@@ -24,11 +24,12 @@
 #include <cassert>
 
 using namespace std;
-Aimer::Aimer(GameManager& csgo) : csgo(csgo),
-                                  mem(csgo.getMemoryAccess()),
-                                  clicker(Clicker(csgo.getMemoryAccess())),
-                                  settings(Settings::getInstance()),
-                                  inverse_sens(1 / settings.sensitivity) {
+Aimer::Aimer(GameManager& csgo, BSPParser& bspParser) : csgo(csgo),
+                                                       mem(csgo.getMemoryAccess()),
+                                                       clicker(Clicker(csgo.getMemoryAccess())),
+                                                       settings(Settings::getInstance()),
+                                                       inverse_sens(1 / settings.sensitivity),
+                                                       bspParser(bspParser) {
   // prepare mouse
   struct uinput_user_dev uidev;
   uinput = open("/dev/input/uinput", O_WRONLY | O_NONBLOCK);
@@ -548,6 +549,9 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view, float fov) {
   Vector target = player_pos + view*len(distVec);
   if (lineSphereIntersection(player_pos, target, closestBone, BONE_RADIUS))
     throw runtime_error("No adjustment needed");
+  // do visibility check last to minimize load
+  if (settings.aim_vis_check && !bspParser.is_visible(player_pos, closestBone))
+    throw runtime_error("Target not visible");
   return pair<EntityType*, Vector>(closestPlayer, closestBone);
 }
 

@@ -25,6 +25,7 @@ public:
   bool debug = false;
   string mouse_file;
   string panic_key;
+  string maps_path;
 
   // trigger settings
   long int trigger_delay;
@@ -48,10 +49,10 @@ public:
   float aim_fov_max_scale = 1.0;
   bool aim_autoshoot = false;
   bool aim_smooth_first_shot = true;
+  bool aim_vis_check;
   bool aim_smoke_check;
   bool aim_flash_check;
   bool aim_teammates;
-
   map<Weapon, float> weapon_fovs;
   vector<unsigned int> bone_ids;
 
