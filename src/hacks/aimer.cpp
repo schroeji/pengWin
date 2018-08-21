@@ -178,7 +178,7 @@ MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist, boo
     // auto snipers
   case Weapon::G3SG1:
   case Weapon::SCAR20:
-    return default_calcMouseMovement(curr_angle, dist, false);
+    return default_calcMouseMovement(curr_angle, dist, use_smooth);
     // disable for nades / knives
   case Weapon::SMOKEGRENADE:
   case Weapon::FLASHBANG:
