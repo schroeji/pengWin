@@ -137,8 +137,13 @@ int main(int argc, char** argv) {
     while (!panicked && csgo.isOnServer()) {
       csgo.grabPlayers();
       if (debug) {
+<<<<<<< HEAD
         csgo.printPlayers();
         // csgo.printEntities();
+=======
+        csgo.printEntities();
+        // cout << "visible:" << vis << endl;
+>>>>>>> BSPParse
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     }

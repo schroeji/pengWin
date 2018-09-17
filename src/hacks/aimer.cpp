@@ -400,7 +400,7 @@ pair<EntityType*, Vector> Aimer::findTargetDispatcher(Vector view, unsigned int 
   if (!(settings.weapon_fovs.find(weapon) == settings.weapon_fovs.end())) // special fov is set
     fov = settings.weapon_fovs[weapon];
   // apply fov scaling on hold
-  if (settings.aim_fov_max_scale > 1.0) {
+  if (settings.aim_fov_max_scale > 1.0 && weapon != Weapon::NEGEV) {
     float t = min((i * settings.aim_sleep) / MAGAZINE_DURATION, 1.0f);
     float scaling = 1 + t * (settings.aim_fov_max_scale - 1);
     fov *= scaling;

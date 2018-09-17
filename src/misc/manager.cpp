@@ -41,7 +41,7 @@ void GameManager::grabPlayers(){
 	size_t count = manager.objects.Count;
 	void* data_ptr = (void*) manager.objects.DataPtr;
   // cout << hex << "Data : " << data_ptr << endl;
-  // cout << dec << "count : " << count << endl;
+  if (settings.debug) cout << dec << "object count: " << count << endl;
   if(!mem.read(data_ptr, (void*) g_glow, sizeof(GlowObjectDefinition_t) * count)){
     cout << "Could not get objects" << endl;
     return;
@@ -136,6 +136,8 @@ void GameManager::printEntities() {
   cout << "----------Entities------------" << endl;
   for (unsigned int i = 0; i < count; i++) {
     EntityType* entity = new EntityType;
+    if (g_glow[i].m_pEntity == nullptr)
+      continue;
     cout << dec << "Nr: " << i << endl;
     cout << hex << "Addr:" << g_glow[i].m_pEntity << endl;
     mem.read(g_glow[i].m_pEntity, entity, sizeof(EntityType));
