@@ -122,6 +122,8 @@ Weapon getWeaponByName(std::string weapon_name){
     return Weapon::SCAR20;
   if (weapon_name == "SG556")
     return Weapon::SG556;
+  if (weapon_name == "SCOUT")
+    return Weapon::SSG08;
   if (weapon_name == "SSG08")
     return Weapon::SSG08;
   if (weapon_name == "KNIFE")
@@ -144,8 +146,8 @@ Weapon getWeaponByName(std::string weapon_name){
     return Weapon::KNIFE_T;
   if (weapon_name == "M4A1_SILENCER")
     return Weapon::M4A1_SILENCER;
-  if (weapon_name == "USP_SILENCER")
-    return Weapon::USP_SILENCER;
+  if (weapon_name == "USP")
+    return Weapon::USP;
   if (weapon_name == "CZ75A")
     return Weapon::CZ75A;
   if (weapon_name == "REVOLVER")
@@ -255,8 +257,8 @@ std::string getWeaponName(Weapon w) {
     return "KNIFE_T";
   case Weapon::M4A1_SILENCER:
     return "M4A1_SILENCER";
-  case Weapon::USP_SILENCER:
-    return "USP_SILENCER";
+  case Weapon::USP:
+    return "USP";
   case Weapon::CZ75A:
     return "CZ75A";
   case Weapon::REVOLVER:

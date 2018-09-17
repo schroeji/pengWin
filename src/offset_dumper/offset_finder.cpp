@@ -195,6 +195,15 @@ int main(int argc, char** argv) {
   offset_names.push_back("isConnected_offset");
   offsets.push_back(string(offset_buf));
 
+  // cout << "-- SplitScreen --" << endl;
+  // addr_type split_call = mem.find_pattern(isConnectedMove_pattern, engineRange);
+  // addr_type isConnected_addr = mem.getCallAddress((void*) (isConnected_call + 0x8)) + 1;
+  // addr_type isConnected_offset = isConnected_addr - engineRange.first;
+  // sprintf(offset_buf, "0x%lx",isConnected_offset);
+  // offset_names.push_back("isConnected_offset");
+  // offsets.push_back(string(offset_buf));
+
+
 
   // // cout << "Test1: " << test1 << endl;
   // // cout << "Test2: " << test2 << endl;
