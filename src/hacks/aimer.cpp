@@ -155,7 +155,7 @@ MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist, boo
   case Weapon::DEAGLE:
     // return spline_calcMouseMovement(curr_angle, dist, i);
   case Weapon::GLOCK:
-  case Weapon::USP_SILENCER:
+  case Weapon::USP:
   case Weapon::FIVESEVEN:
   case Weapon::HKP2000:
   case Weapon::P250:

@@ -86,8 +86,8 @@ Weapon getWeaponByName(std::string weapon_name){
     return Weapon::GALILAR;
   if (weapon_name == "M249")
     return Weapon::M249;
-  if (weapon_name == "M4A1")
-    return Weapon::M4A1;
+  if (weapon_name == "M4A4")
+    return Weapon::M4A4;
   if (weapon_name == "MAC10")
     return Weapon::MAC10;
   if (weapon_name == "P90")
@@ -146,8 +146,10 @@ Weapon getWeaponByName(std::string weapon_name){
     return Weapon::C4;
   if (weapon_name == "KNIFE_T")
     return Weapon::KNIFE_T;
+  if (weapon_name == "M4A1")
+    return Weapon::M4A1;
   if (weapon_name == "M4A1_SILENCER")
-    return Weapon::M4A1_SILENCER;
+    return Weapon::M4A1;
   if (weapon_name == "USP")
     return Weapon::USP;
   if (weapon_name == "CZ75A")
@@ -201,8 +203,8 @@ std::string getWeaponName(Weapon w) {
     return "GALILAR";
   case Weapon::M249:
     return "M249";
-  case Weapon::M4A1:
-    return "M4A1";
+  case Weapon::M4A4:
+    return "M4A4";
   case Weapon::MAC10:
     return "MAC10";
   case Weapon::P90:
@@ -259,8 +261,8 @@ std::string getWeaponName(Weapon w) {
     return "C4";
   case Weapon::KNIFE_T:
     return "KNIFE_T";
-  case Weapon::M4A1_SILENCER:
-    return "M4A1_SILENCER";
+  case Weapon::M4A1:
+    return "M4A1";
   case Weapon::USP:
     return "USP";
   case Weapon::CZ75A:
