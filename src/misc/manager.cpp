@@ -41,7 +41,7 @@ void GameManager::grabPlayers(){
 	size_t count = manager.objects.Count;
 	void* data_ptr = (void*) manager.objects.DataPtr;
   // cout << hex << "Data : " << data_ptr << endl;
-  if (settings.debug) cout << dec << "object count: " << count << endl;
+  // if (settings.debug) cout << dec << "object count: " << count << endl;
   if(!mem.read(data_ptr, (void*) g_glow, sizeof(GlowObjectDefinition_t) * count)){
     cout << "Could not get objects" << endl;
     return;
@@ -90,7 +90,7 @@ vector<EntityType*>& GameManager::getPlayers() {
 
 void GameManager::printPlayers() {
   int i = 0;
-  cout << "---------Players---------" << endl;
+  cout << "---------Playersaa---------" << endl;
   for (EntityType* player : players) {
     cout << dec << "--- Player: " << i << "---" << endl;
     cout << hex << "Addr: " << player_addrs[i] << endl;
@@ -146,6 +146,12 @@ void GameManager::printEntities() {
     printf("Origin x=%f y=%f z=%f\n", entity->m_vecOrigin.x, entity->m_vecOrigin.y, entity->m_vecOrigin.z);
     printf("m_fFlags: %lu\n", entity->m_fFlags);
     printf("m_iEFlags: %d\n", entity->m_iEFlags);
+    vector<int> diffs = mem.diffMem((addr_type)g_glow[i].m_pEntity, 0x200);
+    if (diffs.size() > 0) {
+      // for (int i : diffs)
+      // cout << hex << i << endl;
+      mem.printBlock((addr_type)g_glow[i].m_pEntity, 0x200);
+    }
     cout << "-----" << endl;
   }
 }

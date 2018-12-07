@@ -118,8 +118,8 @@ int main(int argc, char** argv) {
     }
     // function for panic key to stop everything
     boost::function<void(unsigned int)> stop = [&hotkeyMan, &radar, &panicked](unsigned int x) {
-      hotkeyMan.stopListen();
       radar.stop();
+      hotkeyMan.stopListen();
       if (x == 0)
         panicked = true;
     };
@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
     while (!panicked && csgo.isOnServer()) {
       csgo.grabPlayers();
       if (debug) {
-        csgo.printPlayers();
+        // csgo.printPlayers();
         // csgo.printEntities();
         // cout << "visible:" << vis << endl;
       }

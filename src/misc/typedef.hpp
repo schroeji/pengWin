@@ -2,44 +2,152 @@
 
 #include "util.hpp"
 // definitions for the SDK
+// struct EntityType {
+// 	char __buf_0x00[0x88]; // 0x0
+// 	int m_bIsAutoaimTarget; // 0x88
+//   char __buf_0x8c[0x8]; // 0x8C
+//   unsigned int m_iEntityId; //0x94
+//   char __buf_0x98[0x8]; //0x98
+// 	int m_clrRender; // 0xA0
+// 	int m_cellbits; // 0xA4
+// 	char __buf_0xA8[0x4]; // 0xA8
+// 	int m_cellX; // 0xAC
+// 	int m_cellY; // 0xB0
+// 	int m_cellZ; // 0xB4
+// 	char __buf_0xB8[0xC]; // 0xB8
+// 	Vector m_vecAbsVelocity; // 0xC4
+// 	Vector m_vecAbsOrigin; // 0xD0
+// 	Vector m_vecOrigin; // 0xDC
+// 	Vector m_vecAngVelocity; // 0xE8
+// 	QAngle m_angAbsRotation; // 0xF4
+// 	QAngle m_angRotation; // 0x100
+// 	float m_flGravity; // 0x10C
+// 	float m_flProxyRandomValue; // 0x110
+// 	int m_iEFlags; // 0x114
+// 	char __buf_0x118[0x4]; // 0x118
+// 	unsigned char m_nWaterType; // 0x11C
+// 	char __buf_0x11D[0x4]; // 0x11D
+//   unsigned char m_bDormant; // 0x121
+//   char __buf_0x122[6]; // 0x122
+// 	float m_fEffects; // 0x128
+// 	int m_iTeamNum; // 0x12C
+// 	int m_iPendingTeamNum; // 0x130
+// 	int m_iHealth; // 0x134
+// 	unsigned long m_fFlags; // 0x138
+// 	Vector2D m_vecViewOffset; // 0x13C
+// 	Vector m_vecVelocity; // 0x148
+// 	Vector m_vecBaseVelocity; // 0x154
+// 	QAngle m_angNetworkAngles; // 0x160
+// 	Vector m_vecNetworkOrigin; // 0x16C
+// };
+
 struct EntityType {
-	char __buf_0x00[0x88]; // 0x0
-	int m_bIsAutoaimTarget; // 0x88
-  char __buf_0x8c[0x8]; // 0x8C
+  char __buf_0x00[0x40]; // 0x0
+  float m_flLastMadeNoiseTime;  //0x40
+  char __buf_0x44[0x4C]; //0x44
+  bool m_bIsAutoaimTarget; //0x90
+  char __buf_0x91[0x3]; //0x91
   unsigned int m_iEntityId; //0x94
-  char __buf_0x98[0x8]; //0x98
-	int m_clrRender; // 0xA0
-	int m_cellbits; // 0xA4
-	char __buf_0xA8[0x4]; // 0xA8
-	int m_cellX; // 0xAC
-	int m_cellY; // 0xB0
-	int m_cellZ; // 0xB4
-	char __buf_0xB8[0xC]; // 0xB8
-	Vector m_vecAbsVelocity; // 0xC4
-	Vector m_vecAbsOrigin; // 0xD0
-	Vector m_vecOrigin; // 0xDC
-	Vector m_vecAngVelocity; // 0xE8
-	QAngle m_angAbsRotation; // 0xF4
-	QAngle m_angRotation; // 0x100
-	float m_flGravity; // 0x10C
-	float m_flProxyRandomValue; // 0x110
-	int m_iEFlags; // 0x114
-	char __buf_0x118[0x4]; // 0x118
-	unsigned char m_nWaterType; // 0x11C
-	char __buf_0x11D[0x4]; // 0x11D
-  unsigned char m_bDormant; // 0x121
-  char __buf_0x122[6]; // 0x122
-	float m_fEffects; // 0x128
-	int m_iTeamNum; // 0x12C
-	int m_iPendingTeamNum; // 0x130
-	int m_iHealth; // 0x134
-	unsigned long m_fFlags; // 0x138
-	Vector2D m_vecViewOffset; // 0x13C
-	Vector m_vecVelocity; // 0x148
-	Vector m_vecBaseVelocity; // 0x154
-	QAngle m_angNetworkAngles; // 0x160
-	Vector m_vecNetworkOrigin; // 0x16C
+  unsigned short m_EntClientFlags; // 0x98
+  const void *model; // 0xA0
+  int m_clrRender; // 0xA8
+  int m_cellbits; // 0xAC
+  int m_cellwidth; // 0xB0
+  int m_cellX; // 0xB4
+  int m_cellY; // 0xB8
+  int m_cellZ; // 0xBC
+  Vector m_vecCellOrigin; // 0xC0
+  Vector m_vecAbsVelocity; // 0xCC
+  Vector m_vecAbsOrigin; // 0xD8
+  Vector m_vecOrigin; // 0xE4
+  Vector m_vecAngVelocity; // 0xF0
+  QAngle m_angAbsRotation; // 0xFC
+  QAngle m_angRotation; // 0x108
+  float m_flGravity; // 0x114
+  float m_flProxyRandomValue; // 0x118
+  int m_iEFlags; // 0x11C
+  unsigned char m_nWaterType; // 0x120
+  bool m_bDormant; // 0x121
+  char __buf_0x122[0x6]; // 0x122
+  int m_fEffects; // 0x124
+  int m_iTeamNum; // 0x128
+  int m_iPendingTeamNum; // 0x12C
+  int m_nNextThinkTick; // 0x130
+  int m_iHealth; // 0x134
+  int m_fFlags; // 0x138
+  Vector m_vecViewOffset; // 0x13C
+  Vector m_vecVelocity; // 0x148
+  Vector m_vecBaseVelocity; // 0x154
+  QAngle m_angNetworkAngles; // 0x160
+  Vector m_vecNetworkOrigin; // 0x16C
+  float m_flFriction; // 0x178
+  int moveparent;  // 0x17C
+  int m_hOwnerEntity; // 0x180
+  int m_hGroundEntity; // 0x184
+  char m_iName[0x44]; //0x188
+  short m_nModelIndex; //0x28C
+  unsigned char m_nRenderFX; //0x28E
+  unsigned char m_nRenderMode; //0x28F
+  unsigned char m_MoveType;  //0x290
+  unsigned char m_MoveCollide; //0x291
+  unsigned char m_nWaterLevel; //0x292
+  char m_lifeState; //0x293
+  float m_flAnimTime; //0x294
+  float m_flOldAnimTime; //0x298
+  float m_flSimulationTime; //0x29C
+  float m_flOldSimulationTime; //0x2A0
+  float m_flCreateTime; //0x2A4
+  unsigned char m_nOldRenderMode; //0x2A8
+  unsigned short m_hRender; //0x2A9
+  unsigned char m_VisibilityBits; //0x2AB
+  bool m_bReadyToDraw; //0x2AC
+  bool m_bClientSideRagdoll; //0x2AD
+  int m_nLastThinkTick; //0x2AE
+  char m_takedamage; //0x2B2
+  float m_flSpeed; //0x2B3
 };
+
+// struct EntityType {
+// 	char __buf_0x00[0x88]; // 0x0
+// 	int m_bIsAutoaimTarget; // 0x88
+//   char __buf_0x8c[0x8]; // 0x8C
+//   unsigned int m_iEntityId; //0x94
+//   char __buf_0x98[0x8]; //0x98
+// 	int m_clrRender; // 0xA0
+// 	int m_cellbits; // 0xA4
+// 	char __buf_0xA8[0x4]; // 0xA8
+// 	int m_cellX; // 0xAC
+// 	int m_cellY; // 0xB0
+// 	int m_cellZ; // 0xB4
+// 	char __buf_0xB8[0xC]; // 0xB8
+// 	Vector m_vecAbsVelocity; // 0xC4
+// 	Vector m_vecAbsOrigin; // 0xD0
+// 	char __buf_0xDC[0xC]; // 0xDC
+// 	Vector m_vecOrigin; // 0xE8
+// 	Vector m_vecAngVelocity; // 0xE8
+// 	QAngle m_angAbsRotation; // 0xF4
+// 	QAngle m_angRotation; // 0x100
+// 	float m_flGravity; // 0x10C
+// 	float m_flProxyRandomValue; // 0x110
+// 	int m_iEFlags; // 0x114
+// 	char __buf_0x118[0x4]; // 0x118
+// 	unsigned char m_nWaterType; // 0x11C
+// 	char __buf_0x11D[0x4]; // 0x11D
+//   unsigned char m_bDormant; // 0x121
+//   char __buf_0x122[6]; // 0x122
+// 	float m_fEffects; // 0x128
+// 	int m_iTeamNum; // 0x12C
+// 	int m_iPendingTeamNum; // 0x130
+// 	char __buf_0xIDK[0x8]; // 0x11D
+// 	int m_iHealth; // 0x134
+// 	unsigned long m_fFlags; // 0x138
+// 	Vector2D m_vecViewOffset; // 0x13C
+// 	Vector m_vecVelocity; // 0x148
+// 	Vector m_vecBaseVelocity; // 0x154
+// 	QAngle m_angNetworkAngles; // 0x160
+// 	Vector m_vecNetworkOrigin; // 0x16C
+// };
+
 
 template<class T> class CUtlVector {
 public:

@@ -144,13 +144,14 @@ def getData(i):
   rotation = int(data[0,8])
   data = data[1:]
   # data = data[data[:, 1] != 0]
-  xs = data[:, -4]
+  zs = data[:, -4]
+  xs = data[:, -3]
+  # ys = data[:, -2]
   player_count = len(xs)
-  # ys = data[:, -3]
-  zs = data[:, -2]
   cs = [ 'b' if c == 3 else 'r' for c in data[:,2]]
   # homogenous coordinates for easier translation
   vecs = np.dstack((zs, xs))[0]
+  # print(vecs)
   if generic and local_player_index != -1 and local_player_index < len(data):
     # center around local player
     vecs -= vecs[local_player_index]
@@ -203,6 +204,9 @@ def blit_init():
   elif(map_name == "de_nuke"):
     xlims = (-3453, 3750)
     ylims = (-4290, 2887)
+  elif(map_name == "dz_blacksite"):
+    xlims = (-7000, 7000)
+    ylims = (-7000, 7000)
   else:
     xlims = (-1000, 1000)
     ylims = (-1000, 1000)

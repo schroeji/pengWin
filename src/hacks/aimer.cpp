@@ -104,6 +104,11 @@ void Aimer::aimCheck(unsigned int i) {
     if(settings.debug) cout << "--- Aim Check ---" << endl;
     local_player = csgo.getLocalPlayer();
     view = getView(rcs);
+    Vector player_pos = {local_player->m_vecOrigin.x,
+                         local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
+                         local_player->m_vecOrigin.z};
+    if (settings.debug) printf("player_pos %f, %f, %f\n", player_pos.x, player_pos.y, player_pos.z);
+    if (settings.debug) printf("view %f, %f, %f\n", view.x, view.y, view.z);
     pair<EntityType*, Vector> temp = findTargetDispatcher(view, i);
     enemy = temp.first;
     target_pos = temp.second;
@@ -451,21 +456,17 @@ pair<EntityType*, Vector> Aimer::zeusTarget(Vector view, float fov) {
     BoneInfo* boneMatrix = mem.getBoneMatrix(enemy_addr);
     for (unsigned int boneID : settings.bone_ids) {
       // cout << "bone ID:" << boneID << endl;
-      try {
         bone_pos = {boneMatrix[boneID].y, boneMatrix[boneID].z, boneMatrix[boneID].x};
-        // printf("bone: %f, %f, %f \n", bone_pos.x, bone_pos.z, bone_pos.z);
-      } catch(const runtime_error& e) {
-        if (settings.debug) cout << e.what() << endl;;
-      }
-      // find angle between player and target
-      Vector distVec = getDist(&player_pos, &bone_pos);
-      if (len(distVec) > ZEUS_RANGE){
-        if(settings.debug) cout << "target too far for zeus with " << len(distVec) << endl;
-        continue;
-      }
-      normalize_vector(&distVec);
-      float angle = acos(distVec * view);
-      if (angle > fov / 2.)
+        if(settings.debug) printf("bone: %f, %f, %f \n", bone_pos.x, bone_pos.z, bone_pos.z);
+        // find angle between player and target
+        Vector distVec = getDist(&player_pos, &bone_pos);
+        if (len(distVec) > ZEUS_RANGE){
+          if(settings.debug) cout << "target too far for zeus with " << len(distVec) << endl;
+          continue;
+        }
+        normalize_vector(&distVec);
+        float angle = acos(distVec * view);
+        if (angle > fov / 2.)
         continue;
       if (closestPlayer == nullptr || closestAngle > angle) {
         closestPlayer = enemy;
@@ -521,23 +522,19 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view, float fov) {
     BoneInfo* boneMatrix = mem.getBoneMatrix(enemy_addr);
     for (unsigned int boneID : settings.bone_ids) {
       // cout << "bone ID:" << boneID << endl;
-      try {
         bone_pos = {boneMatrix[boneID].y, boneMatrix[boneID].z, boneMatrix[boneID].x};
-        // printf("bone: %f, %f, %f \n", bone_pos.x, bone_pos.z, bone_pos.z);
-      } catch(const runtime_error& e) {
-        if (settings.debug) cout << e.what() << endl;;
-      }
-      // find angle between player and target
-      Vector distVec = getDist(&player_pos, &bone_pos);
-      normalize_vector(&distVec);
-      float angle = acos(distVec * view);
-      if (angle > fov / 2.)
-        continue;
-      if (closestPlayer == nullptr || closestAngle > angle) {
-        closestPlayer = enemy;
-        closestAngle = angle;
-        closestBone = bone_pos;
-      }
+        if(settings.debug) printf("bone: %f, %f, %f \n", bone_pos.x, bone_pos.z, bone_pos.z);
+        // find angle between player and target
+        Vector distVec = getDist(&player_pos, &bone_pos);
+        normalize_vector(&distVec);
+        float angle = acos(distVec * view);
+        if (angle > fov / 2.)
+          continue;
+        if (closestPlayer == nullptr || closestAngle > angle) {
+          closestPlayer = enemy;
+          closestAngle = angle;
+          closestBone = bone_pos;
+        }
     }
     delete boneMatrix;
   }
