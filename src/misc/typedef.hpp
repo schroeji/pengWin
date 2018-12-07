@@ -74,7 +74,7 @@ struct EntityType {
   int m_iPendingTeamNum; // 0x12C
   int m_nNextThinkTick; // 0x130
   int m_iHealth; // 0x134
-  int m_fFlags; // 0x138
+  unsigned long int m_fFlags; // 0x138
   Vector m_vecViewOffset; // 0x13C
   Vector m_vecVelocity; // 0x148
   Vector m_vecBaseVelocity; // 0x154
