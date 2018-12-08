@@ -90,7 +90,7 @@ vector<EntityType*>& GameManager::getPlayers() {
 
 void GameManager::printPlayers() {
   int i = 0;
-  cout << "---------Playersaa---------" << endl;
+  cout << "---------Players---------" << endl;
   for (EntityType* player : players) {
     cout << dec << "--- Player: " << i << "---" << endl;
     cout << hex << "Addr: " << player_addrs[i] << endl;
@@ -109,13 +109,13 @@ void GameManager::printPlayers() {
     printf("Defusing: %d\n", isDefusing(player_addrs[i]));
     printf("Flashed: %d\n", isFlashed(player_addrs[i]));
     printf("Weapon: %s\n", getWeaponName(getWeapon(player_addrs[i])).c_str());
-    // vector<int> diffs = mem.diffMem(mem.local_player_addr + 0x3500, 0x200);
-    // if (diffs.size() > 0) {
-      // for (int i : diffs)
-        // cout << hex << i << endl;
-      // mem.printBlock(mem.local_player_addr + 0x4000, 0x400);
-    // }
-    // cout << "-----" << endl;
+    vector<int> diffs = mem.diffMem(mem.local_player_addr + 0x3600, 0x300);
+    if (diffs.size() > 0) {
+      for (int i : diffs)
+        cout << hex << i << endl;
+      mem.printBlock(mem.local_player_addr + 0x3600, 0x300);
+    }
+    cout << "-----" << endl;
     i++;
   }
 }
@@ -295,11 +295,11 @@ Weapon GameManager::getWeapon(addr_type player_addr) {
     if (!mem.read(g_glow[i].m_pEntity, &currentEntity, sizeof(EntityType)))
       continue;
     if (currentEntity.m_iEntityId == activeWeaponID){ // found entity for weapon
-      // if(settings.debug) cout << "Found entity" << endl;
+      if(settings.debug) cout << "Found entity" << endl;
       // get weapon type
       mem.read((void *)((addr_type)g_glow[i].m_pEntity + mem.m_AttributeManager60 + mem.m_iItemDefinitionIndex), &weaponID, sizeof(int));
       weaponID &= 0xFFF;
-      // if(settings.debug) cout << "weaponID:" << weaponID << endl;
+      if(settings.debug) cout << "weaponID:" << weaponID << endl;
       break;
     }
   }

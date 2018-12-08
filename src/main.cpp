@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
     while (!panicked && csgo.isOnServer()) {
       csgo.grabPlayers();
       if (debug) {
-        // csgo.printPlayers();
+        csgo.printPlayers();
         // csgo.printEntities();
         // cout << "visible:" << vis << endl;
       }

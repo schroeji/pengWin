@@ -136,6 +136,7 @@ int main(int argc, char** argv) {
   const string force_jump_data = "44 89 e8 c1 e0 1d c1 f8 1f 83 e8 03 45 84 e4 74 08 21 d0";
   const string split_screen_pattern = "55 89 FE 48 8D 3D ?? ?? ?? ?? 48 89 E5 5D E9 AD FF FF FF";
   const string isConnectedMove_pattern = "48 8b 05 ?? ?? ?? ?? C6 05 ?? ?? ?? ?? 00 48 8b 10";
+  const string hasC4Pattern = "55 48 89 E5 41 54 53 48 89 FB E8 ? ? ? ? 84 C0 75 3D";
 
   vector<string> offsets;
   vector<string> offset_names;

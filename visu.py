@@ -150,7 +150,12 @@ def getData(i):
   player_count = len(xs)
   cs = [ 'b' if c == 3 else 'r' for c in data[:,2]]
   # homogenous coordinates for easier translation
-  vecs = np.dstack((zs, xs))[0]
+  vecs_tmp = np.dstack((zs, xs))[0]
+  vecs = []
+  for vec in vecs_tmp:
+    if xlims[0] <= vec[0] <= xlims[1] and  ylims[0] <= vec[1] <= ylims[1]:
+      vecs.append(vec)
+
   # print(vecs)
   if generic and local_player_index != -1 and local_player_index < len(data):
     # center around local player

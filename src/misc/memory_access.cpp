@@ -197,7 +197,7 @@ void MemoryAccess::printBlock(addr_type addr, size_t size) {
   read((void*) addr, buffer, size);
   for (size_t i = 0; i < size; i++) {
     if (i % 16 == 0)
-      cout << hex << endl << addr + i << ":";
+      cout << hex << endl << addr + i << "[" << i << "]" << ":";
     cout << hex << setw(2) << setfill('0') << (unsigned int)buffer[i] << " ";
   }
   cout << endl;

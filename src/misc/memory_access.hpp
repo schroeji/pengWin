@@ -46,7 +46,7 @@ public:
   addr_type m_bIsScoped = 0x4156;
   addr_type m_Local = 0x3700;
   addr_type m_bIsDefusing = 0x4160;
-  addr_type m_hActiveWeapon = 0x3628;
+  addr_type m_hActiveWeapon = 0x3638;
   addr_type m_flFlashDuration = 0xad00;
   //ofsets to player + m_Local
   addr_type m_viewPunchAngle = 0x68;
