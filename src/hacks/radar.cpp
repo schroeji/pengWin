@@ -60,8 +60,13 @@ void Radar::writeFunc() {
       continue;
     // print local player index into array[0,0]
     // and rotation of local player for generic radar type
-    string first_line = to_string(csgo.getLocalPlayerIndex()) + ",0,0,0,0,0,0,0," +
-      to_string(csgo.getLocalPlayer()->m_angNetworkAngles.y);
+    try {
+      string first_line = to_string(csgo.getLocalPlayerIndex()) + ",0,0,0,0,0,0,0," +
+        to_string(csgo.getLocalPlayer()->m_angNetworkAngles.y);
+    } catch(const runtime_error& e) {
+      stop();
+      return;
+    }
     fputs(first_line.c_str(), handle);
     // Format: number,hp,team,weapon,defusing,x,y,z,rotation
     int i = 0;
