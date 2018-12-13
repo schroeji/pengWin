@@ -136,7 +136,8 @@ int main(int argc, char** argv) {
   const string force_jump_data = "44 89 e8 c1 e0 1d c1 f8 1f 83 e8 03 45 84 e4 74 08 21 d0";
   const string split_screen_pattern = "55 89 FE 48 8D 3D ?? ?? ?? ?? 48 89 E5 5D E9 AD FF FF FF";
   const string isConnectedMove_pattern = "48 8b 05 ?? ?? ?? ?? C6 05 ?? ?? ?? ?? 00 48 8b 10";
-  const string hasC4Pattern = "55 48 89 E5 41 54 53 48 89 FB E8 ? ? ? ? 84 C0 75 3D";
+  const string clientState_pattern = "48 8B 05 ?? ?? ?? ?? 55 48 8D 3D ?? ?? ?? ?? 48 89 E5 FF 50 28";
+  const string hasC4_pattern = "55 48 89 E5 41 54 53 48 89 FB E8 ? ? ? ? 84 C0 75 3D";
 
   vector<string> offsets;
   vector<string> offset_names;
@@ -146,7 +147,7 @@ int main(int argc, char** argv) {
   addr_type glowPointerCall = mem.find_pattern(glowPointerCall_pattern, clientRange);
   addr_type glowFunctionCall = mem.getCallAddress((void*) glowPointerCall);
   // unsigned int glowOffset;
-	// mem.read((void*) (glowFunctionCall + 0x10), &glowOffset, sizeof(int));
+  // mem.read((void*) (glowFunctionCall + 0x10), &glowOffset, sizeof(int));
   // addr_type glowManAddr = glowFunctionCall + 0x10 + glowOffset + 0x4;
   addr_type glowManAddr = mem.getAbsoluteAddress((void*) (glowFunctionCall + 0x9), 3, 7);
   addr_type glow_offset = glowManAddr - clientRange.first;
@@ -164,7 +165,6 @@ int main(int argc, char** argv) {
   offset_names.push_back("local_player_offset");
   offsets.push_back(string(offset_buf));
 
-
   cout << "-- Attack --" << endl;
   addr_type attack_addr = mem.find_pattern(atk_mov_pattern, clientRange);
   addr_type atk_offset = attack_addr - clientRange.first;
@@ -181,6 +181,13 @@ int main(int argc, char** argv) {
   offset_names.push_back("map_name_offset");
   offsets.push_back(string(offset_buf));
 
+  cout << "-- Client State --" << endl;
+  addr_type clientState_addr = mem.find_pattern(clientState_pattern, engineRange);
+  addr_type clientState_offset = clientState_addr - engineRange.first;
+  sprintf(offset_buf, "0x%lx", clientState_offset);
+  offset_names.push_back("clientState_offset");
+  offsets.push_back(string(offset_buf));
+
   // cout << "-- Force Jump --" << endl;
   // addr_type force_jump_call = mem.find_pattern(force_jump_data, force_jump_pattern, clientRange);
   // addr_type force_jump_addr = mem.getCallAddress((void*) (force_jump_call + 0x1A));
@@ -190,13 +197,13 @@ int main(int argc, char** argv) {
   // offsets.push_back(string(offset_buf));
 
 
-  cout << "-- is Connected --" << endl;
-  addr_type isConnected_call = mem.find_pattern(isConnectedMove_pattern, engineRange);
-  addr_type isConnected_addr = mem.getCallAddress((void*) (isConnected_call + 0x8)) + 1;
-  addr_type isConnected_offset = isConnected_addr - engineRange.first;
-  sprintf(offset_buf, "0x%lx",isConnected_offset);
-  offset_names.push_back("isConnected_offset");
-  offsets.push_back(string(offset_buf));
+  // cout << "-- is Connected --" << endl;
+  // addr_type isConnected_call = mem.find_pattern(isConnectedMove_pattern, engineRange);
+  // addr_type isConnected_addr = mem.getCallAddress((void*) (isConnected_call + 0x8)) + 1;
+  // addr_type isConnected_offset = isConnected_addr - engineRange.first;
+  // sprintf(offset_buf, "0x%lx",isConnected_offset);
+  // offset_names.push_back("isConnected_offset");
+  // offsets.push_back(string(offset_buf));
 
   // cout << "-- SplitScreen --" << endl;
   // addr_type split_call = mem.find_pattern(isConnectedMove_pattern, engineRange);

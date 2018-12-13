@@ -69,16 +69,16 @@ struct EntityType {
   unsigned char m_nWaterType; // 0x120
   bool m_bDormant; // 0x121
   char __buf_0x122[0x6]; // 0x122
-  int m_fEffects; // 0x124
-  int m_iTeamNum; // 0x128
-  int m_iPendingTeamNum; // 0x12C
-  int m_nNextThinkTick; // 0x130
-  int m_iHealth; // 0x134
-  unsigned long int m_fFlags; // 0x138
-  Vector m_vecViewOffset; // 0x13C
-  Vector m_vecVelocity; // 0x148
-  Vector m_vecBaseVelocity; // 0x154
-  QAngle m_angNetworkAngles; // 0x160
+  int m_fEffects; // 0x128
+  int m_iTeamNum; // 0x12C
+  int m_iPendingTeamNum; // 0x130
+  int m_nNextThinkTick; // 0x134
+  int m_iHealth; // 0x138
+  unsigned int m_fFlags; // 0x13C
+  Vector m_vecViewOffset; // 0x140
+  Vector m_vecVelocity; // 0x14C
+  Vector m_vecBaseVelocity; // 0x158
+  QAngle m_angNetworkAngles; // 0x164
   Vector m_vecNetworkOrigin; // 0x16C
   float m_flFriction; // 0x178
   int moveparent;  // 0x17C

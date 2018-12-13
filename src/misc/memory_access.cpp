@@ -21,6 +21,7 @@ MemoryAccess::MemoryAccess(Settings* settings) : settings(settings) {
     map_name_offset = settings->map_name_offset;
     force_jump_offset = settings->force_jump_offset;
     isConnected_offset = settings->isConnected_offset;
+    clientState_offset = settings->clientState_offset;
     debug = settings->debug;
   }
 }
@@ -41,8 +42,10 @@ void MemoryAccess::updateAddrs() {
   }
 
   force_jump_addr = client_range.first + force_jump_offset;
+
   map_name_addr = engine_range.first + map_name_offset;
   isConnected_addr = engine_range.first + isConnected_offset;
+  clientState_addr = engine_range.first + clientState_offset;
 }
 
 pid_t MemoryAccess::getPid() {

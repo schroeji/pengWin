@@ -57,7 +57,7 @@ void GameManager::grabPlayers(){
 
     EntityType* entity = new EntityType;
     mem.read(g_glow[i].m_pEntity, entity, sizeof(EntityType));
-    if ((entity->m_iTeamNum == Team::CT || entity->m_iTeamNum == Team::T) && entity->m_iHealth > 0 && !entity->m_bDormant) {
+    if ((entity->m_iTeamNum == Team::CT || entity->m_iTeamNum == Team::T) && entity->m_iHealth > 0) {
       // cout << dec << "player: " << new_players.size() << " addr: " << objects[i].m_pEntity << endl;
       new_players.push_back(entity);
       new_player_addrs.push_back((addr_type) g_glow[i].m_pEntity);
@@ -101,20 +101,21 @@ void GameManager::printPlayers() {
     else if(player->m_iTeamNum == Team::T)
       cout << "Team: T" << endl;
     printf("Origin x=%f y=%f z=%f\n", player->m_vecOrigin.x, player->m_vecOrigin.y, player->m_vecOrigin.z);
+    // printf("Angle: x=%4.16lf y=%4.16lf z=%f\n", player->m_angAbsRotation.x, player->m_angAbsRotation.y, player->m_angNetworkAngles.z);
     printf("Angle: x=%4.16lf y=%4.16lf z=%f\n", player->m_angNetworkAngles.x, player->m_angNetworkAngles.y, player->m_angNetworkAngles.z);
     printf("view offset: %f, %f\n", player->m_vecViewOffset.x,  player->m_vecViewOffset.y);
-    printf("m_fFlags: %lu\n", player->m_fFlags);
+    printf("m_fFlags: %u\n", player->m_fFlags);
     printf("Velocity: %f, %f, %f\n", player->m_vecVelocity.x,  player->m_vecVelocity.y, player->m_vecVelocity.z);
     printf("Aimpunch: %f, %f, %f\n", getAimPunch(mem.local_player_addr).x,  getAimPunch(mem.local_player_addr).y, getAimPunch(mem.local_player_addr).z);
     printf("Defusing: %d\n", isDefusing(player_addrs[i]));
     printf("Flashed: %d\n", isFlashed(player_addrs[i]));
-    printf("Weapon: %s\n", getWeaponName(getWeapon(player_addrs[i])).c_str());
-    vector<int> diffs = mem.diffMem(mem.local_player_addr + 0x3600, 0x300);
-    if (diffs.size() > 0) {
-      for (int i : diffs)
-        cout << hex << i << endl;
-      mem.printBlock(mem.local_player_addr + 0x3600, 0x300);
-    }
+    // printf("Weapon: %s\n", getWeaponName(getWeapon(player_addrs[i])).c_str());
+    // vector<int> diffs = mem.diffMem(mem.local_player_addr + 0x3600, 0x300);
+    // if (diffs.size() > 0) {
+    //   for (int j : diffs)
+    //     cout << hex << j << endl;
+    //   mem.printBlock(mem.local_player_addr + 0x3600, 0x300);
+    // }
     cout << "-----" << endl;
     i++;
   }
@@ -144,7 +145,7 @@ void GameManager::printEntities() {
     printf("ID: %d\n", entity->m_iEntityId);
     cout << "hp: " << entity->m_iHealth << endl;
     printf("Origin x=%f y=%f z=%f\n", entity->m_vecOrigin.x, entity->m_vecOrigin.y, entity->m_vecOrigin.z);
-    printf("m_fFlags: %lu\n", entity->m_fFlags);
+    printf("m_fFlags: %u\n", entity->m_fFlags);
     printf("m_iEFlags: %d\n", entity->m_iEFlags);
     vector<int> diffs = mem.diffMem((addr_type)g_glow[i].m_pEntity, 0x200);
     if (diffs.size() > 0) {
@@ -276,7 +277,7 @@ float GameManager::getFlashDuration(addr_type player_addr) {
 
 QAngle GameManager::getNetworkAngles(addr_type player_addr) {
   QAngle ang;
-  if(!mem.read((void*) (player_addr + 0x160), &ang, sizeof(ang)))
+  if(!mem.read((void*) (player_addr + 0x164), &ang, sizeof(ang)))
     throw runtime_error("Could not get NetworkAngles.");
   return ang;
 }
@@ -295,7 +296,7 @@ Weapon GameManager::getWeapon(addr_type player_addr) {
     if (!mem.read(g_glow[i].m_pEntity, &currentEntity, sizeof(EntityType)))
       continue;
     if (currentEntity.m_iEntityId == activeWeaponID){ // found entity for weapon
-      if(settings.debug) cout << "Found entity" << endl;
+      // if(settings.debug) cout << "Found entity" << endl;
       // get weapon type
       mem.read((void *)((addr_type)g_glow[i].m_pEntity + mem.m_AttributeManager60 + mem.m_iItemDefinitionIndex), &weaponID, sizeof(int));
       weaponID &= 0xFFF;

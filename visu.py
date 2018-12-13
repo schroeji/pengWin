@@ -18,7 +18,7 @@ ln = plt.scatter([], [], animated=True)
 # ln.set_offsets([[0.5], [0.4]])
 # print(ln.get_offsets())
 # location_file = "/tmp/locs.csv"
-
+xlims, ylims = [], []
 
 def weapon(wid):
   if wid == 0:
@@ -140,6 +140,7 @@ def getData(i):
     return ln,
   if(len(data.shape) == 1):
     data = data.reshape((1, 9))
+  # parse input data
   local_player_index = int(data[0,0])
   rotation = int(data[0,8])
   data = data[1:]
@@ -149,14 +150,16 @@ def getData(i):
   # ys = data[:, -2]
   player_count = len(xs)
   cs = [ 'b' if c == 3 else 'r' for c in data[:,2]]
-  # homogenous coordinates for easier translation
   vecs_tmp = np.dstack((zs, xs))[0]
-  vecs = []
-  for vec in vecs_tmp:
-    if xlims[0] <= vec[0] <= xlims[1] and  ylims[0] <= vec[1] <= ylims[1]:
-      vecs.append(vec)
 
-  # print(vecs)
+  # filter out thos points not inside the limits
+  filter_indices = []
+  for j,vec in enumerate(vecs_tmp):
+    if xlims[0] <= vec[0] <= xlims[1] and  ylims[0] <= vec[1] <= ylims[1]:
+      filter_indices.append(j)
+  vecs = vecs_tmp[filter_indices]
+
+  # transformation for generic radar
   if generic and local_player_index != -1 and local_player_index < len(data):
     # center around local player
     vecs -= vecs[local_player_index]
@@ -174,17 +177,18 @@ def getData(i):
   ln.set_offsets(vecs[:,:2])
   ln.set_color(cs)
   strings = []
-  for i in range(player_count):
+  for i in range(len(vecs)):
     strings.append(str(hps[i]))
     strings[-1] += " " + weapon(weapons[i])
     if defusings[i]:
       strings[-1] += " def"
-  txt = [ax.annotate(strings[i], vecs[i], color=cs[i]) for i in range(player_count)]
+  txt = [ax.annotate(strings[i], vecs[i], color=cs[i]) for i in range(len(vecs))]
   txt.insert(0, ln)
   # return ln,
   return tuple(txt)
 
 def blit_init():
+  global xlims, ylims
   if(map_name == "de_dust2"):
     xlims = (-2400, 2040)
     ylims = (-1287, 3232)
@@ -210,8 +214,8 @@ def blit_init():
     xlims = (-3453, 3750)
     ylims = (-4290, 2887)
   elif(map_name == "dz_blacksite"):
-    xlims = (-7000, 7000)
-    ylims = (-7000, 7000)
+    xlims = (-8604, 8350)
+    ylims = (-8300, 8804)
   else:
     xlims = (-2400, 2400)
     ylims = (-1500, 1500)

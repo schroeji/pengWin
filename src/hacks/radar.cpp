@@ -59,6 +59,7 @@ void Radar::writeFunc() {
     if (players.empty())
       continue;
     // print local player index into array[0,0]
+    // and rotation of local player for generic radar type
     string first_line = to_string(csgo.getLocalPlayerIndex()) + ",0,0,0,0,0,0,0," +
       to_string(csgo.getLocalPlayer()->m_angNetworkAngles.y);
     fputs(first_line.c_str(), handle);

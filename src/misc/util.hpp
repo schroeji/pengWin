@@ -196,6 +196,13 @@ inline int len(MouseMovement move) {
   return abs(move.x) + abs(move.y);
 }
 
+inline void printVec(std::string name, Vector vec) {
+  printf("%s %f, %f, %f\n", name.c_str(), vec.x, vec.y, vec.z);
+}
+
+inline void printVec(std::string name, QAngle vec) {
+  printf("%s %f, %f, %f\n", name.c_str(), vec.x, vec.y, vec.z);
+}
 
 inline bool lineSphereIntersection(Vector line_start, Vector line_end,
                                    Vector sphere_center, float sphere_radius) {

@@ -97,6 +97,7 @@ void Aimer::aimCheck(unsigned int i) {
   EntityType* enemy;
   Vector target_pos;
   Vector view;
+  Vector player_pos;
   // recoil compensate after 180ms of holding
   // (pistols have an addidtional check for holding see mouseMOvementDispatcher)
   bool rcs = i > 180/settings.aim_sleep;
@@ -104,11 +105,11 @@ void Aimer::aimCheck(unsigned int i) {
     if(settings.debug) cout << "--- Aim Check ---" << endl;
     local_player = csgo.getLocalPlayer();
     view = getView(rcs);
-    Vector player_pos = {local_player->m_vecOrigin.x,
-                         local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
-                         local_player->m_vecOrigin.z};
-    if (settings.debug) printf("player_pos %f, %f, %f\n", player_pos.x, player_pos.y, player_pos.z);
-    if (settings.debug) printf("view %f, %f, %f\n", view.x, view.y, view.z);
+    player_pos = local_player->m_vecOrigin + local_player->m_vecViewOffset;
+    if (settings.debug) printVec("player_pos", player_pos);
+    if (settings.debug) printVec("view_offset", local_player->m_vecViewOffset);
+    if (settings.debug) printVec("view", view);
+    // usually closestTargetInFOV
     pair<EntityType*, Vector> temp = findTargetDispatcher(view, i);
     enemy = temp.first;
     target_pos = temp.second;
@@ -117,16 +118,14 @@ void Aimer::aimCheck(unsigned int i) {
     this_thread::sleep_for(chrono::milliseconds(settings.aim_sleep));
     return;
   }
-  Vector player_pos = {local_player->m_vecOrigin.x,
-                       local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
-                       local_player->m_vecOrigin.z};
+  // calculate predicted locations
   player_pos += predictPositionOffset(local_player);
   target_pos += predictPositionOffset(enemy);
   Vector dist = getDist(&player_pos, &target_pos);
+  if (settings.debug) printVec("distance vec", dist);
+  if (settings.debug) printVec("player_pos", player_pos);
+  if (settings.debug) printVec("target_pos", target_pos);
 
-  if (settings.debug) printf("distance vector: %f, %f, %f\n", dist.x, dist.y, dist.z);
-  if (settings.debug) printf("player_pos %f, %f, %f\n", player_pos.x, player_pos.y, player_pos.z);
-  if (settings.debug) printf("target_pos %f, %f, %f\n", target_pos.x, target_pos.y, target_pos.z);
   if (dist.x == 0 && dist.y == 0 && dist.z == 0)
     return;
   bool use_smooth = settings.aim_smooth_first_shot || i != 0;
@@ -328,19 +327,19 @@ MouseMovement Aimer::spline_calcMouseMovement(QAngle curr_angle, Vector dist, un
 
 MouseMovement Aimer::default_calcMouseMovement(QAngle curr_angle, Vector dist, bool use_smooth) {
   normalize_vector(&dist);
-  if (settings.debug) printf("dist: %f, %f, %f\n", dist.x, dist.y, dist.z);
+  if (settings.debug) printVec("dist", dist);
 
   // curr_angle and target angle are in format {pitch, yaw, 0}
-  QAngle target_angle = {asin(-dist.y), atan2(dist.x, dist.z), 0};
+  QAngle target_angle = {asin(-dist.z), atan2(dist.y, dist.x), 0};
   target_angle = radian_to_degree(target_angle);
-  if (settings.debug) printf("curr_angle: %f, %f\n", curr_angle.x, curr_angle.y);
-  if (settings.debug) printf("target_angle: %f, %f\n", target_angle.x, target_angle.y);
+  if (settings.debug) printVec("curr Angle", curr_angle);
+  if (settings.debug) printVec("target_angle", target_angle);
   QAngle missing_angle = target_angle - curr_angle;
   if (missing_angle.y > 180)
     missing_angle.y -= 360;
   else if (missing_angle.y < -180)
     missing_angle.y += 360;
-  if (settings.debug) printf("missing angles: x:%f y:%f\n", missing_angle.x, missing_angle.y);
+  if (settings.debug) printVec("missing angles", missing_angle);
   // cout << settings.aim_fov << endl;
   // cout << degree_to_radian(missing_angle.x) << endl;
   // cout << degree_to_radian(missing_angle.y) << endl;
@@ -391,9 +390,9 @@ Vector Aimer::getView(bool rcs) {
     currAngle = currAngle + aimPunch;
   float radians_x = degree_to_radian(-currAngle.x); // pitch
   float radians_y = degree_to_radian(currAngle.y);  // yaw
-  float v1 = cos(radians_x) * sin(radians_y);
-  float v2 = sin(radians_x);
-  float v3 = cos(radians_x) * cos(radians_y);
+  float v1 = cos(radians_x) * cos(radians_y);
+  float v2 = cos(radians_x) * sin(radians_y);
+  float v3 = sin(radians_x);
   // is normalized because sin*sin + cos*cos = 1
   return {v1, v2, v3};
 }
@@ -456,17 +455,17 @@ pair<EntityType*, Vector> Aimer::zeusTarget(Vector view, float fov) {
     BoneInfo* boneMatrix = mem.getBoneMatrix(enemy_addr);
     for (unsigned int boneID : settings.bone_ids) {
       // cout << "bone ID:" << boneID << endl;
-        bone_pos = {boneMatrix[boneID].y, boneMatrix[boneID].z, boneMatrix[boneID].x};
-        if(settings.debug) printf("bone: %f, %f, %f \n", bone_pos.x, bone_pos.z, bone_pos.z);
-        // find angle between player and target
-        Vector distVec = getDist(&player_pos, &bone_pos);
-        if (len(distVec) > ZEUS_RANGE){
-          if(settings.debug) cout << "target too far for zeus with " << len(distVec) << endl;
-          continue;
-        }
-        normalize_vector(&distVec);
-        float angle = acos(distVec * view);
-        if (angle > fov / 2.)
+      bone_pos = {boneMatrix[boneID].x, boneMatrix[boneID].y, boneMatrix[boneID].z};
+      if(settings.debug) printf("bone: %f, %f, %f \n", bone_pos.x, bone_pos.y, bone_pos.z);
+      // find angle between player and target
+      Vector distVec = getDist(&player_pos, &bone_pos);
+      if (len(distVec) > ZEUS_RANGE){
+        if(settings.debug) cout << "target too far for zeus with " << len(distVec) << endl;
+        continue;
+      }
+      normalize_vector(&distVec);
+      float angle = acos(distVec * view);
+      if (angle > fov / 2.)
         continue;
       if (closestPlayer == nullptr || closestAngle > angle) {
         closestPlayer = enemy;
@@ -496,9 +495,7 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view, float fov) {
   } catch (const runtime_error& e) {
     throw e;
   }
-  Vector player_pos = {local_player->m_vecOrigin.x,
-                       local_player->m_vecOrigin.y + local_player->m_vecViewOffset.y,
-                       local_player->m_vecOrigin.z};
+  Vector player_pos = local_player->m_vecOrigin + local_player->m_vecViewOffset;
   vector<EntityType*> players = csgo.getPlayers();
   // unsigned int boneIds[] = {3, 6, 7, 8, 66, 67, 73, 74};
   if (players.size() < 2)
@@ -522,13 +519,13 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view, float fov) {
     BoneInfo* boneMatrix = mem.getBoneMatrix(enemy_addr);
     for (unsigned int boneID : settings.bone_ids) {
       // cout << "bone ID:" << boneID << endl;
-        bone_pos = {boneMatrix[boneID].y, boneMatrix[boneID].z, boneMatrix[boneID].x};
-        if(settings.debug) printf("bone: %f, %f, %f \n", bone_pos.x, bone_pos.z, bone_pos.z);
-        // find angle between player and target
-        Vector distVec = getDist(&player_pos, &bone_pos);
-        normalize_vector(&distVec);
-        float angle = acos(distVec * view);
-        if (angle > fov / 2.)
+      bone_pos = {boneMatrix[boneID].x, boneMatrix[boneID].y, boneMatrix[boneID].z};
+      if(settings.debug) printVec("bone", bone_pos);
+      // find angle between player and target
+      Vector distVec = getDist(&player_pos, &bone_pos);
+      normalize_vector(&distVec);
+      float angle = acos(distVec * view);
+      if (angle > fov / 2.)
           continue;
         if (closestPlayer == nullptr || closestAngle > angle) {
           closestPlayer = enemy;
