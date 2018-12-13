@@ -63,11 +63,11 @@ void Radar::writeFunc() {
     try {
       string first_line = to_string(csgo.getLocalPlayerIndex()) + ",0,0,0,0,0,0,0," +
         to_string(csgo.getLocalPlayer()->m_angNetworkAngles.y);
+      fputs(first_line.c_str(), handle);
     } catch(const runtime_error& e) {
       stop();
       return;
     }
-    fputs(first_line.c_str(), handle);
     // Format: number,hp,team,weapon,defusing,x,y,z,rotation
     int i = 0;
     for (EntityType* player : players) {
