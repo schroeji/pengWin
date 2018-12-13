@@ -43,7 +43,7 @@ void Radar::start() {
 void Radar::stop(){
   if (running) {
     running = false;
-    writeLocations.join();
+    // writeLocations.join();
     fputs("quit\n", handle);
     fflush(handle);
     pclose(handle);
