@@ -14,7 +14,7 @@ TARGET_DUMPER = offset_dumper
 INC=-lX11 -lXtst -lboost_thread -lboost_system -pthread -I src/
 
 SRC=$(wildcard src/main.cpp src/misc/*.cpp src/hacks/*.cpp src/ValveBSP/*.cpp)
-SRC_DUMPER = src/offset_dumper/offset_finder.cpp src/misc/*.cpp
+SRC_DUMPER = src/offset_dumper/offset_finder.cpp src/offset_dumper/netvar_finder.cpp src/misc/util.cpp src/misc/memory_access.cpp
 
 all: $(TARGET) $(TARGET_DUMPER)
 all: CFLAGS += -O3

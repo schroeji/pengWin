@@ -1,6 +1,3 @@
-#include "misc/memory_access.hpp"
-#include "misc/typedef.hpp"
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -8,6 +5,9 @@
 #include <fstream>
 #include <stdio.h>
 #include <unistd.h>
+
+#include "netvar_finder.hpp"
+#include "misc/typedef.hpp"
 
 using namespace std;
 
@@ -139,6 +139,9 @@ int main(int argc, char** argv) {
   const string clientState_pattern = "48 8B 05 ?? ?? ?? ?? 55 48 8D 3D ?? ?? ?? ?? 48 89 E5 FF 50 28";
   const string hasC4_pattern = "55 48 89 E5 41 54 53 48 89 FB E8 ? ? ? ? 84 C0 75 3D";
 
+  // for finding netvars
+  const string dwGetAllClasses_pattern = "48 8B ?? ?? ?? ?? ?? 8B ?? ?? 48 ?? ?? 48 ?? ?? 75 ?? e9 ?? ?? ?? ?? 66";
+
   vector<string> offsets;
   vector<string> offset_names;
   char offset_buf[64];
@@ -188,6 +191,17 @@ int main(int argc, char** argv) {
   offset_names.push_back("clientState_offset");
   offsets.push_back(string(offset_buf));
 
+
+
+
+  // netvar dumping
+  cout << "-- dwGetAllClasses --" << endl;
+  addr_type allClasses_call = mem.find_pattern(dwGetAllClasses_pattern, clientRange);
+  addr_type allClasses_addr = mem.getCallAddress((void*) (allClasses_call + 0x2));
+  mem.read((void*) (allClasses_addr + 0x0), (void*) &allClasses_addr, sizeof(allClasses_addr));
+  mem.read((void*) (allClasses_addr + 0x0), (void*) &allClasses_addr, sizeof(allClasses_addr));
+  NetvarFinder netVars(mem, allClasses_addr);
+  netVars.dump();
   // cout << "-- Force Jump --" << endl;
   // addr_type force_jump_call = mem.find_pattern(force_jump_data, force_jump_pattern, clientRange);
   // addr_type force_jump_addr = mem.getCallAddress((void*) (force_jump_call + 0x1A));
@@ -217,7 +231,6 @@ int main(int argc, char** argv) {
 
   // // cout << "Test1: " << test1 << endl;
   // // cout << "Test2: " << test2 << endl;
-  // // cout << viewAngels << endl;
   write_offsets(offset_names, offsets, file_name);
   print_offsets(offset_names, offsets);
   if (retain_settings && settings != "") {

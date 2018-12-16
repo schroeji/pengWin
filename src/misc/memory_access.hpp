@@ -55,7 +55,7 @@ public:
   //ofsets to player + m_Local
   addr_type m_viewPunchAngle = 0x68;
   addr_type m_aimPunchAngle = 0x74;
-  addr_type m_AttributeManager60 = 0x3530;
+  addr_type m_AttributeManager = 0x34d0;
   addr_type m_iItemDefinitionIndex = 0x282;
 
   //offsets to ClientState
@@ -68,7 +68,9 @@ public:
   bool write(void*, void*, size_t);
   Addr_Range getClientRange();
   Addr_Range getEngineRange();
+  // returns the address of the call located at the first argument
   addr_type getCallAddress(void*);
+  // returns the address of a jump
   addr_type getAbsoluteAddress(void*, int, int);
   addr_type find_pattern(const std::string&, Addr_Range);
   void updateLocalPlayerAddr();

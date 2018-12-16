@@ -298,7 +298,7 @@ Weapon GameManager::getWeapon(addr_type player_addr) {
     if (currentEntity.m_iEntityId == activeWeaponID){ // found entity for weapon
       // if(settings.debug) cout << "Found entity" << endl;
       // get weapon type
-      mem.read((void *)((addr_type)g_glow[i].m_pEntity + mem.m_AttributeManager60 + mem.m_iItemDefinitionIndex), &weaponID, sizeof(int));
+      mem.read((void *)((addr_type)g_glow[i].m_pEntity + mem.m_AttributeManager + 0x60 + mem.m_iItemDefinitionIndex), &weaponID, sizeof(int));
       weaponID &= 0xFFF;
       if(settings.debug) cout << "weaponID:" << weaponID << endl;
       break;
