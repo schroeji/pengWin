@@ -144,6 +144,8 @@ def getData(i):
   local_player_index = int(data[0,0])
   rotation = int(data[0,8])
   data = data[1:]
+  if local_player_index > len(data):
+    return ln,
   # data = data[data[:, 1] != 0]
   zs = data[:, -4]
   xs = data[:, -3]
