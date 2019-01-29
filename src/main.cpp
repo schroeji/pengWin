@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
     };
     hotkeyMan.bind(settings.panic_key, stop);
     hotkeyMan.startListen();
-    if (settings.aim_vis_check) {
+    if (settings.aim_vis_check  && use_aimbot) {
       if (bspParser.parse_map(settings.maps_path, csgo.getMapName() + ".bsp")) {
         cout << "Parsed map: " << csgo.getMapName() << endl;
       } else {
@@ -137,9 +137,8 @@ int main(int argc, char** argv) {
     while (!panicked && csgo.isOnServer()) {
       csgo.grabPlayers();
       if (debug) {
-        csgo.printPlayers();
+        // csgo.printPlayers();
         // csgo.printEntities();
-        // cout << "visible:" << vis << endl;
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     }
