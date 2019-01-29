@@ -135,8 +135,12 @@ def getData(i):
     #Format: id,hp,team,weapon,defusing,x,y,z,rotation
     data = readFromInput()
   except:
+    print("No data from input")
+    print(ln)
     return ln,
   if(len(data) == 0):
+    print("Data len is zero")
+    print(ln)
     return ln,
   if(len(data.shape) == 1):
     data = data.reshape((1, 9))
@@ -144,7 +148,7 @@ def getData(i):
   local_player_index = int(data[0,0])
   rotation = int(data[0,8])
   data = data[1:]
-  if local_player_index > len(data):
+  if local_player_index > data.shape[0]:
     return ln,
   # data = data[data[:, 1] != 0]
   zs = data[:, -4]
@@ -152,15 +156,11 @@ def getData(i):
   # ys = data[:, -2]
   player_count = len(xs)
   cs = [ 'b' if c == 3 else 'r' for c in data[:,2]]
-  vecs_tmp = np.dstack((zs, xs))[0]
+  if (local_player_index != -1 and local_player_index < len(data)):
+    cs[local_player_index] = 'g'
+  vecs = np.dstack((zs, xs))[0]
 
-  # filter out thos points not inside the limits
-  filter_indices = []
-  for j,vec in enumerate(vecs_tmp):
-    if xlims[0] <= vec[0] <= xlims[1] and  ylims[0] <= vec[1] <= ylims[1]:
-      filter_indices.append(j)
-  vecs = vecs_tmp[filter_indices]
-
+  
   # transformation for generic radar
   if generic and local_player_index != -1 and local_player_index < len(data):
     # center around local player
@@ -169,16 +169,26 @@ def getData(i):
     angle = np.radians(rotation - 90)
     rotation_matrix = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
     vecs = np.dot(vecs, rotation_matrix)
+  # filter out thos points not inside the limits
+  filter_indices = []
+  for j,vec in enumerate(vecs):
+    if xlims[0] <= vec[0] <= xlims[1] and  ylims[0] <= vec[1] <= ylims[1]:
+      filter_indices.append(j)
+    # if vector outside limits the point is filtered => we need to adjust local_player_index
+    elif j < local_player_index:
+        local_player_index -= 1
+  # apply filtering to all arrays
+  vecs = vecs[filter_indices]
+  cs = np.array(cs)[filter_indices]
+  hps = data[:, 1].astype(int, copy=False)[filter_indices]
+  weapons = data[:, 3][filter_indices]
+  defusings = (data[:, 4] == 1)[filter_indices]
 
-  if (local_player_index != -1 and local_player_index < len(data)):
-    cs[local_player_index] = 'g'
-
-  hps = data[:, 1].astype(int, copy=False)
-  weapons = data[:, 3]
-  defusings = (data[:, 4] == 1)
+  # add points in correct color
   ln.set_offsets(vecs[:,:2])
   ln.set_color(cs)
   strings = []
+  # add defusing and hp text
   for i in range(len(vecs)):
     strings.append(str(hps[i]))
     strings[-1] += " " + weapon(weapons[i])
