@@ -11,6 +11,16 @@
 
 using namespace std;
 
+void write_netvars(std::map<std::string, std::uint64_t> const& netvars, string const& file_name) {
+  ofstream file(file_name, ios_base::app);
+  file << endl;
+  file << "[netvars]" << endl;
+  for (std::pair<std::string, std::uint64_t> const& netvar : netvars) {
+    file << netvar.first << "=0x" << hex << netvar.second << endl;
+  }
+  file << dec;
+  file.close();
+}
 
 void write_offsets(vector<string> names, vector<string> offsets, const string& file_name) {
   if(names.size() != offsets.size()){
@@ -37,16 +47,19 @@ string read_settings(const string& file_name) {
   bool reading_settings = false;
   // find length
   settings_file.seekg (0, settings_file.end);
-  int length = settings_file.tellg();
   // go back to start
   settings_file.seekg (0, settings_file.beg);
   int settings_start = 0;
+
+  int settings_end = 0;
 
   if (settings_file.is_open()) {
     while (getline(settings_file, line)) {
       if (line == "[settings]") {
         reading_settings = true;
         settings_start = settings_file.tellg();
+      } else if (line == "[netvars]") {
+        settings_end = settings_file.tellg() - static_cast<std::streampos>(11);
         break;
       }
     }
@@ -54,10 +67,12 @@ string read_settings(const string& file_name) {
     cout << "No settings file found!" << endl;
     return "";
   }
-  char* buffer = new char [length - settings_start];
-  if (reading_settings)
-    settings_file.read(buffer, length - settings_start);
-  return "[settings]\n" + string(buffer);
+  char* buffer = new char [settings_end - settings_start];
+  if (reading_settings) {
+    settings_file.seekg(settings_start);
+    settings_file.read(buffer, settings_end - settings_start);
+  }
+  return "\n[settings]\n" + string(buffer);
 }
 
 void write_settings(const string& file_name) {
@@ -198,16 +213,21 @@ int main(int argc, char** argv) {
   cout << "-- dwGetAllClasses --" << endl;
   addr_type allClasses_call = mem.find_pattern(dwGetAllClasses_pattern, clientRange);
   addr_type allClasses_addr = mem.getCallAddress((void*) (allClasses_call + 0x2));
-  mem.read((void*) (allClasses_addr + 0x0), (void*) &allClasses_addr, sizeof(allClasses_addr));
-  mem.read((void*) (allClasses_addr + 0x0), (void*) &allClasses_addr, sizeof(allClasses_addr));
-  NetvarFinder netVars(mem, allClasses_addr);
-  netVars.dump();
+  mem.read((void*) (allClasses_addr), (void*) &allClasses_addr, sizeof(allClasses_addr));
+  mem.read((void*) (allClasses_addr), (void*) &allClasses_addr, sizeof(allClasses_addr));
+  NetvarFinder netFinder(mem, allClasses_addr);
+  netFinder.dump();
+  std::map<std::string, std::uint64_t> const& netvars = netFinder.getNetvars();
+  // for (std::pair<std::string, std::uint64_t> const& netvar : netvars) {
+  //   cout << netvar.first << " = " << netvar.second << endl;
+  // }
+
   // cout << "-- Force Jump --" << endl;
-  // addr_type force_jump_call = mem.find_pattern(force_jump_data, force_jump_pattern, clientRange);
-  // addr_type force_jump_addr = mem.getCallAddress((void*) (force_jump_call + 0x1A));
-  // addr_type force_jump_offset = force_jump_addr - clientRange.first;
-  // sprintf(offset_buf, "0x%lx", force_jump_offset);
-  // offset_names.push_back("force_jump_offset");
+    // addr_type force_jump_call = mem.find_pattern(force_jump_data, force_jump_pattern, clientRange);
+    // addr_type force_jump_addr = mem.getCallAddress((void*) (force_jump_call + 0x1A));
+    // addr_type force_jump_offset = force_jump_addr - clientRange.first;
+    // sprintf(offset_buf, "0x%lx", force_jump_offset);
+// offset_names.push_back("force_jump_offset");
   // offsets.push_back(string(offset_buf));
 
 
@@ -229,10 +249,11 @@ int main(int argc, char** argv) {
 
 
 
-  // // cout << "Test1: " << test1 << endl;
-  // // cout << "Test2: " << test2 << endl;
+  // cout << "Test1: " << test1 << endl;
+  // cout << "Test2: " << test2 << endl;
   write_offsets(offset_names, offsets, file_name);
   print_offsets(offset_names, offsets);
+
   if (retain_settings && settings != "") {
     // rewrite settings
     ofstream file(file_name, ios_base::app);
@@ -241,4 +262,8 @@ int main(int argc, char** argv) {
   } else {
     write_settings(file_name);
   }
+
+  write_netvars(netvars, file_name);
+
+  return 0;
 }

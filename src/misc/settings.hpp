@@ -56,9 +56,11 @@ public:
   bool aim_teammates;
   map<Weapon, float> weapon_fovs;
   vector<unsigned int> bone_ids;
+  std::map<std::string, std::uint64_t> netvars;
 
   Settings(const string&);
   static Settings& getInstance();
+  void readNetvars(std::ifstream& handle);
   void load(const string&);
   void print();
 };

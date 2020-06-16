@@ -45,21 +45,21 @@ public:
 
   //offsets to players
   addr_type m_iCrosshairIndex = 0xbbe4;
-  addr_type m_iTeamNum = 0x12C;
-  addr_type m_dwBoneMatrix = 0x2C80;
-  addr_type m_bIsScoped = 0x41fe;
-  addr_type m_Local = 0x3700;
-  addr_type m_bIsDefusing = 0x4208;
-  addr_type m_hActiveWeapon = 0x3638;
-  addr_type m_flFlashDuration = 0xad00;
+  addr_type m_iTeamNum;
+  addr_type m_dwBoneMatrix;
+  addr_type m_bIsScoped;
+  addr_type m_Local;
+  addr_type m_bIsDefusing;
+  addr_type m_hActiveWeapon;
+  addr_type m_flFlashDuration;
   //ofsets to player + m_Local
-  addr_type m_viewPunchAngle = 0x68;
-  addr_type m_aimPunchAngle = 0x74;
-  addr_type m_AttributeManager = 0x34d0;
-  addr_type m_iItemDefinitionIndex = 0x282;
+  addr_type m_viewPunchAngle;
+  addr_type m_aimPunchAngle;
+  addr_type m_AttributeManager;
+  addr_type m_iItemDefinitionIndex;
 
   //offsets to ClientState
-  addr_type viewAngles = 0x8E20;
+  // addr_type viewAngles = 0x8E20;
 
   MemoryAccess(Settings*);
   pid_t getPid();

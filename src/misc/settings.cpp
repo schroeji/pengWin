@@ -24,12 +24,17 @@ void Settings::load(const string& file) {
   string line;
   vector<string> splits;
   vector<string> name_splits;
+
   if (settings_file.is_open()) {
     while (getline(settings_file, line)) {
       // remove comments in file
       splits = split_string(line, "#");
       if (splits[0] == "" || splits[0] == "[offsets]" || splits[0] == "[settings]")
         continue;
+      else if(splits[0] == "[netvars]") {
+        readNetvars(settings_file);
+        break;
+      }
       else {
         splits = split_string(splits[0], "=");
         if (splits.size() != 2) {
@@ -122,6 +127,11 @@ void Settings::load(const string& file) {
 }
 
 void Settings::print() {
+  // cout << "--------- NetVars ---------" << endl;
+  // for (std::pair<std::string, std::uint64_t> const& netvar : netvars) {
+  // cout << hex << netvar.first << "=0x" << netvar.second << endl;
+  // }
+
   cout << "--------- Offsets ---------" << endl;
   cout << hex << "glow offset: " << glow_offset << endl;
   cout << "attack offset: " << attack_offset << endl;
@@ -171,4 +181,17 @@ void Settings::print() {
   cout << "radar_sleep: " << radar_sleep << endl;
   cout << "radar_generic: " << radar_generic << endl;
   cout << "------------------------" << endl;
+
+}
+
+void Settings::readNetvars(ifstream& handle) {
+  string line;
+  vector<string> splits;
+  while (getline(handle, line)) {
+    splits = split_string(line, "#");
+    splits = split_string(splits[0], "=");
+    std::string qualified_name = splits[0];
+    std::uint64_t value = strtoul(splits[1].c_str(), NULL, 16);
+    netvars.insert(std::make_pair(qualified_name, value));
+  }
 }

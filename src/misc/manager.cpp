@@ -109,7 +109,8 @@ void GameManager::printPlayers() {
     printf("Aimpunch: %f, %f, %f\n", getAimPunch(mem.local_player_addr).x,  getAimPunch(mem.local_player_addr).y, getAimPunch(mem.local_player_addr).z);
     printf("Defusing: %d\n", isDefusing(player_addrs[i]));
     printf("Flashed: %d\n", isFlashed(player_addrs[i]));
-    // printf("Weapon: %s\n", getWeaponName(getWeapon(player_addrs[i])).c_str());
+    printf("Weapon: %s\n", getWeaponName(getWeapon(player_addrs[i])).c_str());
+    printf("dormant: %u\n", player->m_bDormant);
     // vector<int> diffs = mem.diffMem(mem.local_player_addr + 0x3600, 0x300);
     // if (diffs.size() > 0) {
     //   for (int j : diffs)

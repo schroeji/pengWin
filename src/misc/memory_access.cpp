@@ -23,6 +23,24 @@ MemoryAccess::MemoryAccess(Settings* settings) : settings(settings) {
     isConnected_offset = settings->isConnected_offset;
     clientState_offset = settings->clientState_offset;
     debug = settings->debug;
+
+    // load netvar offsets
+    try {
+      m_Local = settings->netvars.at("CBasePlayer::DT_BasePlayer::DT_LocalPlayerExclusive::m_Local");
+      m_dwBoneMatrix = settings->netvars.at("CBaseAnimating::DT_BaseAnimating::m_nForceBone") + 0x2c;
+
+      m_bIsScoped = settings->netvars.at("CCSPlayer::DT_CSPlayer::m_bIsScoped");
+      m_bIsDefusing = settings->netvars.at("CCSPlayer::DT_CSPlayer::m_bIsDefusing");
+      m_flFlashDuration = settings->netvars.at("CCSPlayer::DT_CSPlayer::m_flFlashDuration");
+      // m_hActiveWeapon = settings->netvars.at("CBaseCombatCharacter::DT_BaseCombatCharacter::m_hActiveWeapon");
+      m_iTeamNum = settings->netvars.at("CBaseEntity::DT_BaseEntity::m_iTeamNum");
+      m_viewPunchAngle = settings->netvars.at("CBasePlayer::DT_BasePlayer::DT_LocalPlayerExclusive::DT_Local::m_viewPunchAngle");
+      m_aimPunchAngle = settings->netvars.at("CBasePlayer::DT_BasePlayer::DT_LocalPlayerExclusive::DT_Local::m_aimPunchAngle");
+      m_AttributeManager = settings->netvars.at("CEconEntity::DT_EconEntity::m_AttributeManager");
+      m_iItemDefinitionIndex = settings->netvars.at("CBaseAttributableItem::DT_BaseAttributableItem::DT_AttributeContainer::DT_ScriptCreatedItem::m_iItemDefinitionIndex");
+    } catch (std::out_of_range const& e) {
+      cout << e.what() << endl;;
+    }
   }
 }
 
@@ -63,7 +81,7 @@ pid_t MemoryAccess::getPid() {
 }
 
 Addr_Range MemoryAccess::getClientRange() {
-  client_range = getModule("client_panorama_client.so");
+  client_range = getModule("client_client.so");
   cout << hex << "Client Base: " << client_range.first << endl;
   updateAddrs();
   return client_range;

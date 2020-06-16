@@ -9,6 +9,7 @@ Unlike other external hacks it does not write to the games memory at all.
 - Triggerbot
 - BunnyHop
 - Aimbot
+- Visibility check (BSP parsing)
 - Offset Dumper
 - Loading settings from file
 - Defining Hotkeys
@@ -17,7 +18,6 @@ Unlike other external hacks it does not write to the games memory at all.
 # Todo:
 - Sound ESP
 - BlockBot
-- Visibility check (BSP parsing)
 
 # Building
 Dependencies:
