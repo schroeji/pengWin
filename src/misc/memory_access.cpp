@@ -32,7 +32,7 @@ MemoryAccess::MemoryAccess(Settings* settings) : settings(settings) {
       m_bIsScoped = settings->netvars.at("CCSPlayer::DT_CSPlayer::m_bIsScoped");
       m_bIsDefusing = settings->netvars.at("CCSPlayer::DT_CSPlayer::m_bIsDefusing");
       m_flFlashDuration = settings->netvars.at("CCSPlayer::DT_CSPlayer::m_flFlashDuration");
-      // m_hActiveWeapon = settings->netvars.at("CBaseCombatCharacter::DT_BaseCombatCharacter::m_hActiveWeapon");
+      m_hActiveWeapon = settings->netvars.at("CBaseCombatCharacter::DT_BaseCombatCharacter::m_hActiveWeapon");
       m_iTeamNum = settings->netvars.at("CBaseEntity::DT_BaseEntity::m_iTeamNum");
       m_viewPunchAngle = settings->netvars.at("CBasePlayer::DT_BasePlayer::DT_LocalPlayerExclusive::DT_Local::m_viewPunchAngle");
       m_aimPunchAngle = settings->netvars.at("CBasePlayer::DT_BasePlayer::DT_LocalPlayerExclusive::DT_Local::m_aimPunchAngle");
