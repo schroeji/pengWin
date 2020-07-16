@@ -313,8 +313,9 @@ std::vector<Vector> GameManager::getSmokeLocations() {
   // if a non player entity has FL_ONGROUND set it's a smoke
   std::vector<Vector> result;
   for (EntityType* entity : nonPlayerEntities) {
-    if (entity->m_fFlags & FL_ONGROUND)
+    if (!(entity->m_fFlags & FL_CLIENT) && (entity->m_fFlags & FL_ONGROUND) ) {
       result.push_back(entity->m_vecOrigin);
+    }
   }
   return result;
 }

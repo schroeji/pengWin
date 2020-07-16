@@ -36,6 +36,8 @@ private:
   float spline_last_x;
   QAngle spline_start_angle;
   QAngle spline_supp_angle;
+  void createFakeInputDevice();
+
 public:
   Aimer(GameManager& csgo, BSPParser&);
   ~Aimer();

@@ -87,9 +87,6 @@ int main(int argc, char** argv) {
   Radar radar(csgo);
   HotkeyManager hotkeyMan(csgo);
 
-  // string maps_path("/run/media/hidden/big/SteamLibrary/steamapps/common/Counter-Strike Global Offensive/csgo/maps/");
-  // cout << "Load:" << bspParser.parse_map(cs_path, "de_dust2.bsp") << endl;
-
   while (!panicked && csgo.gameRunning()) {
     if (debug) cout << "Waiting until connected..." << endl;
     while (csgo.gameRunning()) {
@@ -137,7 +134,7 @@ int main(int argc, char** argv) {
     while (!panicked && csgo.isOnServer()) {
       csgo.grabPlayers();
       if (debug) {
-        csgo.printPlayers();
+        // csgo.printPlayers();
         // csgo.printEntities();
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));

@@ -31,63 +31,19 @@ Aimer::Aimer(GameManager& csgo, BSPParser& bspParser) : csgo(csgo),
                                                        inverse_sens(1 / settings.sensitivity),
                                                        bspParser(bspParser) {
   // prepare mouse
-  struct uinput_user_dev uidev;
-  uinput = open("/dev/input/uinput", O_WRONLY | O_NONBLOCK);
-
-  if(uinput < 0)
-    uinput = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
-
-  if(uinput < 0) {
-    cout << "WARNING: could not open uinput" << endl;
-    return;
-  }
-
-  if(ioctl(uinput, UI_SET_EVBIT, EV_KEY) < 0) {
-    cout << "Error while setting up aimbot" << endl;
-    return;
-  }
-  if(ioctl(uinput, UI_SET_KEYBIT, BTN_LEFT) < 0) {
-    cout << "Error while setting up aimbot" << endl;
-    return;
-  }
-
-  if(ioctl(uinput, UI_SET_EVBIT, EV_REL) < 0) {
-    cout << "Error while setting up aimbot" << endl;
-    return;
-  }
-
-  if(ioctl(uinput, UI_SET_RELBIT, REL_X) < 0) {
-    cout << "Error while setting up aimbot" << endl;
-    return;
-  }
-
-  if(ioctl(uinput, UI_SET_RELBIT, REL_Y) < 0) {
-    cout << "Error while setting up aimbot" << endl;
-    return;
-  }
-
-  memset(&uidev, 0, sizeof(uidev));
-  snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "USB-Mouse");
-  uidev.id.bustype = BUS_USB;
-  uidev.id.vendor  = 0x1;
-  uidev.id.product = 0x1;
-  uidev.id.version = 1;
-
-  if(write(uinput, &uidev, sizeof(uidev)) < 0) {
-    cout << "Error while creating fake input device" << endl;
-    return;
-  }
-
-  if(ioctl(uinput, UI_DEV_CREATE) < 0) {
-    cout << "Error while creating fake input device" << endl;
-    return;
+  if (settings.use_fake_input_device) {
+    createFakeInputDevice();
+  } else {
+    uinput = open(settings.mouse_file.c_str(), O_WRONLY | O_NONBLOCK);
   }
 }
 
 Aimer::~Aimer() {
-  if(ioctl(uinput, UI_DEV_DESTROY) < 0) {
-    cout << "WARNING: Could not destroy fake input device" << endl;
-    return;
+  if (settings.use_fake_input_device) {
+    createFakeInputDevice();
+    if(ioctl(uinput, UI_DEV_DESTROY) < 0) {
+      cout << "WARNING: Could not destroy fake input device" << endl;
+    }
   }
   close(uinput);
 }
@@ -513,8 +469,10 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view, float fov) {
     enemy_index++;
     if (enemy_index == local_player_index || (!settings.aim_teammates && enemy->m_iTeamNum == team))
       continue;
-    if (settings.aim_smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin))
+    if (settings.aim_smoke_check && csgo.lineThroughSmoke(player_pos, enemy->m_vecOrigin)) {
+      if (settings.debug) cout << "Ignoring player " << enemy_index << " due to smoke."<< endl;
       continue;
+    }
     addr_type enemy_addr = csgo.getPlayerAddr(enemy);
     BoneInfo* boneMatrix = mem.getBoneMatrix(enemy_addr);
     for (unsigned int boneID : settings.bone_ids) {
@@ -526,12 +484,12 @@ pair<EntityType*, Vector> Aimer::closestTargetInFov(Vector view, float fov) {
       normalize_vector(&distVec);
       float angle = acos(distVec * view);
       if (angle > fov / 2.)
-          continue;
-        if (closestPlayer == nullptr || closestAngle > angle) {
-          closestPlayer = enemy;
-          closestAngle = angle;
-          closestBone = bone_pos;
-        }
+        continue;
+      if (closestPlayer == nullptr || closestAngle > angle) {
+        closestPlayer = enemy;
+        closestAngle = angle;
+        closestBone = bone_pos;
+      }
     }
     delete boneMatrix;
   }
@@ -553,4 +511,59 @@ Vector Aimer::predictPositionOffset(EntityType* player) {
   Vector vel = {player->m_vecVelocity.y, player->m_vecVelocity.z, player->m_vecVelocity.x};
   float t = (float) settings.main_loop_sleep / 1000.0;
   return vel * t;
+}
+
+void Aimer::createFakeInputDevice() {
+  struct uinput_user_dev uidev;
+  uinput = open("/dev/input/uinput", O_WRONLY | O_NONBLOCK);
+
+  if(uinput < 0)
+  uinput = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
+
+  if(uinput < 0) {
+    cout << "WARNING: could not open uinput" << endl;
+    return;
+  }
+
+  if(ioctl(uinput, UI_SET_EVBIT, EV_KEY) < 0) {
+    cout << "Error while setting up aimbot" << endl;
+    return;
+  }
+  if(ioctl(uinput, UI_SET_KEYBIT, BTN_LEFT) < 0) {
+    cout << "Error while setting up aimbot" << endl;
+    return;
+  }
+
+  if(ioctl(uinput, UI_SET_EVBIT, EV_REL) < 0) {
+    cout << "Error while setting up aimbot" << endl;
+    return;
+  }
+
+  if(ioctl(uinput, UI_SET_RELBIT, REL_X) < 0) {
+    cout << "Error while setting up aimbot" << endl;
+    return;
+  }
+
+  if(ioctl(uinput, UI_SET_RELBIT, REL_Y) < 0) {
+    cout << "Error while setting up aimbot" << endl;
+    return;
+  }
+
+  memset(&uidev, 0, sizeof(uidev));
+  snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "USB-Mouse");
+  uidev.id.bustype = BUS_USB;
+  uidev.id.vendor  = 0x1;
+  uidev.id.product = 0x1;
+  uidev.id.version = 1;
+
+  if(write(uinput, &uidev, sizeof(uidev)) < 0) {
+    cout << "Error while creating fake input device" << endl;
+    return;
+  }
+
+  if(ioctl(uinput, UI_DEV_CREATE) < 0) {
+    cout << "Error while creating fake input device" << endl;
+    return;
+  }
+
 }

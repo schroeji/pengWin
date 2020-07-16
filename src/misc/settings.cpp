@@ -105,6 +105,8 @@ void Settings::load(const string& file) {
           aim_vis_check = (splits[1] == "true");
         else if (splits[0] == "aim_teammates")
           aim_teammates = (splits[1] == "true");
+        else if (splits[0] == "use_fake_input_device")
+          use_fake_input_device = (splits[1] == "true");
         else if (splits[0] == "bone_ids") {
           vector<string> bones = split_string(splits[1], ",");
           for (string bone : bones)

@@ -115,6 +115,7 @@ void write_settings(const string& file_name) {
   file << "aim_fov_max_scale=3.1" << endl;
   file << "# your ingame sensitivity (used for aim calculations)" << endl;
   file << "sensitivity=1.3" << endl;
+  file << "use_fake_input_device=false" << endl;
   file << "# radar settings" << endl;
   file << "find_map=true" << endl;
   file << "radar_sleep=100" << endl;
