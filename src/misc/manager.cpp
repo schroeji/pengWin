@@ -224,29 +224,31 @@ addr_type GameManager::getPlayerAddr(EntityType *player) {
 }
 
 string GameManager::getMapName() {
-  string map_name = "";
-  if (settings.find_map) {
-    if (settings.debug)
-      cout << "Scanning for map..." << endl;
-    if (settings.radar_generic)
-      map_name = "generic";
-    while (map_name == "") {
-      char MapName[32];
-      if (!mem.read((void *)(mem.map_name_addr), &MapName, sizeof(MapName)))
-        throw runtime_error("Could not get MapName.");
-      // mem.read((void*)(Address + OFFSET_MAPNAME), &MapName, sizeof(MapName));
-      string map_path(MapName);
-      // vector<string> no_path = split_string(map_path, "/");
-      vector<string> no_bsp = split_string(map_path, ".");
-      map_name = string(no_bsp[0]);
-      this_thread::sleep_for(chrono::milliseconds(1000));
+  if (current_map_ == "") {
+    if (settings.find_map) {
+      if (settings.debug)
+        cout << "Scanning for map..." << endl;
+      if (settings.radar_generic)
+        current_map_ = "generic";
+      while (current_map_ == "") {
+        char MapName[32];
+        if (!mem.read((void *)(mem.map_name_addr), &MapName, sizeof(MapName)))
+          throw runtime_error("Could not get MapName.");
+        // mem.read((void*)(Address + OFFSET_MAPNAME), &MapName,
+        // sizeof(MapName));
+        string map_path(MapName);
+        // vector<string> no_path = split_string(map_path, "/");
+        vector<string> no_bsp = split_string(map_path, ".");
+        current_map_ = string(no_bsp[0]);
+        this_thread::sleep_for(chrono::milliseconds(1000));
+      }
+      cout << "Found Map: " << current_map_ << endl;
+    } else {
+      cout << "Map detection deactivated. Please choose map:" << endl;
+      cin >> current_map_;
     }
-    cout << "Found Map: " << map_name << endl;
-  } else {
-    cout << "Map detection deactivated. Please choose map:" << endl;
-    cin >> map_name;
   }
-  return map_name;
+  return current_map_;
 }
 
 bool GameManager::isScoped(addr_type player_addr) {

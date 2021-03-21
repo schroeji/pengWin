@@ -4,7 +4,7 @@ CC = g++
 # compiler flags:
 #  -g    adds debugging information to the executable file
 #  -Wall turns on most, but not all, compiler warnings
-CFLAGS  = -Wall -MD
+CFLAGS  = -Wall -MD -std=c++17
 
 # the build target executable:
 TARGET = pengWin
