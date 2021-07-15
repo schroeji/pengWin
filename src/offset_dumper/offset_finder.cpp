@@ -224,7 +224,6 @@ int main(int argc, char **argv) {
   cout << "-- Map Name --" << endl;
   std::vector<addr_type> map_name_calls =
       mem.find_pattern(map_name_pattern, engineRange);
-  cout << "Matches: " << map_name_calls.size() << endl; //
   addr_type map_name_addr =
       mem.getCallAddress((void *)(map_name_calls[0] + 0x9));
   // example: "maps/de_dust2.bsp"
