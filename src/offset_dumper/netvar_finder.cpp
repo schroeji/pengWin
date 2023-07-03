@@ -1,57 +1,55 @@
 #include "netvar_finder.hpp"
 
-#include <stdexcept>
+#include <iostream>
 #include <map>
-
+#include <stdexcept>
 
 using namespace std;
 
-NetvarFinder::NetvarFinder(MemoryAccess& mem, addr_type class_head) : mem(mem) {
-  cc.m_pNext = class_head;
-}
+NetvarFinder::NetvarFinder(ClientClass client_class) : cc(client_class) {}
 
 void NetvarFinder::dump() {
-  if(cc.m_pNext == 0)
+  std::cout << "Dumping Netvars ..." << std::endl;
+  if (cc.m_pNext == 0)
     throw runtime_error("Invalid class_head");
-  while(cc.m_pNext) {
-    mem.read((void*) cc.m_pNext, &cc, sizeof(cc));
-    char networkName[64];
-      if (cc.m_pRecvTable) {
-        mem.read((void*) cc.m_pNetworkName, (void*) networkName, sizeof(networkName));
-        // cout << networkName << endl;
-        walkTable(cc.m_pRecvTable, 0, networkName);
-      } else {
-        break;
-      }
+  while (cc.m_pNext) {
+    printf("Next address %lu \n", cc.m_pNext);
+    cc = *cc.m_pNext;
+    printf("ASD \n");
+    if (cc.m_pRecvTable) {
+      std::string network_name{cc.m_pNetworkName};
+      std::cout << "Dumping " << network_name << std::endl;
+      walkTable(cc.m_pRecvTable, 0, network_name);
+    } else {
+      break;
     }
+  }
+  std::cout << "Dumping Netvars complete." << std::endl;
 }
 
-void NetvarFinder::walkTable(addr_type m_pRecvTable, int level, std::string prefix) {
-  char tableName[64];
+void NetvarFinder::walkTable(RecvTable *table, int level, std::string prefix) {
   char propName[64];
-  RecvTable table;
-  RecvProp prop;
-  mem.read((void*) m_pRecvTable, (void*) &table, sizeof(table));
-  mem.read((void*) table.m_pNetTableName, (void*) &tableName, sizeof(tableName));
-  for (int i = 0; i < table.m_nProps; i++) {
-    mem.read((void*) table.m_pProps + i * sizeof(prop), (void*) &prop, sizeof(prop));
-    mem.read((void*) prop.m_pVarName, (void*) &propName, sizeof(propName));
+  for (int i = 0; i < table->m_nProps; i++) {
+    std::string table_name(table->m_pNetTableName);
 
+    std::cout << "Dumping " << table_name << std::endl;
+    RecvProp *prop{
+        reinterpret_cast<RecvProp *>(&table->m_nProps + i * sizeof(RecvProp))};
     if (!strcmp(propName, "baseclass"))
       continue;
 
-    if (isdigit(propName[0]) || prop.m_RecvType == SendProp::DPT_Array)
+    if (isdigit(propName[0]) || prop->m_RecvType == SendProp::DPT_Array)
       continue;
 
-    netvar_map.insert(std::make_pair(prefix + "::" + tableName + "::" + propName, prop.m_Offset));
+    netvar_map.insert(std::make_pair(
+        prefix + "::" + table_name + "::" + propName, prop->m_Offset));
 
-    if (prop.m_RecvType == SendProp::DPT_DataTable && prop.m_pDataTable) {
-      walkTable(prop.m_pDataTable, level + 1, prefix + "::" + tableName);
+    if (prop->m_RecvType == SendProp::DPT_DataTable && prop->m_pDataTable) {
+      walkTable(prop->m_pDataTable, level + 1, prefix + "::" + table_name);
     }
   }
 }
 
-
-std::map<std::string, std::uint64_t> const& NetvarFinder::getNetvars() const {
+std::map<std::string, std::uint64_t> const &NetvarFinder::getNetvars() const {
   return netvar_map;
 }

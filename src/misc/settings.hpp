@@ -1,15 +1,16 @@
 #pragma once
 #include "util.hpp"
 
+#include <X11/Xlib.h>
+#include <cstdint>
+#include <map>
 #include <string>
 #include <vector>
-#include <X11/Xlib.h>
-#include <map>
 
 using namespace std;
 class Settings {
 private:
-  static Settings* instance;
+  static Settings *instance;
 
 public:
   // offsets
@@ -33,15 +34,15 @@ public:
   bool trigger_use_random = false;
   string trigger_key;
 
-  //bhop settings
+  // bhop settings
   string bhop_key;
 
-  //radar settings
+  // radar settings
   bool find_map = false;
   long int radar_sleep = 200;
   bool radar_generic = false;
 
-  //aimbot settings
+  // aimbot settings
   float aim_fov;
   long int aim_sleep;
   string aim_key;
@@ -59,9 +60,9 @@ public:
   vector<unsigned int> bone_ids;
   std::map<std::string, std::uint64_t> netvars;
 
-  Settings(const string&);
-  static Settings& getInstance();
-  void readNetvars(std::ifstream& handle);
-  void load(const string&);
+  Settings(const string &);
+  static Settings &getInstance();
+  void readNetvars(std::ifstream &handle);
+  void load(const string &);
   void print();
 };
