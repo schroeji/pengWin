@@ -43,15 +43,15 @@ void Radar::writeFunc() {
   while (running) {
     this_thread::sleep_for(chrono::milliseconds(settings.radar_sleep));
     const char SEPERATOR[] = "|";
-    vector<EntityType *> players = csgo.getPlayers();
+    auto const players = csgo.getPlayers();
     if (players.empty())
       continue;
     // print local player index into array[0,0]
     // and rotation of local player for generic radar type
     try {
-      string first_line =
-          to_string(csgo.getLocalPlayerIndex()) + ",0,0,0,0,0,0,0," +
-          to_string(csgo.getLocalPlayer()->m_angNetworkAngles.y);
+      string first_line = to_string(csgo.getLocalPlayerIndex()) +
+                          ",0,0,0,0,0,0,0," +
+                          to_string(csgo.getLocalPlayer()->networkAngle.x);
       fputs(first_line.c_str(), handle);
     } catch (const runtime_error &e) {
       stop();
@@ -59,19 +59,18 @@ void Radar::writeFunc() {
     }
     // Format: number,hp,team,weapon,defusing,x,y,z,rotation
     int i = 0;
-    for (EntityType *player : players) {
-      addr_type player_addr = csgo.getPlayerAddr(player);
+    for (PlayerPtr player : players) {
       fputs(SEPERATOR, handle);
       ostringstream os;
       os << i << ",";
-      os << player->m_iHealth << ",";
-      os << player->m_iTeamNum << ",";
-      os << csgo.getWeapon(player_addr) << ",";
-      os << csgo.isDefusing(player_addr) << ",";
-      os << player->m_vecOrigin.x << ",";
-      os << player->m_vecOrigin.y << ",";
-      os << player->m_vecOrigin.z << ",";
-      os << player->m_angNetworkAngles.y;
+      os << player->health << ",";
+      os << player->team << ",";
+      os << player->weapon << ",";
+      os << player->is_defusing << ",";
+      os << player->origin.x << ",";
+      os << player->origin.y << ",";
+      os << player->origin.z << ",";
+      os << player->networkAngle.x;
       fputs(os.str().c_str(), handle);
       i++;
     }

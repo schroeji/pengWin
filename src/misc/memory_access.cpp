@@ -3,6 +3,8 @@
 #include "typedef.hpp"
 #include "util.hpp"
 
+#include <cstdint>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <stdlib.h>
@@ -14,75 +16,53 @@
 using namespace std;
 
 MemoryAccess::MemoryAccess(Settings *settings) : settings(settings) {
-  if (settings != nullptr) {
-    glow_offset = settings->glow_offset;
-    attack_offset = settings->attack_offset;
-    local_player_offset = settings->local_player_offset;
-    map_name_offset = settings->map_name_offset;
-    force_jump_offset = settings->force_jump_offset;
-    isConnected_offset = settings->isConnected_offset;
-    clientState_offset = settings->clientState_offset;
-    debug = settings->debug;
+  vac_bypass.set_inotify_max();
+}
 
-    // load netvar offsets
-    try {
-      m_Local = settings->netvars.at(
-          "CBasePlayer::DT_BasePlayer::DT_LocalPlayerExclusive::m_Local");
-      m_dwBoneMatrix = settings->netvars.at(
-                           "CBaseAnimating::DT_BaseAnimating::m_nForceBone") +
-                       0x2c;
+unsigned int MemoryAccess::read_offset(void *addr) { return read_uint32(addr); }
 
-      m_bIsScoped = settings->netvars.at("CCSPlayer::DT_CSPlayer::m_bIsScoped");
-      m_bIsDefusing =
-          settings->netvars.at("CCSPlayer::DT_CSPlayer::m_bIsDefusing");
-      m_flFlashDuration =
-          settings->netvars.at("CCSPlayer::DT_CSPlayer::m_flFlashDuration");
-      m_hActiveWeapon = settings->netvars.at(
-          "CBaseCombatCharacter::DT_BaseCombatCharacter::m_hActiveWeapon");
-      m_iTeamNum =
-          settings->netvars.at("CBaseEntity::DT_BaseEntity::m_iTeamNum");
-      m_viewPunchAngle = settings->netvars.at(
-          "CBasePlayer::DT_BasePlayer::DT_LocalPlayerExclusive::DT_Local::m_"
-          "viewPunchAngle");
-      m_aimPunchAngle = settings->netvars.at(
-          "CBasePlayer::DT_BasePlayer::DT_LocalPlayerExclusive::DT_Local::m_"
-          "aimPunchAngle");
-      m_AttributeManager = settings->netvars.at(
-          "CEconEntity::DT_EconEntity::m_AttributeManager");
-      m_iItemDefinitionIndex = settings->netvars.at(
-          "CBaseAttributableItem::DT_BaseAttributableItem::DT_"
-          "AttributeContainer::DT_ScriptCreatedItem::m_iItemDefinitionIndex");
-    } catch (std::out_of_range const &e) {
-      cout << e.what() << endl;
-      ;
-    }
-  }
+unsigned int MemoryAccess::read_uint32(void *addr) {
+  std::uint32_t value;
+  read(addr, &value, sizeof(std::uint32_t));
+  return value;
+}
+
+std::uint8_t MemoryAccess::read_uint8(void *addr) {
+  std::uint8_t value;
+  read(addr, &value, sizeof(std::uint8_t));
+  return value;
+}
+
+addr_type MemoryAccess::get_address(void *pointer) {
+  addr_type pointee;
+  read(pointer, &pointee, sizeof(pointee));
+  return pointee;
 }
 
 void MemoryAccess::updateAddrs() {
-  local_player_addr_location = client_range.first + local_player_offset;
-  if (!read((void *)local_player_addr_location, &local_player_addr,
-            sizeof(local_player_addr)))
-    if (settings != nullptr && settings->debug)
-      cout << "WARNING: could not get local_player" << endl;
+  // local_player_addr_location = client_range.first + local_player_offset;
+  // if (!read((void *)local_player_addr_location, &local_player_addr,
+  //           sizeof(local_player_addr)))
+  //   if (settings != nullptr && settings->debug)
+  //     cout << "WARNING: could not get local_player" << endl;
 
-  glow_addr = client_range.first + glow_offset;
-  if (debug)
-    cout << hex << "glow_addr: " << glow_addr << endl;
+  // glow_addr = client_range.first + glow_offset;
+  // if (debug)
+  //   cout << hex << "glow_addr: " << glow_addr << endl;
 
-  attack_addr_call_location = client_range.first + attack_offset;
-  if (settings != nullptr) {
-    attack_addr = getCallAddress((void *)attack_addr_call_location);
-    if (!attack_addr)
-      if (settings->debug)
-        cout << "WARNING: could not get attack_addr" << endl;
-  }
+  // attack_addr_call_location = client_range.first + attack_offset;
+  // if (settings != nullptr) {
+  //   attack_addr = getCallAddress((void *)attack_addr_call_location);
+  //   if (!attack_addr)
+  //     if (settings->debug)
+  //       cout << "WARNING: could not get attack_addr" << endl;
+  // }
 
-  force_jump_addr = client_range.first + force_jump_offset;
+  // force_jump_addr = client_range.first + force_jump_offset;
 
-  map_name_addr = engine_range.first + map_name_offset;
-  isConnected_addr = engine_range.first + isConnected_offset;
-  clientState_addr = engine_range.first + clientState_offset;
+  // map_name_addr = engine_range.first + map_name_offset;
+  // isConnected_addr = engine_range.first + isConnected_offset;
+  // clientState_addr = engine_range.first + clientState_offset;
 }
 
 pid_t MemoryAccess::getPid() {
@@ -99,47 +79,92 @@ pid_t MemoryAccess::getPid() {
   return pid;
 }
 
-Addr_Range MemoryAccess::getClientRange() {
-  client_range = getModule("client_client.so");
-  cout << hex << "Client Base: " << client_range.first << endl;
-  updateAddrs();
+void MemoryAccess::printAddrRangeVec(std::vector<Addr_Range> const &range_vec) {
+  for (auto range : range_vec) {
+    cout << range.first << " - " << range.second << endl;
+  }
+}
+
+std::vector<Addr_Range> &MemoryAccess::getClientRange() {
+  if (client_range.empty()) {
+    client_range = getModule("libclient.so");
+    cout << hex << "Client Range: " << endl;
+    printAddrRangeVec(client_range);
+  }
   return client_range;
 }
 
-Addr_Range MemoryAccess::getEngineRange() {
-  engine_range = getModule("engine_client.so");
-  cout << hex << "Engine Base: " << engine_range.first << endl;
+std::vector<Addr_Range> MemoryAccess::getPanoramaClientRange() {
+  panorama_client_range = getModule("libpanoramauiclient.so");
+  cout << hex << "Panorama Client Range: " << endl;
+  printAddrRangeVec(panorama_client_range);
+  updateAddrs();
+  return panorama_client_range;
+}
+
+std::vector<Addr_Range> MemoryAccess::getEngineRange() {
+  engine_range = getModule("libengine2.so");
+  cout << hex << "Engine Range: " << endl;
+  printAddrRangeVec(engine_range);
   updateAddrs();
   return engine_range;
 }
 
-Addr_Range MemoryAccess::getModule(const string &modname) {
-  string cmd =
-      "grep " + modname + " /proc/" + to_string(pid) + "/maps | head -n 1";
-  FILE *in;
-  char buf[512];
-  in = popen(cmd.c_str(), "r");
-  if (!(in && fgets(buf, sizeof(buf), in))) {
-    cout << "WARNING: Could not open module: " << modname << endl;
-    return Addr_Range(0, 0);
+std::vector<Addr_Range> MemoryAccess::getModule(const string &modname) {
+  std::string mapsFilePath = "/proc/" + std::to_string(pid) + "/maps";
+  std::ifstream mapsFile(mapsFilePath);
+  std::vector<Addr_Range> result{};
+  if (!mapsFile.is_open()) {
+    std::cerr << "Could not open " << mapsFilePath << std::endl;
+    return result;
   }
-  pclose(in);
-  string line(buf);
-  vector<string> splits = split_string(line, " ");
-  vector<string> range = split_string(splits[0], "-");
-  return Addr_Range(strtoul(range[0].c_str(), NULL, 16),
-                    strtoul(range[1].c_str(), NULL, 16));
+
+  std::string line;
+  std::cout << "Memory mappings for library: " << modname << std::endl;
+
+  while (std::getline(mapsFile, line)) {
+    if (line.find(modname) != std::string::npos) {
+      std::istringstream iss(line);
+      std::string addressRange, perms, offset, dev, inode, pathname;
+
+      // Read the line into respective fields
+      iss >> addressRange >> perms >> offset >> dev >> inode;
+      std::getline(iss, pathname);
+      auto split = split_string(addressRange, "-");
+      result.push_back(Addr_Range(strtoul(split[0].c_str(), NULL, 16),
+                                  strtoul(split[1].c_str(), NULL, 16)));
+      // Output the parsed information
+      // std::cout << "Address Range: " << addressRange << std::endl;
+      // std::cout << "Permissions: " << perms << std::endl;
+      // std::cout << "Offset: " << offset << std::endl;
+      // std::cout << "Device: " << dev << std::endl;
+      // std::cout << "Inode: " << inode << std::endl;
+      // std::cout << "Pathname: " << pathname << std::endl;
+      // std::cout << "-----------------------------" << std::endl;
+    }
+  }
+
+  mapsFile.close();
+  return result;
+}
+
+bool MemoryAccess::read(addr_type addr, void *buff, size_t size) {
+  return read((void *)addr, buff, size);
 }
 
 bool MemoryAccess::read(void *addr, void *buff, size_t size) {
-  iovec local_mem;
-  iovec remote_mem;
-  local_mem.iov_base = buff;
-  local_mem.iov_len = size;
-  remote_mem.iov_base = addr;
-  remote_mem.iov_len = size;
-  return (process_vm_readv(pid, &local_mem, 1, &remote_mem, 1, 0) ==
-          (signed)size);
+  addr = (void *)vac_bypass.filter_address(pid, (addr_type)addr);
+  if (addr) {
+    iovec local_mem;
+    iovec remote_mem;
+    local_mem.iov_base = buff;
+    local_mem.iov_len = size;
+    remote_mem.iov_base = addr;
+    remote_mem.iov_len = size;
+    return (process_vm_readv(pid, &local_mem, 1, &remote_mem, 1, 0) ==
+            (signed)size);
+  }
+  return false;
 }
 
 bool MemoryAccess::write(void *addr, void *buff, size_t size) {
@@ -152,43 +177,6 @@ bool MemoryAccess::write(void *addr, void *buff, size_t size) {
   return (process_vm_writev(pid, &local_mem, 1, &remote_mem, 1, 0) ==
           (signed)size);
 }
-
-std::vector<addr_type>
-MemoryAccess::find_pattern(MemoryAccess::BytePattern pattern,
-                           Addr_Range range) {
-  size_t begin = range.first;
-  size_t end = range.second;
-  char buffer[8192];
-  size_t blocksize = sizeof(buffer);
-  size_t totalsize = end - begin;
-  size_t chunknum = 0;
-
-  std::vector<addr_type> result{};
-  while (totalsize > 0) {
-    size_t readsize = min(totalsize, blocksize);
-    size_t readaddr = begin + (blocksize * chunknum);
-    bzero(buffer, blocksize);
-    if (read((void *)readaddr, buffer, readsize)) {
-      for (size_t b = 0; b < readsize; b++) {
-        size_t matches = 0;
-        while (!pattern[matches].has_value() ||
-               buffer[b + matches] == pattern[matches].value()) {
-          matches++; // one matched byte
-          if (matches == pattern.size()) {
-            result.push_back(static_cast<addr_type>(readaddr + b));
-            break;
-          }
-        }
-      }
-    }
-    totalsize -= readsize;
-    chunknum++;
-  }
-  if (result.empty())
-    cout << "WARNING: no match for pattern" << endl;
-  return result;
-}
-
 addr_type MemoryAccess::getCallAddress(void *addr) {
   unsigned int jump_len;
 
@@ -202,16 +190,16 @@ addr_type MemoryAccess::getCallAddress(void *addr) {
 addr_type MemoryAccess::getAbsoluteAddress(void *addr, int offset, int size) {
   unsigned int jump_len;
   if (read((char *)addr + offset, &jump_len, sizeof(unsigned int))) {
-    return jump_len + (unsigned long)addr + size;
+    return jump_len + (unsigned long)addr + size + offset;
   }
   return 0;
 }
 
 void MemoryAccess::updateLocalPlayerAddr() {
-  if (!read((void *)local_player_addr_location, &local_player_addr,
-            sizeof(local_player_addr)))
-    if (settings->debug)
-      cout << "WARNING: could not get localplayer" << endl;
+  // if (!read((void *)local_player_addr_location, &local_player_addr,
+  //           sizeof(local_player_addr)))
+  //   if (settings->debug)
+  //     cout << "WARNING: could not get localplayer" << endl;
 }
 
 BoneInfo *MemoryAccess::getBoneMatrix(addr_type player) {
@@ -244,7 +232,7 @@ void MemoryAccess::printBlock(addr_type addr, size_t size) {
   for (size_t i = 0; i < size; i++) {
     if (i % 16 == 0)
       cout << hex << endl
-           << addr + i << "[" << i << "]"
+           << addr + i << "[" << setw(2) << setfill('0') << i << "]"
            << ":";
     cout << hex << setw(2) << setfill('0') << (unsigned int)buffer[i] << " ";
   }
@@ -268,29 +256,4 @@ vector<int> MemoryAccess::diffMem(addr_type addr, size_t size) {
   if (result.size() > 0)
     memcpy(diffBuffer, buffer, size);
   return result;
-}
-
-MemoryAccess::BytePattern
-MemoryAccess::compile_byte_pattern(const std::string &pattern) {
-  std::vector<std::optional<char>> compiled_pattern{};
-  for (size_t i = 0; i < pattern.size();
-       i += 3) { // skip over two characters plus space
-    if (pattern.substr(i, 2) == "??") {
-      compiled_pattern.push_back(std::optional<char>{});
-    } else {
-      char byte = (char)strtol(pattern.substr(i, 2).c_str(), NULL, 16);
-      compiled_pattern.push_back(std::optional<char>{byte});
-    }
-  }
-  return compiled_pattern;
-}
-
-MemoryAccess::BytePattern
-MemoryAccess::compile_byte_pattern(std::uint32_t pointer) {
-  std::vector<std::optional<char>> compiled_pattern{};
-  char *char_ptr = reinterpret_cast<char *>(&pointer);
-  for (size_t i = 0; i < 4; i++) { // skip over two characters plus space
-    compiled_pattern.push_back(std::optional<char>{char_ptr[i]});
-  }
-  return compiled_pattern;
 }

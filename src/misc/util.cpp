@@ -1,23 +1,24 @@
 #include "typedef.hpp"
 
-#include <vector>
-#include <string.h>
-#include <string>
-#include <iostream>
-#include <math.h>
-#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/lu.hpp>
-#include <boost/algorithm/string.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <iostream>
+#include <math.h>
+#include <string.h>
+#include <string>
+#include <vector>
 
 using namespace std;
 
-std::vector<std::string> split_string(const std::string& split_str, const std::string& delimiter) {
-  const char* str = split_str.c_str();
-  const char* deli = delimiter.c_str();
+std::vector<std::string> split_string(const std::string &split_str,
+                                      const std::string &delimiter) {
+  const char *str = split_str.c_str();
+  const char *deli = delimiter.c_str();
   std::vector<std::string> result;
   std::string buf = "";
-  for (unsigned int i = 0; i < split_str.length(); i++){
+  for (unsigned int i = 0; i < split_str.length(); i++) {
     if (!strncmp(&str[i], deli, delimiter.length())) {
       result.push_back(buf);
       buf = "";
@@ -29,40 +30,38 @@ std::vector<std::string> split_string(const std::string& split_str, const std::s
   return result;
 }
 
-void normalize_vector(Vector* vec) {
-  float length = len(*vec);
-  vec->x /= length;
-  vec->y /= length;
-  vec->z /= length;
+void normalize_vector(Vector &vec) {
+  float length = len(vec);
+  vec.x /= length;
+  vec.y /= length;
+  vec.z /= length;
 }
 
-void normalize_vector(Vector2D* vec) {
-  float length = len(*vec);
-  vec->x /= length;
-  vec->y /= length;
+void normalize_vector(Vector2D &vec) {
+  float length = len(vec);
+  vec.x /= length;
+  vec.y /= length;
 }
 
-Vector getDist(Vector* a, Vector* b) {
-  return Vector{b->x - a->x, b->y - a->y, b->z - a->z};
+Vector getDist(Vector const &a, Vector const &b) {
+  return Vector{b.x - a.x, b.y - a.y, b.z - a.z};
 }
 
-float scalar_prod(Vector* a, Vector* b) {
-  return (a->x * b->x) + (a->y * b->y) + (a->z * b->z);
+float scalar_prod(Vector const &a, Vector const &b) {
+  return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 }
 
-float scalar_prod(Vector2D* a, Vector2D* b) {
-  return (a->x * b->x) + (a->y * b->y);
+float scalar_prod(Vector2D const &a, Vector2D const &b) {
+  return (a.x * b.x) + (a.y * b.y);
 }
 
-Vector cross_prod(Vector* a, Vector* b) {
-  return {a->y*b->z - a->z*b->y, a->z*b->x - a->x*b->z, a->x*b->y - a->y*b->x};
+Vector cross_prod(Vector const &a, Vector const &b) {
+  return {a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
 }
 
-float sgn(float val) {
-  return (0.0 < val) - (val < 0.0);
-}
+float sgn(float val) { return (0.0 < val) - (val < 0.0); }
 
-Weapon getWeaponByName(std::string weapon_name){
+Weapon getWeaponByName(std::string weapon_name) {
   boost::to_upper(weapon_name);
   if (weapon_name == "DEAGLE")
     return Weapon::DEAGLE;
@@ -180,7 +179,7 @@ Weapon getWeaponByName(std::string weapon_name){
 }
 
 std::string getWeaponName(Weapon w) {
-  switch(w) {
+  switch (w) {
   case Weapon::DEAGLE:
     return "DEAGLE";
   case Weapon::ELITE:
@@ -295,7 +294,7 @@ std::string getWeaponName(Weapon w) {
 }
 
 using namespace boost::numeric::ublas;
-void solve(matrix<float>* A, boost::numeric::ublas::vector<float>* b) {
+void solve(matrix<float> *A, boost::numeric::ublas::vector<float> *b) {
   permutation_matrix<size_t> pm(A->size1());
   lu_factorize(*A, pm);
   lu_substitute(*A, pm, *b);

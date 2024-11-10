@@ -1,8 +1,10 @@
 #pragma once
 #include "memory_access.hpp"
+#include "pattern_scanner.h"
 #include "typedef.hpp"
 #include "util.hpp"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -18,9 +20,12 @@ public:
   // return the MemoryAccess  isntance of this object
   MemoryAccess &getMemoryAccess();
   // return the players (read by the last grabPlayers call)
-  std::vector<EntityType *> &getPlayers();
+  std::vector<PlayerPtr> &getPlayers();
   // return the LocalPlayer object (read by last grabPlayers call)
-  EntityType *getLocalPlayer();
+  PlayerPtr getLocalPlayer();
+
+  // Create a player object from the given entity
+  PlayerPtr makePlayerPtr(addr_type entity);
   // returns the index of the localplayer in the player lsit returned by
   // getPlayers
   int getLocalPlayerIndex();
@@ -29,7 +34,7 @@ public:
   // checks if the game is currebtly conencted to a a server
   bool isOnServer();
   // returns the player address for a player object
-  addr_type getPlayerAddr(EntityType *);
+  // addr_type getPlayerAddr(PlayerPtr);
   // returns the current map name
   std::string getMapName();
   // returns if the player at player_addr is scoped
@@ -50,7 +55,10 @@ public:
   Team getTeam(addr_type);
   // returns the team the crosshair target of the player
   unsigned int getCrosshairTarget(addr_type);
+  // returns the AimPunch value (recoil)
   QAngle getAimPunch(addr_type);
+  // returns the AimPunch value (recoil)
+  Vector getViewOrigin(addr_type);
   // returns the current network angles (data is read directly from memory and
   // not from the player list)
   // => more recent
@@ -60,18 +68,21 @@ public:
   // returns if the line connecting start and end passes through a smoke
   bool lineThroughSmoke(Vector start, Vector end);
 
+  // Returns the entity address for a given handle
+  addr_type getEntityFromHandle(std::uint32_t handle);
+
 private:
   MemoryAccess &mem;
+  PatternScanner pattern_scanner;
   Settings &settings;
-  std::vector<EntityType *> players;
-  std::vector<EntityType *> nonPlayerEntities;
+  std::vector<PlayerPtr> players;
+  std::vector<CEntityInstance *> nonPlayerEntities;
   std::vector<addr_type> player_addrs;
   // number of the local_player in players
   int local_player_index = -1;
-  EntityType *local_player = new EntityType;
+  PlayerPtr local_player;
   bool connected = false;
-  GlowObjectManager_t manager;
-  GlowObjectDefinition_t g_glow[1024];
+  CConcreteEntityList entity_list;
   std::string current_map_;
 
   // some helper variables

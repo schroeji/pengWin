@@ -78,9 +78,9 @@ int main(int argc, char **argv) {
   GameManager csgo = GameManager(mem);
 
   BSPParser bspParser;
-  Trigger trigger(csgo);
+  // Trigger trigger(csgo);
   Aimer aimer(csgo, bspParser);
-  BunnyHopper bhopper(csgo);
+  // BunnyHopper bhopper(csgo);
   Radar radar(csgo);
   HotkeyManager hotkeyMan(csgo);
 
@@ -101,54 +101,55 @@ int main(int argc, char **argv) {
     if (use_radar)
       radar.start();
 
-    if (use_bhop) {
-      boost::function<void(unsigned int)> bhopFunc = boost::bind(
-          &BunnyHopper::jumpCheck, &bhopper, boost::placeholders::_1);
-      hotkeyMan.bind(settings.bhop_key, bhopFunc);
-    }
-    if (use_trigger) {
-      boost::function<void(unsigned int)> triggerFunc = boost::bind(
-          &Trigger::triggerCheck, &trigger, boost::placeholders::_1);
-      hotkeyMan.bind(settings.trigger_key, triggerFunc);
-    }
+    // if (use_bhop) {
+    //   boost::function<void(unsigned int)> bhopFunc = boost::bind(
+    //       &BunnyHopper::jumpCheck, &bhopper, boost::placeholders::_1);
+    //   hotkeyMan.bind(settings.bhop_key, bhopFunc);
+    // }
+    // if (use_trigger) {
+    //   boost::function<void(unsigned int)> triggerFunc = boost::bind(
+    //       &Trigger::triggerCheck, &trigger, boost::placeholders::_1);
+    //   hotkeyMan.bind(settings.trigger_key, triggerFunc);
+    // }
     if (use_aimbot) {
       boost::function<void(unsigned int)> aimFunc =
           boost::bind(&Aimer::aimCheck, &aimer, boost::placeholders::_1);
       hotkeyMan.bind(settings.aim_key, aimFunc);
     }
     // function for panic key to stop everything
-    boost::function<void(unsigned int)> stop = [&hotkeyMan, &radar,
-                                                &panicked](unsigned int x) {
-      radar.stop();
-      hotkeyMan.stopListen();
-      if (x == 0)
-        panicked = true;
-    };
-    hotkeyMan.bind(settings.panic_key, stop);
+    // boost::function<void(unsigned int)> stop = [&hotkeyMan, &radar,
+    //                                             &panicked](unsigned int x) {
+    //   radar.stop();
+    //   hotkeyMan.stopListen();
+    //   if (x == 0)
+    //     panicked = true;
+    // };
+    // hotkeyMan.bind(settings.panic_key, stop);
     hotkeyMan.startListen();
-    if (settings.aim_vis_check && use_aimbot) {
-      if (bspParser.parse_map(settings.maps_path, csgo.getMapName() + ".bsp")) {
-        cout << "Parsed map: " << csgo.getMapName() << endl;
-      } else {
-        cout << "WARNING: Could not parse: " << settings.maps_path
-             << csgo.getMapName() + ".bsp" << endl;
-      }
-    }
+    // if (settings.aim_vis_check && use_aimbot) {
+    //   if (bspParser.parse_map(settings.maps_path, csgo.getMapName() +
+    //   ".bsp")) {
+    //     cout << "Parsed map: " << csgo.getMapName() << endl;
+    //   } else {
+    //     cout << "WARNING: Could not parse: " << settings.maps_path
+    //          << csgo.getMapName() + ".bsp" << endl;
+    //   }
+    // }
 
     // main loop
     while (!panicked && csgo.isOnServer()) {
       csgo.grabPlayers();
       if (debug) {
-        // csgo.printPlayers();
+        csgo.printPlayers();
         // csgo.printEntities();
       }
       this_thread::sleep_for(chrono::milliseconds(settings.main_loop_sleep));
     }
     if (debug)
       cout << "Not on a server. Stopping everything..." << endl;
-    if (!panicked) {
-      stop(1);
-    }
+    // if (!panicked) {
+    //   stop(1);
+    // }
     if (debug)
       cout << "Stopped everything. Entering sleep mode..." << endl;
   }

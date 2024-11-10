@@ -1,18 +1,21 @@
-#pragma once
+#ifndef MEMORY_ACCESS_H_
+#define MEMORY_ACCESS_H_
+
 #include "settings.hpp"
 #include "typedef.hpp"
 #include "util.hpp"
+#include "vac_bypass.h"
 
-#include <optional>
 #include <string>
 #include <vector>
 class MemoryAccess {
 private:
-  const std::string GAME_NAME = "csgo_linux64";
+  const std::string GAME_NAME = "cs2";
   pid_t pid;
   Settings *settings;
-  Addr_Range engine_range;
-  Addr_Range client_range;
+  std::vector<Addr_Range> engine_range;
+  std::vector<Addr_Range> client_range;
+  std::vector<Addr_Range> panorama_client_range;
   unsigned char *diffBuffer = nullptr;
 
   addr_type local_player_addr_location;
@@ -28,13 +31,12 @@ private:
   addr_type map_name_offset;
   addr_type isConnected_offset;
   addr_type clientState_offset;
+  VacBypass vac_bypass;
 
   bool debug = false;
   void updateAddrs();
 
 public:
-  using BytePattern = std::vector<std::optional<char>>;
-
   // addreses in client
   addr_type local_player_addr;
   addr_type glow_addr;
@@ -66,21 +68,27 @@ public:
 
   MemoryAccess(Settings *);
   pid_t getPid();
-  Addr_Range getModule(const std::string &);
+  addr_type getEntityListAddr();
+  std::vector<Addr_Range> getModule(const std::string &);
   bool read(void *, void *, size_t);
+  bool read(addr_type, void *, size_t);
   bool write(void *, void *, size_t);
-  Addr_Range getClientRange();
-  Addr_Range getEngineRange();
+  unsigned int read_offset(void *);
+  std::uint32_t read_uint32(void *);
+  std::uint8_t read_uint8(void *);
+  addr_type get_address(void *);
+  std::vector<Addr_Range> getPanoramaClientRange();
+  std::vector<Addr_Range> &getClientRange();
+  std::vector<Addr_Range> getEngineRange();
   // returns the address of the call located at the first argument
   addr_type getCallAddress(void *);
   // returns the address of a jump
   addr_type getAbsoluteAddress(void *, int, int);
-  std::vector<addr_type> find_pattern(BytePattern pattern, Addr_Range range);
+
+  void printAddrRangeVec(std::vector<Addr_Range> const &range_vec);
   void updateLocalPlayerAddr();
   BoneInfo *getBoneMatrix(addr_type);
   void printBlock(addr_type, size_t);
   std::vector<int> diffMem(addr_type, size_t);
-
-  BytePattern compile_byte_pattern(const std::string &);
-  BytePattern compile_byte_pattern(std::uint32_t);
 };
+#endif

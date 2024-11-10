@@ -1,10 +1,10 @@
 #include "manager.hpp"
 #include "memory_access.hpp"
+#include "typedef.hpp"
 #include "util.hpp"
-
 #include <chrono>
-#include <fstream>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 #include <stdlib.h>
 #include <string>
@@ -13,7 +13,7 @@
 using namespace std;
 
 GameManager::GameManager(MemoryAccess &mem)
-    : mem(mem), settings(Settings::getInstance()) {
+    : mem(mem), pattern_scanner(mem), settings(Settings::getInstance()) {
   bool fresh_launch = false;
   while (!mem.getPid()) { // wait until game has launched
     if (!fresh_launch)
@@ -23,103 +23,142 @@ GameManager::GameManager(MemoryAccess &mem)
   }
   if (fresh_launch) // additional wait when game just launched
     this_thread::sleep_for(chrono::milliseconds(15000));
-  if (!mem.getClientRange().first) {
+  if (mem.getClientRange().empty()) {
     cout << "Could not find Client Base" << endl;
     exit(0);
   }
-  if (!mem.getEngineRange().first) {
+  if (mem.getEngineRange().empty()) {
     cout << "Could not find Engine Base" << endl;
     exit(0);
   }
 }
 
 void GameManager::grabPlayers() {
-  if (!mem.read((void *)mem.glow_addr, &manager, sizeof(GlowObjectManager_t))) {
-    cout << "Could not get GlowObjectManager" << endl;
+  addr_type entity_list_addr{pattern_scanner.getEntitySystem() +
+                             pattern_scanner.getEntityListOffset()};
+  if (!mem.read((void *)entity_list_addr, &entity_list,
+                sizeof(CConcreteEntityList))) {
+    cout << "Could not get EntityList" << endl;
     return;
   }
-  size_t count = manager.objects.Count;
-  void *data_ptr = (void *)manager.objects.DataPtr;
-  // cout << hex << "Data : " << data_ptr << endl;
-  // if (settings.debug) cout << dec << "object count: " << count << endl;
-  if (!mem.read(data_ptr, (void *)g_glow,
-                sizeof(GlowObjectDefinition_t) * count)) {
-    cout << "Could not get objects" << endl;
-    return;
-  }
-  vector<EntityType *> new_players;
-  vector<EntityType *> new_nonPlayerEntities;
+  addr_type entity_list_max_index_addr{
+      pattern_scanner.getEntitySystem() +
+      pattern_scanner.getEntityListMaxIndexOffset()};
+  auto entity_list_max_index =
+      mem.read_uint32((void *)entity_list_max_index_addr);
+  addr_type local_player_pawn_addr{pattern_scanner.getLocalPlayerController() +
+                                   pattern_scanner.getPawnHandleOffset()};
+  auto local_player_pawn_handle =
+      mem.read_uint32((void *)local_player_pawn_addr);
+  auto local_player_pawn_index = local_player_pawn_handle & 0x7FFF;
+  vector<PlayerPtr> new_players;
+  vector<CEntityInstance *> new_nonPlayerEntities;
   vector<addr_type> new_player_addrs;
   local_player_index = -1;
-  for (unsigned int i = 0; i < count; i++) {
-    // cout << "reading obj: " << i <<endl;
-    if (g_glow[i].m_pEntity == 0)
+
+  for (int i = 0; i <= entity_list_max_index; ++i) {
+    const auto chunkIndex =
+        i / CConcreteEntityList::kNumberOfIdentitiesPerChunk;
+    addr_type chunk = (addr_type)entity_list.chunks[chunkIndex];
+    if (!chunk)
       continue;
 
-    EntityType *entity = new EntityType;
-    mem.read(g_glow[i].m_pEntity, entity, sizeof(EntityType));
-    if ((entity->m_iTeamNum == Team::CT || entity->m_iTeamNum == Team::T) &&
-        entity->m_iHealth > 0) {
-      // cout << dec << "player: " << new_players.size() << " addr: " <<
-      // objects[i].m_pEntity << endl;
-      new_players.push_back(entity);
-      new_player_addrs.push_back((addr_type)g_glow[i].m_pEntity);
-      if (g_glow[i].m_pEntity == (void *)mem.local_player_addr)
-        local_player_index = new_players.size() - 1;
-    } else
-      new_nonPlayerEntities.push_back(entity);
+    const auto indexInChunk =
+        i % CConcreteEntityList::kNumberOfIdentitiesPerChunk;
+    CConcreteEntityList::EntityChunk entity_chunk{};
+    mem.read(chunk, &entity_chunk, sizeof(entity_chunk));
+    const auto &entityIdentity = entity_chunk[indexInChunk];
+    if (entityIdentity.entity && (entityIdentity.handle & 0x7fff) == i) {
+      addr_type entity_health_addr{(addr_type)entityIdentity.entity +
+                                   pattern_scanner.getHealthOffset()};
+      auto health = mem.read_uint32((void *)entity_health_addr);
+      if (health > 0) {
+        auto player = makePlayerPtr((addr_type)entityIdentity.entity);
+        new_players.push_back(player);
+        if (i == local_player_pawn_index)
+          local_player_index = new_players.size() - 1;
+      }
+    }
+    vector<PlayerPtr> old_players = players;
+    players = new_players;
+    for (CEntityInstance *ent : new_nonPlayerEntities)
+      delete ent;
   }
-  // copy new players and delete old ones afterwards for thread safety
-  vector<EntityType *> old_players = players;
-  players = new_players;
-  player_addrs = new_player_addrs;
-  nonPlayerEntities = new_nonPlayerEntities;
-  for (EntityType *player : old_players)
-    delete player;
-  for (EntityType *ent : new_nonPlayerEntities)
-    delete ent;
 
-  // refresh helper variables
-  if (isFlashed(mem.local_player_addr))
-    local_player_flashed_timer += float(settings.main_loop_sleep) / 1000.;
-  else
-    local_player_flashed_timer = 0.0;
+  // for (unsigned int i = 0; i < count; i++) {
+  //   // cout << "reading obj: " << i <<endl;
+  //   if (g_glow[i].m_pEntity == 0)
+  //     continue;
+
+  //   EntityType *entity = new EntityType;
+  //   mem.read(g_glow[i].m_pEntity, entity, sizeof(EntityType));
+  //   if ((entity->m_iTeamNum == Team::CT || entity->m_iTeamNum == Team::T) &&
+  //       entity->m_iHealth > 0) {
+  //     // cout << dec << "player: " << new_players.size() << " addr: " <<
+  //     // objects[i].m_pEntity << endl;
+  //     new_players.push_back(entity);
+  //     new_player_addrs.push_back((addr_type)g_glow[i].m_pEntity);
+  //     if (g_glow[i].m_pEntity == (void *)mem.local_player_addr)
+  //       local_player_index = new_players.size() - 1;
+  //   } else
+  //     new_nonPlayerEntities.push_back(entity);
+  // }
+  // // copy new players and delete old ones afterwards for thread safety
+  // vector<EntityType *> old_players = players;
+  // players = new_players;
+  // player_addrs = new_player_addrs;
+  // nonPlayerEntities = new_nonPlayerEntities;
+  // for (EntityType *player : old_players)
+  //   delete player;
+  // for (EntityType *ent : new_nonPlayerEntities)
+  //   delete ent;
+
+  // // refresh helper variables
+  // if (isFlashed(mem.local_player_addr))
+  //   local_player_flashed_timer += float(settings.main_loop_sleep) / 1000.;
+  // else
+  //   local_player_flashed_timer = 0.0;
 }
 
-vector<EntityType *> &GameManager::getPlayers() { return players; }
+vector<PlayerPtr> &GameManager::getPlayers() { return players; }
 
 void GameManager::printPlayers() {
   int i = 0;
   cout << "---------Players---------" << endl;
-  for (EntityType *player : players) {
+  for (auto player : players) {
     cout << dec << "--- Player: " << i << "---" << endl;
-    cout << hex << "Addr: " << player_addrs[i] << endl;
-    printf("ID: %d\n", player->m_iEntityId);
-    cout << dec << "hp: " << player->m_iHealth << endl;
-    if (player->m_iTeamNum == Team::CT)
+    cout << hex << "Addr: " << player->entity_addr << endl;
+    cout << dec << "hp: " << player->health << endl;
+    if (player->team == Team::CT)
       cout << "Team: CT" << endl;
-    else if (player->m_iTeamNum == Team::T)
+    else if (player->team == Team::T)
       cout << "Team: T" << endl;
-    printf("Origin x=%f y=%f z=%f\n", player->m_vecOrigin.x,
-           player->m_vecOrigin.y, player->m_vecOrigin.z);
+    cout << "Defusing: " << player->is_defusing << endl;
+    cout << "Weapon: " << player->weapon << endl;
+    printVec("Origin:", player->origin);
+    printVec("View Offset:", player->viewOrigin);
+    printVec("ViewAngles:", player->networkAngle);
+    printVec("AimPunch:", player->aimPunch);
+
     // printf("Angle: x=%4.16lf y=%4.16lf z=%f\n", player->m_angAbsRotation.x,
     // player->m_angAbsRotation.y, player->m_angNetworkAngles.z);
-    printf("Angle: x=%4.16lf y=%4.16lf z=%f\n", player->m_angNetworkAngles.x,
-           player->m_angNetworkAngles.y, player->m_angNetworkAngles.z);
-    printf("view offset: %f, %f\n", player->m_vecViewOffset.x,
-           player->m_vecViewOffset.y);
-    printf("m_fFlags: %u\n", player->m_fFlags);
-    printf("Velocity: %f, %f, %f\n", player->m_vecVelocity.x,
-           player->m_vecVelocity.y, player->m_vecVelocity.z);
-    printf("Aimpunch: %f, %f, %f\n", getAimPunch(mem.local_player_addr).x,
-           getAimPunch(mem.local_player_addr).y,
-           getAimPunch(mem.local_player_addr).z);
-    printf("Defusing: %d\n", isDefusing(player_addrs[i]));
-    printf("Flashed: %d\n", isFlashed(player_addrs[i]));
-    printf("Weapon: %s\n", getWeaponName(getWeapon(player_addrs[i])).c_str());
-    printf("dormant: %u\n", player->m_bDormant);
-    // vector<int> diffs = mem.diffMem(mem.local_player_addr + 0x3600, 0x300);
-    // if (diffs.size() > 0) {
+    // printf("Angle: x=%4.16lf y=%4.16lf z=%f\n", player->m_angNetworkAngles.x,
+    //        player->m_angNetworkAngles.y, player->m_angNetworkAngles.z);
+    // printf("view offset: %f, %f\n", player->m_vecViewOffset.x,
+    //        player->m_vecViewOffset.y);
+    // printf("m_fFlags: %u\n", player->m_fFlags);
+    // printf("Velocity: %f, %f, %f\n", player->m_vecVelocity.x,
+    //        player->m_vecVelocity.y, player->m_vecVelocity.z);
+    // printf("Aimpunch: %f, %f, %f\n", getAimPunch(mem.local_player_addr).x,
+    //        getAimPunch(mem.local_player_addr).y,
+    //        getAimPunch(mem.local_player_addr).z);
+    // printf("Defusing: %d\n", isDefusing(player_addrs[i]));
+    // printf("Flashed: %d\n", isFlashed(player_addrs[i]));
+    // printf("Weapon: %s\n",
+    // getWeaponName(getWeapon(player_addrs[i])).c_str()); printf("dormant:
+    // %u\n", player->m_bDormant); vector<int> diffs =
+    // mem.diffMem(mem.local_player_addr + 0x3600, 0x300); if (diffs.size() > 0)
+    // {
     //   for (int j : diffs)
     //     cout << hex << j << endl;
     //   mem.printBlock(mem.local_player_addr + 0x3600, 0x300);
@@ -130,71 +169,143 @@ void GameManager::printPlayers() {
 }
 
 void GameManager::printEntities() {
-  if (!mem.read((void *)mem.glow_addr, &manager, sizeof(GlowObjectManager_t))) {
-    cout << "Could not get GlowObjectManager" << endl;
+  addr_type entity_list_addr{pattern_scanner.getEntitySystem() +
+                             pattern_scanner.getEntityListOffset()};
+  if (!mem.read((void *)entity_list_addr, &entity_list,
+                sizeof(CConcreteEntityList))) {
+    cout << "Could not get EntityList" << endl;
     return;
   }
-  size_t count = manager.objects.Count;
-  void *data_ptr = (void *)manager.objects.DataPtr;
-  // cout << hex << "Data : " << data_ptr << endl;
-  // cout << dec << "count : " << count << endl;
-  if (!mem.read(data_ptr, (void *)g_glow,
-                sizeof(GlowObjectDefinition_t) * count)) {
-    cout << "Could not get objects" << endl;
-    return;
-  }
+  addr_type entity_list_max_index_addr{
+      pattern_scanner.getEntitySystem() +
+      pattern_scanner.getEntityListMaxIndexOffset()};
+  auto entity_list_max_index =
+      mem.read_uint32((void *)entity_list_max_index_addr);
+
   cout << "----------Entities------------" << endl;
-  for (unsigned int i = 0; i < count; i++) {
-    EntityType *entity = new EntityType;
-    if (g_glow[i].m_pEntity == nullptr)
+  for (int i = 0; i <= entity_list_max_index; ++i) {
+    const auto chunkIndex =
+        i / CConcreteEntityList::kNumberOfIdentitiesPerChunk;
+    void *chunk = entity_list.chunks[chunkIndex];
+    if (!chunk)
       continue;
-    cout << dec << "Nr: " << i << endl;
-    cout << hex << "Addr:" << g_glow[i].m_pEntity << endl;
-    mem.read(g_glow[i].m_pEntity, entity, sizeof(EntityType));
-    printf("ID: %d\n", entity->m_iEntityId);
-    cout << "hp: " << entity->m_iHealth << endl;
-    printf("Origin x=%f y=%f z=%f\n", entity->m_vecOrigin.x,
-           entity->m_vecOrigin.y, entity->m_vecOrigin.z);
-    printf("m_fFlags: %u\n", entity->m_fFlags);
-    printf("m_iEFlags: %d\n", entity->m_iEFlags);
-    vector<int> diffs = mem.diffMem((addr_type)g_glow[i].m_pEntity, 0x200);
-    if (diffs.size() > 0) {
-      // for (int i : diffs)
-      // cout << hex << i << endl;
-      mem.printBlock((addr_type)g_glow[i].m_pEntity, 0x200);
+
+    const auto indexInChunk =
+        i % CConcreteEntityList::kNumberOfIdentitiesPerChunk;
+    CConcreteEntityList::EntityChunk entity_chunk{};
+    mem.read(chunk, &entity_chunk, sizeof(entity_chunk));
+    const auto &entityIdentity = entity_chunk[indexInChunk];
+    if (entityIdentity.entity && (entityIdentity.handle & 0x7fff) == i) {
+      cout << "Found entity:" << i << endl;
+      addr_type entity_health_addr{(addr_type)entityIdentity.entity +
+                                   pattern_scanner.getHealthOffset()};
+      addr_type entity_team_addr{(addr_type)entityIdentity.entity +
+                                 pattern_scanner.getTeamNumberOffset()};
+      auto health = mem.read_uint32((void *)entity_health_addr);
+      auto team = mem.read_uint8((void *)entity_team_addr);
+      cout << "Team: " << team << endl;
+      cout << "Health: " << health << endl;
     }
-    cout << "-----" << endl;
   }
+
+  // for (unsigned int i = 0; i < count; i++) {
+  //   if (g_glow[i].m_pEntity == nullptr)
+  //     continue;
+  //   cout << dec << "Nr: " << i << endl;
+  //   cout << hex << "Addr:" << g_glow[i].m_pEntity << endl;
+  //   mem.read(g_glow[i].m_pEntity, entity, sizeof(EntityType));
+  //   printf("ID: %d\n", entity->m_iEntityId);
+  //   cout << "hp: " << entity->m_iHealth << endl;
+  //   printf("Origin x=%f y=%f z=%f\n", entity->m_vecOrigin.x,
+  //          entity->m_vecOrigin.y, entity->m_vecOrigin.z);
+  //   printf("m_fFlags: %u\n", entity->m_fFlags);
+  //   printf("m_iEFlags: %d\n", entity->m_iEFlags);
+  //   vector<int> diffs = mem.diffMem((addr_type)g_glow[i].m_pEntity, 0x200);
+  //   if (diffs.size() > 0) {
+  //     // for (int i : diffs)
+  //     // cout << hex << i << endl;
+  //     mem.printBlock((addr_type)g_glow[i].m_pEntity, 0x200);
+  //   }
+  //   cout << "-----" << endl;
+  // }
 }
 
 void GameManager::printPlayerLocationsToFile(const string &filename) {
-  if (players.empty())
-    return;
-  ofstream file;
-  file.open(filename);
-  // print local player index into array[0,0]
-  file << local_player_index << ",0,0,0,0,0" << endl;
-  // Format: number,hp,team,x,y,z
-  int i = 0;
-  for (EntityType *player : players) {
-    file << i << ",";
-    file << player->m_iHealth << ",";
-    file << player->m_iTeamNum << ",";
-    file << player->m_vecOrigin.x << "," << player->m_vecOrigin.y << ","
-         << player->m_vecOrigin.z << endl;
-    i++;
-  }
-  file.close();
+  // if (players.empty())
+  //   return;
+  // ofstream file;
+  // file.open(filename);
+  // // print local player index into array[0,0]
+  // file << local_player_index << ",0,0,0,0,0" << endl;
+  // // Format: number,hp,team,x,y,z
+  // int i = 0;
+  // for (PlayerPtr player : players) {
+  //   file << i << ",";
+  //   file << player->m_iHealth << ",";
+  //   file << player->m_iTeamNum << ",";
+  //   file << player->m_vecOrigin.x << "," << player->m_vecOrigin.y << ","
+  //        << player->m_vecOrigin.z << endl;
+  //   i++;
+  // }
+  // file.close();
 }
 
 MemoryAccess &GameManager::getMemoryAccess() { return mem; }
 
-EntityType *GameManager::getLocalPlayer() {
-  mem.updateLocalPlayerAddr();
-  if (!mem.read((void *)mem.local_player_addr, (void *)local_player,
-                sizeof(EntityType))) {
+PlayerPtr GameManager::makePlayerPtr(addr_type entity) {
+  addr_type entity_health_addr{entity + pattern_scanner.getHealthOffset()};
+  addr_type entity_team_addr{entity + pattern_scanner.getTeamNumberOffset()};
+  addr_type game_scene_node_addr{entity +
+                                 pattern_scanner.getGameSceneNodeOffset()};
+  auto const health = mem.read_uint32((void *)entity_health_addr);
+  auto const team = static_cast<Team>(mem.read_uint8((void *)entity_team_addr));
+  auto const game_scene_node = mem.get_address((void *)game_scene_node_addr);
+  auto const abs_origin_addr =
+      game_scene_node + pattern_scanner.getAbsOriginOffset();
+  bool const is_defusing = isDefusing(entity);
+  auto const weapon = getWeapon(entity);
+  auto view_angles = getNetworkAngles(entity);
+  auto const aim_punch = getAimPunch(entity);
+  auto const view_origin = getViewOrigin(entity);
+  Vector origin;
+  mem.read((void *)abs_origin_addr, &origin, sizeof(origin));
+
+  auto player =
+      std::make_shared<Player>(entity, health, origin, team, is_defusing,
+                               weapon, view_angles, aim_punch, view_origin);
+  return player;
+}
+
+addr_type GameManager::getEntityFromHandle(std::uint32_t handle) {
+  auto index = handle & 0x7FFF;
+  auto chunkIndex = index / CConcreteEntityList::kNumberOfIdentitiesPerChunk;
+  CConcreteEntityList entity_list{};
+  addr_type entity_list_addr{pattern_scanner.getEntitySystem() +
+                             pattern_scanner.getEntityListOffset()};
+  mem.read((void *)entity_list_addr, &entity_list, sizeof(CConcreteEntityList));
+  auto *chunk = entity_list.chunks[chunkIndex];
+  const auto indexInChunk =
+      index % CConcreteEntityList::kNumberOfIdentitiesPerChunk;
+  CConcreteEntityList::EntityChunk entity_chunk{};
+  mem.read(chunk, &entity_chunk, sizeof(entity_chunk));
+  CEntityIdentity entityIdentity = entity_chunk[indexInChunk];
+  if (entityIdentity.handle == handle) {
+    return (addr_type)entityIdentity.entity;
+  }
+  return 0;
+}
+
+PlayerPtr GameManager::getLocalPlayer() {
+  addr_type local_player_controller{pattern_scanner.getLocalPlayerController()};
+  if (local_player_controller == 0) {
     connected = false;
     throw runtime_error("No local player");
+  } else {
+    addr_type local_player_pawn_addr{local_player_controller +
+                                     pattern_scanner.getPawnHandleOffset()};
+    auto player_pawn_handle = mem.read_uint32((void *)local_player_pawn_addr);
+    auto entity = getEntityFromHandle(player_pawn_handle);
+    local_player = makePlayerPtr(entity);
   }
   connected = true;
   return local_player;
@@ -215,13 +326,13 @@ bool GameManager::isOnServer() {
   return connected;
 }
 
-addr_type GameManager::getPlayerAddr(EntityType *player) {
-  for (unsigned int i = 0; i < players.size(); i++) {
-    if (player == players[i])
-      return player_addrs[i];
-  }
-  return 0;
-}
+// addr_type GameManager::getPlayerAddr(PlayerPtr player) {
+//   for (unsigned int i = 0; i < players.size(); i++) {
+//     if (player == players[i])
+//       return player_addrs[i];
+//   }
+//   return 0;
+// }
 
 string GameManager::getMapName() {
   if (current_map_ == "") {
@@ -273,17 +384,32 @@ unsigned int GameManager::getCrosshairTarget(addr_type player_addr) {
   return target;
 }
 
+Vector GameManager::getViewOrigin(addr_type player_addr) {
+  Vector view_origin;
+  if (!mem.read((void *)(player_addr + 4908), &view_origin,
+                sizeof(view_origin)))
+    throw runtime_error("Could not get view offset.");
+  return view_origin;
+}
+
 QAngle GameManager::getAimPunch(addr_type player_addr) {
   QAngle ang;
-  if (!mem.read((void *)(player_addr + mem.m_Local + mem.m_aimPunchAngle), &ang,
-                sizeof(ang)))
+  // auto diffs = mem.diffMem(player_addr, 10000);
+  // for (auto i : diffs) {
+  //   QAngle angle;
+  //   mem.read(player_addr + i, &angle, sizeof(angle));
+  //   printVec(std::to_string(i), angle);
+  // }
+
+  if (!mem.read((void *)(player_addr + 5420), &ang, sizeof(ang)))
     throw runtime_error("Could not get AimPunch.");
   return ang;
 }
 
 bool GameManager::isDefusing(addr_type player_addr) {
   char buf;
-  if (!mem.read((void *)(player_addr + mem.m_bIsDefusing), &buf, sizeof(buf)))
+  if (!mem.read(player_addr + pattern_scanner.getIsDefusingOffset(), &buf,
+                sizeof(buf)))
     return false;
   return (bool)buf;
 }
@@ -301,50 +427,44 @@ float GameManager::getFlashDuration(addr_type player_addr) {
 }
 
 QAngle GameManager::getNetworkAngles(addr_type player_addr) {
+  // auto diffs = mem.diffMem(player_addr, 8192);
+  // for (auto i : diffs) {
+  //   QAngle angle;
+  //   mem.read(player_addr + i, &angle, sizeof(angle));
+  //   printVec(std::to_string(i), angle);
+  // }
+  // Offset found by running diffMem and sanity checking
   QAngle ang;
-  if (!mem.read((void *)(player_addr + 0x164), &ang, sizeof(ang)))
+  if (!mem.read((void *)(player_addr + 0x1338), &ang, sizeof(ang)))
     throw runtime_error("Could not get NetworkAngles.");
   return ang;
 }
 
 Weapon GameManager::getWeapon(addr_type player_addr) {
-  unsigned int activeWeaponID;
-  if (!mem.read((void *)(player_addr + mem.m_hActiveWeapon), &activeWeaponID,
-                sizeof(int)))
-    return Weapon::NONE;
-  // if(settings.debug) cout << "Active weaponID:" << activeWeaponID << endl;
-  activeWeaponID &= 0xFFF;
-  unsigned int weaponID = 0;
-  EntityType currentEntity;
-  for (size_t i = 0; i < manager.objects.Count; i++) {
-    if (g_glow[i].m_pEntity == nullptr)
-      continue;
-    if (!mem.read(g_glow[i].m_pEntity, &currentEntity, sizeof(EntityType)))
-      continue;
-    if (currentEntity.m_iEntityId ==
-        activeWeaponID) { // found entity for weapon
-      // if(settings.debug) cout << "Found entity" << endl;
-      // get weapon type
-      mem.read((void *)((addr_type)g_glow[i].m_pEntity +
-                        mem.m_AttributeManager + 0x60 +
-                        mem.m_iItemDefinitionIndex),
-               &weaponID, sizeof(int));
-      weaponID &= 0xFFF;
-      // if(settings.debug) cout << "weaponID:" << weaponID << endl;
-      break;
-    }
-  }
-  return (Weapon)weaponID;
+  // cout << "Reading weapon_service_addr" << endl;
+  auto const weapon_service_addr = mem.get_address(
+      (void *)(player_addr + pattern_scanner.getWeaponServicesOffset()));
+  // cout << "Reading weapon_handle" << endl;
+  auto const weapon_handle = mem.read_uint32(
+      (void *)(weapon_service_addr + pattern_scanner.getActiveWeaponOffset()));
+  auto const active_weapon_addr = getEntityFromHandle(weapon_handle);
+  // cout << "active_weapon_addr: " << active_weapon_addr << endl;
+  auto weapon_id =
+      mem.read_uint32((void *)(active_weapon_addr + 0x1140 + 0x50 + 0x1BA));
+  // cout << "weapon_id:" << weapon_id << endl;
+  weapon_id &= 0xFFF;
+  return (Weapon)weapon_id;
 }
 
 std::vector<Vector> GameManager::getSmokeLocations() {
   // super hacky way to detect smokes from the entity list:
   // if a non player entity has FL_ONGROUND set it's a smoke
   std::vector<Vector> result;
-  for (EntityType *entity : nonPlayerEntities) {
-    if (!(entity->m_fFlags & FL_CLIENT) && (entity->m_fFlags & FL_ONGROUND)) {
-      result.push_back(entity->m_vecOrigin);
-    }
+  for (auto entity : nonPlayerEntities) {
+    // if (!(entity->m_fFlags & FL_CLIENT) && (entity->m_fFlags & FL_ONGROUND))
+    // {
+    //   result.push_back(entity->m_vecOrigin);
+    // }
   }
   return result;
 }
@@ -352,7 +472,7 @@ std::vector<Vector> GameManager::getSmokeLocations() {
 bool GameManager::lineThroughSmoke(Vector start, Vector end) {
   std::vector<Vector> smokeLocations = getSmokeLocations();
   Vector d = end - start;
-  normalize_vector(&d);
+  normalize_vector(d);
   for (Vector smoke : smokeLocations) {
     if (lineSphereIntersection(start, end, smoke, smokeRadius))
       return true;
