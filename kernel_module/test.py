@@ -1,0 +1,5 @@
+kernel_module = open('/proc/helloworlddriver', 'rb')
+kernel_module.seek(0x5e65a2ad9000)
+greeting = kernel_module.read(16)
+print(greeting) 
+kernel_module.close()
