@@ -11,3 +11,13 @@
 /pengWin
 /offset_dumper.d
 /pengWin.d
+*.o
+*.ko
+*.mod
+*.mod.o
+*.mod.c
+*.cmd
+Kbuild
+modules.order
+Module.symvers
+.cache/
