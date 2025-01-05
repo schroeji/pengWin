@@ -65,13 +65,13 @@ static ssize_t custom_read(struct file *file, char __user *user_buffer,
   }
   printk(KERN_INFO "Reading %lu bytes from offset %lu. PID: %lu ; Name: %s",
          (unsigned long)count, (unsigned long)*offset, task->tgid, task->comm);
-  void *buffer = kmalloc(count, GFP_KERNEL);
-  int ret = access_process_vm(task, *offset, buffer, count, 0);
-  if (ret < 0) {
-    printk(KERN_INFO "Failed to read memory\n");
-    task_unlock(task);
-    return ret;
-  }
+  /* void *buffer = kmalloc(count, GFP_KERNEL); */
+  /* int ret = access_process_vm(task, *offset, buffer, count, 0); */
+  /* if (ret < 0) { */
+  /*   printk(KERN_INFO "Failed to read memory\n"); */
+  /*   task_unlock(task); */
+  /*   return ret; */
+  /* } */
   task_unlock(task);
 
   *offset = *offset + count;
