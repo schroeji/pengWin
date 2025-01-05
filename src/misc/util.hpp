@@ -1,7 +1,7 @@
 #pragma once
+#include "vpk_parsing/vector.h"
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
-#include <iostream>
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -97,41 +97,41 @@ struct MouseMovement {
 typedef std::pair<unsigned long int, unsigned long int> Addr_Range;
 typedef unsigned long int addr_type;
 
-struct Vector2D {
-  float x;
-  float y;
-  inline Vector2D operator+(Vector2D a) { return {a.x + x, a.y + y}; }
-  inline float operator*(Vector2D a) { return a.x * x + a.y * y; }
-  inline Vector2D operator*(float a) { return {a * x, a * y}; }
-};
+// struct Vector2D {
+//   float x;
+//   float y;
+//   inline Vector2D operator+(Vector2D a) { return {a.x + x, a.y + y}; }
+//   inline float operator*(Vector2D a) { return a.x * x + a.y * y; }
+//   inline Vector2D operator*(float a) { return {a * x, a * y}; }
+// };
 
-struct Vector {
-  float x;
-  float y;
-  float z;
-  inline void operator+=(Vector a) {
-    x += a.x;
-    y += a.y;
-    z += a.z;
-  }
-  inline Vector operator+(Vector a) { return {a.x + x, a.y + y, a.z + z}; }
-  // inline float operator*(Vector a) {
-  // return a.x * x + a.y * y + a.z * z;
-  // }
-  inline float operator*(const Vector a) { return a.x * x + a.y * y + a.z * z; }
-  inline Vector operator-(Vector a) { return {x - a.x, y - a.y, z - a.z}; }
-  inline Vector operator*(float a) { return {a * x, a * y, a * z}; }
-  inline Vector operator/(float a) { return {x / a, y / a, z / a}; }
-};
+// struct Vector {
+//   float x;
+//   float y;
+//   float z;
+//   inline void operator+=(Vector a) {
+//     x += a.x;
+//     y += a.y;
+//     z += a.z;
+//   }
+//   inline Vector operator+(Vector a) { return {a.x + x, a.y + y, a.z + z}; }
+//   // inline float operator*(Vector a) {
+//   // return a.x * x + a.y * y + a.z * z;
+//   // }
+//   inline float operator*(const Vector a) { return a.x * x + a.y * y + a.z *
+//   z; } inline Vector operator-(Vector a) { return {x - a.x, y - a.y, z -
+//   a.z}; } inline Vector operator*(float a) { return {a * x, a * y, a * z}; }
+//   inline Vector operator/(float a) { return {x / a, y / a, z / a}; }
+// };
 
-struct QAngle {
-  float x; // Pitch
-  float y; // Yaw
-  float z; // Roll
-  inline QAngle operator+(QAngle a) { return {a.x + x, a.y + y, a.z + z}; }
-  inline QAngle operator-(QAngle a) { return {x - a.x, y - a.y, z - a.z}; }
-  inline QAngle operator*(float a) { return {a * x, a * y, a * z}; }
-};
+// struct QAngle {
+//   float x; // Pitch
+//   float y; // Yaw
+//   float z; // Roll
+//   inline QAngle operator+(QAngle a) { return {a.x + x, a.y + y, a.z + z}; }
+//   inline QAngle operator-(QAngle a) { return {x - a.x, y - a.y, z - a.z}; }
+//   inline QAngle operator*(float a) { return {a * x, a * y, a * z}; }
+// };
 
 std::vector<std::string> split_string(const std::string &, const std::string &);
 void normalize_vector(Vector &);
@@ -166,15 +166,6 @@ inline int len(MouseMovement move) {
   // manhatten distance
   return abs(move.x) + abs(move.y);
 }
-
-inline void printVec(std::string name, Vector vec) {
-  printf("%s %f, %f, %f\n", name.c_str(), vec.x, vec.y, vec.z);
-}
-
-inline void printVec(std::string name, QAngle vec) {
-  printf("%s %f, %f, %f\n", name.c_str(), vec.x, vec.y, vec.z);
-}
-
 inline bool lineSphereIntersection(Vector line_start, Vector line_end,
                                    Vector sphere_center, float sphere_radius) {
   // according to https://en.wikipedia.org/wiki/Line%E2%80%93sphere_intersection
@@ -182,8 +173,8 @@ inline bool lineSphereIntersection(Vector line_start, Vector line_end,
   Vector line_dir = line_end - line_start;
   normalize_vector(line_dir);
   Vector line_start_to_sphere_center = line_start - sphere_center;
-  float t2 = line_start_to_sphere_center * line_start_to_sphere_center;
-  float t1 = line_dir * line_start_to_sphere_center;
+  float t2 = line_start_to_sphere_center.Dot(line_start_to_sphere_center);
+  float t1 = line_dir.Dot(line_start_to_sphere_center);
   t1 = t1 * t1;
   float has_intersection = t1 - t2 + sphere_radius * sphere_radius;
   return (has_intersection >= 0); // solution exists => intersecion

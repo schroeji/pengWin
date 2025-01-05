@@ -3,20 +3,38 @@
 #include "typedef.hpp"
 #include "util.hpp"
 
+#include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <sys/types.h>
 #include <sys/uio.h>
 #include <vector>
 
 using namespace std;
 
 MemoryAccess::MemoryAccess(Settings *settings) : settings(settings) {
+  if (settings->use_kernel_module) {
+    kernel_module_file = fopen(kernel_module_file_path.c_str(), "rb");
+    if (!kernel_module_file) {
+      cout << "Failed to open " << kernel_module_file_path << std::endl;
+      throw("Could not open kernel_module_file");
+    }
+    cout << "Successfully opened " << kernel_module_file_path << " for reading."
+         << std::endl;
+  }
   vac_bypass.set_inotify_max();
+}
+MemoryAccess::~MemoryAccess() {
+  if (settings->use_kernel_module) {
+    fclose(kernel_module_file);
+  }
 }
 
 unsigned int MemoryAccess::read_offset(void *addr) { return read_uint32(addr); }
@@ -110,7 +128,50 @@ std::vector<Addr_Range> MemoryAccess::getEngineRange() {
   return engine_range;
 }
 
+std::vector<Addr_Range>
+MemoryAccess::getModuleFromKernelModule(const string &modname) {
+  std::vector<Addr_Range> result{};
+  static constexpr std::size_t kMapsBufferSize{0x20000};
+  // Magic number that is handled by the kernel module to get the memory
+  // mappings of the file.
+  static constexpr off64_t kMapsMagicNumber{0xFFFF};
+  char maps_buffer[kMapsBufferSize];
+  std::size_t read_sum = pread(fileno(kernel_module_file), maps_buffer,
+                               kMapsBufferSize, kMapsMagicNumber);
+  std::cout << "Read " << read_sum << " bytes from kernel module maps."
+            << std::endl;
+  std::string maps_string(maps_buffer, &maps_buffer[read_sum]);
+  std::istringstream maps_stream(maps_string);
+  std::string line;
+  std::cout << "Memory mappings for library: " << modname << std::endl;
+  while (std::getline(maps_stream, line)) {
+    if (line.find(modname) != std::string::npos) {
+      std::istringstream iss(line);
+      std::string addressRange, perms, offset, dev, inode, pathname;
+
+      // Read the line into respective fields
+      iss >> addressRange >> perms >> offset >> dev >> inode;
+      std::getline(iss, pathname);
+      auto split = split_string(addressRange, "-");
+      result.push_back(Addr_Range(strtoul(split[0].c_str(), NULL, 16),
+                                  strtoul(split[1].c_str(), NULL, 16)));
+      // Output the parsed information
+      // std::cout << "Address Range: " << addressRange << std::endl;
+      // std::cout << "Permissions: " << perms << std::endl;
+      // std::cout << "Offset: " << offset << std::endl;
+      // std::cout << "Device: " << dev << std::endl;
+      // std::cout << "Inode: " << inode << std::endl;
+      // std::cout << "Pathname: " << pathname << std::endl;
+      // std::cout << "-----------------------------" << std::endl;
+    }
+  }
+  return result;
+}
+
 std::vector<Addr_Range> MemoryAccess::getModule(const string &modname) {
+  if (settings->use_kernel_module) {
+    return getModuleFromKernelModule(modname);
+  }
   std::string mapsFilePath = "/proc/" + std::to_string(pid) + "/maps";
   std::ifstream mapsFile(mapsFilePath);
   std::vector<Addr_Range> result{};
@@ -118,7 +179,6 @@ std::vector<Addr_Range> MemoryAccess::getModule(const string &modname) {
     std::cerr << "Could not open " << mapsFilePath << std::endl;
     return result;
   }
-
   std::string line;
   std::cout << "Memory mappings for library: " << modname << std::endl;
 
@@ -143,8 +203,6 @@ std::vector<Addr_Range> MemoryAccess::getModule(const string &modname) {
       // std::cout << "-----------------------------" << std::endl;
     }
   }
-
-  mapsFile.close();
   return result;
 }
 
@@ -153,29 +211,45 @@ bool MemoryAccess::read(addr_type addr, void *buff, size_t size) {
 }
 
 bool MemoryAccess::read(void *addr, void *buff, size_t size) {
-  addr = (void *)vac_bypass.filter_address(pid, (addr_type)addr);
-  if (addr) {
+  void *filtered_addr = (void *)vac_bypass.filter_address(pid, (addr_type)addr);
+  if (filtered_addr && settings->use_kernel_module) {
+    int ret = fseeko64(kernel_module_file, (off64_t)addr, SEEK_SET);
+    if (ret < 0) {
+      cout << "Failed to seek to address: "
+           << std::to_string((off64_t)filtered_addr) << std::endl;
+      return false;
+    }
+    ret = fread(buff, 1, size, kernel_module_file);
+    if (ret < 0) {
+      cout << "Failed to read from kernel module file.";
+      return false;
+    }
+    return true;
+  } else if (filtered_addr) {
     iovec local_mem;
     iovec remote_mem;
     local_mem.iov_base = buff;
     local_mem.iov_len = size;
-    remote_mem.iov_base = addr;
+    remote_mem.iov_base = filtered_addr;
     remote_mem.iov_len = size;
     return (process_vm_readv(pid, &local_mem, 1, &remote_mem, 1, 0) ==
             (signed)size);
+  } else {
+    if (settings->debug)
+      cout << "Invalid address encountered: " << addr << endl;
   }
   return false;
 }
 
 bool MemoryAccess::write(void *addr, void *buff, size_t size) {
-  iovec local_mem;
-  iovec remote_mem;
-  local_mem.iov_base = buff;
-  local_mem.iov_len = size;
-  remote_mem.iov_base = addr;
-  remote_mem.iov_len = size;
-  return (process_vm_writev(pid, &local_mem, 1, &remote_mem, 1, 0) ==
-          (signed)size);
+  // iovec local_mem;
+  // iovec remote_mem;
+  // local_mem.iov_base = buff;
+  // local_mem.iov_len = size;
+  // remote_mem.iov_base = addr;
+  // remote_mem.iov_len = size;
+  // return (process_vm_writev(pid, &local_mem, 1, &remote_mem, 1, 0) ==
+  //         (signed)size);
 }
 addr_type MemoryAccess::getCallAddress(void *addr) {
   unsigned int jump_len;

@@ -11,12 +11,14 @@
 class MemoryAccess {
 private:
   const std::string GAME_NAME = "cs2";
+  const std::string kernel_module_file_path = "/proc/read_access";
   pid_t pid;
   Settings *settings;
   std::vector<Addr_Range> engine_range;
   std::vector<Addr_Range> client_range;
   std::vector<Addr_Range> panorama_client_range;
   unsigned char *diffBuffer = nullptr;
+  FILE *kernel_module_file;
 
   addr_type local_player_addr_location;
   addr_type attack_addr_call_location;
@@ -67,9 +69,11 @@ public:
   // addr_type viewAngles = 0x8E20;
 
   MemoryAccess(Settings *);
+  ~MemoryAccess();
   pid_t getPid();
   addr_type getEntityListAddr();
   std::vector<Addr_Range> getModule(const std::string &);
+  std::vector<Addr_Range> getModuleFromKernelModule(const std::string &);
   bool read(void *, void *, size_t);
   bool read(addr_type, void *, size_t);
   bool write(void *, void *, size_t);

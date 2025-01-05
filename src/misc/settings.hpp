@@ -56,6 +56,8 @@ public:
   bool aim_flash_check;
   bool aim_teammates;
   bool use_fake_input_device = false;
+  bool use_kernel_module = true;
+
   map<Weapon, float> weapon_fovs;
   vector<unsigned int> bone_ids;
   std::map<std::string, std::uint64_t> netvars;

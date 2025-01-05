@@ -24,17 +24,18 @@
 #include <unistd.h>
 
 using namespace std;
-Aimer::Aimer(GameManager &csgo, BSPParser &bspParser)
+Aimer::Aimer(GameManager &csgo)
     : csgo(csgo), mem(csgo.getMemoryAccess()),
       clicker(Clicker(csgo.getMemoryAccess())),
-      settings(Settings::getInstance()), inverse_sens(1 / settings.sensitivity),
-      bspParser(bspParser) {
+      settings(Settings::getInstance()),
+      inverse_sens(1 / settings.sensitivity) {
   // prepare mouse
   if (settings.use_fake_input_device) {
     createFakeInputDevice();
   } else {
     uinput = open(settings.mouse_file.c_str(), O_WRONLY | O_NONBLOCK);
   }
+  map.load_map("mirage");
 }
 
 Aimer::~Aimer() {
@@ -45,6 +46,7 @@ Aimer::~Aimer() {
     }
   }
   close(uinput);
+  map.unload();
 }
 
 void Aimer::aimCheck(unsigned int i) {
@@ -97,7 +99,7 @@ void Aimer::aimCheck(unsigned int i) {
   // if (rcs)
   //   aimPunch = csgo.getAimPunch(local_player->entity_addr) * 2.0;
   // else
-  aimPunch = {0, 0};
+  aimPunch = {0, 0, 0};
   MouseMovement move = mouseMovementDispatcher(
       csgo.getNetworkAngles(local_player->entity_addr) + aimPunch, dist,
       use_smooth, i);
@@ -568,7 +570,7 @@ pair<std::shared_ptr<Player>, Vector> Aimer::closestTargetInFov(Vector view,
     printVec("view:", view);
     cout << "Len(view): " << len(view) << endl;
     cout << "Len(distVec): " << len(distVec) << endl;
-    float angle = acos(distVec * view);
+    float angle = acos(distVec.Dot(view));
     if (settings.debug)
       cout << "Angle: " << angle << endl;
     if (angle > fov / 2.)
@@ -590,8 +592,7 @@ pair<std::shared_ptr<Player>, Vector> Aimer::closestTargetInFov(Vector view,
   if (lineSphereIntersection(player_pos, target, closestBone, BONE_RADIUS))
     throw runtime_error("No adjustment needed");
   // do visibility check last to minimize load
-  if (settings.aim_vis_check && !bspParser.is_visible(player_pos, closestBone))
-    throw runtime_error("Target not visible");
+  cout << "Is visible: " << map.is_visible(player_pos, closestBone) << endl;
   if (settings.debug)
     cout << "Returning player" << endl;
   return pair<PlayerPtr, Vector>(closestPlayer, closestBone);

@@ -1,4 +1,3 @@
-#include "ValveBSP/BSPParser.hpp"
 #include "hacks/aimer.hpp"
 #include "hacks/bunnyhop.hpp"
 #include "hacks/radar.hpp"
@@ -77,9 +76,8 @@ int main(int argc, char **argv) {
   MemoryAccess mem(&settings);
   GameManager csgo = GameManager(mem);
 
-  BSPParser bspParser;
   // Trigger trigger(csgo);
-  Aimer aimer(csgo, bspParser);
+  Aimer aimer(csgo);
   // BunnyHopper bhopper(csgo);
   Radar radar(csgo);
   HotkeyManager hotkeyMan(csgo);

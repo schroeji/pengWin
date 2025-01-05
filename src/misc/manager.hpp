@@ -84,7 +84,6 @@ private:
   bool connected = false;
   CConcreteEntityList entity_list;
   std::string current_map_;
-
   // some helper variables
   float local_player_flashed_timer = 0.0;
 };

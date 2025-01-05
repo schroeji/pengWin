@@ -1,21 +1,21 @@
-#include "ValveBSP/BSPParser.hpp"
 #include "misc/clicker.hpp"
 #include "misc/manager.hpp"
 #include "misc/memory_access.hpp"
 #include "misc/settings.hpp"
 #include "misc/typedef.hpp"
+#include "vpk_parsing/ray_trace.h"
 
 class Aimer {
 
 private:
   GameManager &csgo;
   MemoryAccess &mem;
+  MapLoader map;
   Clicker clicker;
   int uinput;
   Settings &settings;
   const float angle_multiplier = 1 / 0.0220031738281250;
   const float inverse_sens;
-  BSPParser &bspParser;
   const float angle_multiplier_scoped = 1 / 0.0127111077308654;
   Vector getView(bool);
   Vector predictPositionOffset(PlayerPtr);
@@ -42,7 +42,7 @@ private:
   void createFakeInputDevice();
 
 public:
-  Aimer(GameManager &csgo, BSPParser &);
+  Aimer(GameManager &csgo);
   ~Aimer();
   // Routine to call by thread; unsigned int i is the number of the call
   void aimCheck(unsigned int);

@@ -1,26 +1,24 @@
 #include "settings.hpp"
 #include "util.hpp"
 
-#include <string>
-#include <vector>
+#include <X11/keysymdef.h>
 #include <fstream>
 #include <iostream>
-#include <X11/keysymdef.h>
 #include <stdlib.h>
+#include <string>
+#include <vector>
 
 using namespace std;
-Settings* Settings::instance = nullptr;
-Settings::Settings(const string& file) {
+Settings *Settings::instance = nullptr;
+Settings::Settings(const string &file) {
   load(file);
   instance = this;
 }
 
-Settings& Settings::getInstance() {
-  return *instance;
-}
+Settings &Settings::getInstance() { return *instance; }
 
-void Settings::load(const string& file) {
-  ifstream settings_file (file);
+void Settings::load(const string &file) {
+  ifstream settings_file(file);
   string line;
   vector<string> splits;
   vector<string> name_splits;
@@ -29,13 +27,13 @@ void Settings::load(const string& file) {
     while (getline(settings_file, line)) {
       // remove comments in file
       splits = split_string(line, "#");
-      if (splits[0] == "" || splits[0] == "[offsets]" || splits[0] == "[settings]")
+      if (splits[0] == "" || splits[0] == "[offsets]" ||
+          splits[0] == "[settings]")
         continue;
-      else if(splits[0] == "[netvars]") {
+      else if (splits[0] == "[netvars]") {
         readNetvars(settings_file);
         break;
-      }
-      else {
+      } else {
         splits = split_string(splits[0], "=");
         if (splits.size() != 2) {
           cout << "WARNING: invalid line in settings file:" << endl;
@@ -107,6 +105,8 @@ void Settings::load(const string& file) {
           aim_teammates = (splits[1] == "true");
         else if (splits[0] == "use_fake_input_device")
           use_fake_input_device = (splits[1] == "true");
+        else if (splits[0] == "use_kernel_module")
+          use_kernel_module = (splits[1] == "true");
         else if (splits[0] == "bone_ids") {
           vector<string> bones = split_string(splits[1], ",");
           for (string bone : bones)
@@ -115,7 +115,7 @@ void Settings::load(const string& file) {
           panic_key = splits[1];
         } else {
           // weapon specific fov settings
-          if(name_splits[0] == "aim" && name_splits[2] == "fov") {
+          if (name_splits[0] == "aim" && name_splits[2] == "fov") {
             Weapon w = getWeaponByName(name_splits[1]);
             weapon_fovs[w] = degree_to_radian(strtof(splits[1].c_str(), NULL));
           }
@@ -123,7 +123,8 @@ void Settings::load(const string& file) {
       }
     }
   } else {
-    cout << "Error could not open " << file << ". Please run offset_dumper first." << endl;
+    cout << "Error could not open " << file
+         << ". Please run offset_dumper first." << endl;
   }
   settings_file.close();
 }
@@ -173,20 +174,19 @@ void Settings::print() {
   for (unsigned int bone : bone_ids)
     cout << bone << " ";
   cout << endl;
-  cout <<  "Weapon fovs:" << endl;
+  cout << "Weapon fovs:" << endl;
   for (pair<Weapon, float> p : weapon_fovs)
-    cout << "aim_" << getWeaponName(p.first) << "_fov: " << radian_to_degree(p.second) << endl;
-
+    cout << "aim_" << getWeaponName(p.first)
+         << "_fov: " << radian_to_degree(p.second) << endl;
 
   cout << endl << "[Radar]" << endl;
   cout << "find_map: " << find_map << endl;
   cout << "radar_sleep: " << radar_sleep << endl;
   cout << "radar_generic: " << radar_generic << endl;
   cout << "------------------------" << endl;
-
 }
 
-void Settings::readNetvars(ifstream& handle) {
+void Settings::readNetvars(ifstream &handle) {
   string line;
   vector<string> splits;
   while (getline(handle, line)) {

@@ -117,7 +117,7 @@ addr_type PatternScanner::getEntityListMaxIndexOffset() {
 addr_type PatternScanner::getGameSceneNodeOffset() {
   if (game_scene_node_offset == 0) {
     BytePattern pattern{compile_byte_pattern(
-        "E8 ?? ?? ?? ?? 84 C0 75 ?? 49 8B BC 24 ?? ?? ?? ?? 4C 89 EE")};
+        "E8 ?? ?? ?? ?? 84 C0 ?? ?? 49 8B BC 24 ?? ?? ?? ?? 4C 89 EE")};
     std::vector<addr_type> match =
         find_pattern_vec(pattern, mem.getClientRange());
     game_scene_node_offset = mem.read_offset((void *)(match[0] + 13));
