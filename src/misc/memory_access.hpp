@@ -6,6 +6,7 @@
 #include "util.hpp"
 #include "vac_bypass.h"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 class MemoryAccess {
@@ -78,12 +79,16 @@ public:
   bool read(addr_type, void *, size_t);
   bool write(void *, void *, size_t);
   unsigned int read_offset(void *);
+  std::uint64_t read_uint64(void *);
   std::uint32_t read_uint32(void *);
+  std::uint16_t read_uint16(void *);
   std::uint8_t read_uint8(void *);
+  std::string read_string(void *);
   addr_type get_address(void *);
   std::vector<Addr_Range> getPanoramaClientRange();
   std::vector<Addr_Range> &getClientRange();
   std::vector<Addr_Range> getEngineRange();
+  std::uint64_t getModuleSize(addr_type module_base);
   // returns the address of the call located at the first argument
   addr_type getCallAddress(void *);
   // returns the address of a jump

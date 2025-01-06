@@ -13,7 +13,6 @@
 
 #include "../misc/pattern_scanner.h"
 #include "../misc/settings.hpp"
-#include "netvar_finder.hpp"
 
 using namespace std;
 
@@ -66,20 +65,21 @@ std::map<std::string, DlHandle> load_modules() {
   return result;
 }
 
-ClientClass load_module(std::string const &module_name) {
-  auto const handle_map = load_modules();
-  DlHandle const &module_handle{handle_map.at(module_name)};
-  using create_interface_t = void *(*)(const char *, int *);
-  create_interface_t create_interface_ptr =
-      reinterpret_cast<create_interface_t>(
-          dlsym(module_handle.Get(), "CreateInterface"));
-  printf("CreateInterface location: %lu\n", &create_interface_ptr);
-  void *client_interface = create_interface_ptr("VClient018", nullptr);
-  printf("Client interface location: %lu\n", &client_interface);
-  ClientClass *cc =
-      reinterpret_cast<i_baseclientdll *>(client_interface)->get_all_classes();
-  return *cc;
-}
+// ClientClass load_module(std::string const &module_name) {
+//   auto const handle_map = load_modules();
+//   DlHandle const &module_handle{handle_map.at(module_name)};
+//   using create_interface_t = void *(*)(const char *, int *);
+//   create_interface_t create_interface_ptr =
+//       reinterpret_cast<create_interface_t>(
+//           dlsym(module_handle.Get(), "CreateInterface"));
+//   printf("CreateInterface location: %lu\n", &create_interface_ptr);
+//   void *client_interface = create_interface_ptr("VClient018", nullptr);
+//   printf("Client interface location: %lu\n", &client_interface);
+//   ClientClass *cc =
+//       reinterpret_cast<i_baseclientdll
+//       *>(client_interface)->get_all_classes();
+//   return *cc;
+// }
 
 void write_netvars(std::map<std::string, std::uint64_t> const &netvars,
                    string const &file_name) {

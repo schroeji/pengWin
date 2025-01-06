@@ -8,6 +8,7 @@
 #include <linux/seq_file.h> // seq_read, ..
 #include <linux/string.h>
 #include <linux/uaccess.h>
+#include <linux/vmalloc.h>
 
 #define PROC_FILE_NAME "read_access"
 #define GET_MAPS_MAGIC_NUMBER 0xFFFF
@@ -65,7 +66,6 @@ static ssize_t read_maps(struct file *file, char __user *user_buffer,
     } else { // implies an anonymous mapping i.e. not file backup'ed
       strcpy(filename, "[anon]");
     }
-    printk(KERN_INFO "0x%lx-0x%lx %s", vma->vm_start, vma->vm_end, filename);
     if (cursor >= MAPS_BUFFER_SIZE) {
       break;
     }
@@ -91,10 +91,13 @@ static ssize_t read_maps(struct file *file, char __user *user_buffer,
 
 static ssize_t read_cs2_mem(struct file *file, char __user *user_buffer,
                             size_t count, loff_t *offset) {
+
   if (offset == NULL || user_buffer == NULL) {
     printk(KERN_INFO "Offset is nullptr");
     return 0;
   }
+  /* printk(KERN_INFO "Requesting to read %lx bytes from address 0x%lx\n",
+   * count,  *offset); */
   struct task_struct *task;
   struct pid *pid_struct;
   int pid = get_cs_pid();
@@ -114,7 +117,13 @@ static ssize_t read_cs2_mem(struct file *file, char __user *user_buffer,
     return read_maps(file, user_buffer, count, offset, task);
   }
 
-  void *buffer = kmalloc(count, GFP_KERNEL);
+  void *buffer = vmalloc(count);
+  if (buffer == NULL) {
+    printk(KERN_INFO "Failed to allocate memory\n");
+    return 0;
+  }
+  /* printk(KERN_INFO "Allocated memory at 0x%lx\n", (unsigned long)buffer); */
+
   int ret = access_process_vm(task, *offset, buffer, count, 0);
   if (ret < 0) {
     printk(KERN_INFO "Failed to read memory\n");
@@ -125,7 +134,7 @@ static ssize_t read_cs2_mem(struct file *file, char __user *user_buffer,
   if (ret < 0) {
     printk(KERN_INFO "Copy to user failed for %lx bytes.", count);
   }
-  kfree(buffer);
+  vfree(buffer);
 
   *offset = *offset + count;
   return count;

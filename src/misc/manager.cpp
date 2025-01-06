@@ -1,19 +1,28 @@
 #include "manager.hpp"
 #include "memory_access.hpp"
+#include "netvar_finder.hpp"
 #include "typedef.hpp"
 #include "util.hpp"
+#include <algorithm>
+#include <cctype>
 #include <chrono>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <stdexcept>
 #include <stdlib.h>
 #include <string>
 #include <thread>
+#include <vector>
 
 using namespace std;
 
 GameManager::GameManager(MemoryAccess &mem)
-    : mem(mem), pattern_scanner(mem), settings(Settings::getInstance()) {
+    : mem(mem), netvar_finder(mem), pattern_scanner(mem),
+      settings(Settings::getInstance()) {
   bool fresh_launch = false;
   while (!mem.getPid()) { // wait until game has launched
     if (!fresh_launch)
@@ -31,6 +40,8 @@ GameManager::GameManager(MemoryAccess &mem)
     cout << "Could not find Engine Base" << endl;
     exit(0);
   }
+  netvar_finder.dump();
+  netvar_finder.printNetvars();
 }
 
 void GameManager::grabPlayers() {
@@ -134,7 +145,7 @@ void GameManager::printPlayers() {
     else if (player->team == Team::T)
       cout << "Team: T" << endl;
     cout << "Defusing: " << player->is_defusing << endl;
-    cout << "Weapon: " << player->weapon << endl;
+    cout << "Weapon: " << getWeaponName(player->weapon) << endl;
     printVec("Origin:", player->origin);
     printVec("View Offset:", player->viewOrigin);
     printVec("ViewAngles:", player->networkAngle);
@@ -449,25 +460,16 @@ QAngle GameManager::getNetworkAngles(addr_type player_addr) {
 }
 
 Weapon GameManager::getWeapon(addr_type player_addr) {
-  // cout << "Reading weapon_service_addr" << endl;
-  if (settings.debug)
-    std::cout << "Reading weapon service addr" << std::endl;
-  auto const weapon_service_addr = mem.get_address(
-      (void *)(player_addr + pattern_scanner.getWeaponServicesOffset()));
-  // cout << "Reading weapon_handle" << endl;
-  if (settings.debug)
-    std::cout << "Reading weapon handle" << std::endl;
-  auto const weapon_handle = mem.read_uint32(
-      (void *)(weapon_service_addr + pattern_scanner.getActiveWeaponOffset()));
-  if (settings.debug)
-    std::cout << "Reading active weapon addr" << std::endl;
-  auto const active_weapon_addr = getEntityFromHandle(weapon_handle);
-  // cout << "active_weapon_addr: " << active_weapon_addr << endl;
-  auto weapon_id =
-      mem.read_uint32((void *)(active_weapon_addr + 0x1140 + 0x50 + 0x1BA));
-  // cout << "weapon_id:" << weapon_id << endl;
-  weapon_id &= 0xFFF;
-  return (Weapon)weapon_id;
+  auto const m_pClippingWeapon = mem.get_address(
+      (void *)(player_addr + netvar_finder.getNetvar("m_pClippingWeapon")));
+  auto const weapon_handle =
+      mem.get_address((void *)(m_pClippingWeapon + 0x10));
+  if (weapon_handle == 0) {
+    return Weapon::KNIFE;
+  }
+  auto const weapon_name_addr = mem.get_address((void *)(weapon_handle + 0x20));
+  auto name = mem.read_string((void *)weapon_name_addr);
+  return getWeaponByName(name);
 }
 
 std::vector<Vector> GameManager::getSmokeLocations() {

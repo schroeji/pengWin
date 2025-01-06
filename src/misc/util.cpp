@@ -62,119 +62,96 @@ Vector cross_prod(Vector const &a, Vector const &b) {
 float sgn(float val) { return (0.0 < val) - (val < 0.0); }
 
 Weapon getWeaponByName(std::string weapon_name) {
-  boost::to_upper(weapon_name);
-  if (weapon_name == "DEAGLE")
+  if (weapon_name == "weapon_deagle")
     return Weapon::DEAGLE;
-  if (weapon_name == "ELITE")
+  if (weapon_name == "weapon_elite")
     return Weapon::ELITE;
-  if (weapon_name == "FIVESEVEN")
+  if (weapon_name == "weapon_fiveseven")
     return Weapon::FIVESEVEN;
-  if (weapon_name == "GLOCK")
+  if (weapon_name == "weapon_glock")
     return Weapon::GLOCK;
-  if (weapon_name == "AK47")
+  if (weapon_name == "weapon_ak47")
     return Weapon::AK47;
-  if (weapon_name == "AUG")
+  if (weapon_name == "weapon_aug")
     return Weapon::AUG;
-  if (weapon_name == "AWP")
+  if (weapon_name == "weapon_awp")
     return Weapon::AWP;
-  if (weapon_name == "FAMAS")
+  if (weapon_name == "weapon_famas")
     return Weapon::FAMAS;
-  if (weapon_name == "G3SG1")
+  if (weapon_name == "weapon_g3sg1")
     return Weapon::G3SG1;
-  if (weapon_name == "GALILAR")
+  if (weapon_name == "weapon_galilar")
     return Weapon::GALILAR;
-  if (weapon_name == "M249")
+  if (weapon_name == "weapon_m249")
     return Weapon::M249;
-  if (weapon_name == "M4A4")
+  if (weapon_name == "weapon_m4a4")
     return Weapon::M4A4;
-  if (weapon_name == "MAC10")
+  if (weapon_name == "weapon_mac10")
     return Weapon::MAC10;
-  if (weapon_name == "P90")
+  if (weapon_name == "weapon_p90")
     return Weapon::P90;
-  if (weapon_name == "UMP45")
+  if (weapon_name == "weapon_ump45")
     return Weapon::UMP45;
-  if (weapon_name == "MP5SD")
+  if (weapon_name == "weapon_mp5sd")
     return Weapon::MP5SD;
-  if (weapon_name == "XM1014")
+  if (weapon_name == "weapon_xm1014")
     return Weapon::XM1014;
-  if (weapon_name == "BIZON")
+  if (weapon_name == "weapon_bizon")
     return Weapon::BIZON;
-  if (weapon_name == "MAG7")
+  if (weapon_name == "weapon_mag7")
     return Weapon::MAG7;
-  if (weapon_name == "NEGEV")
+  if (weapon_name == "weapon_negev")
     return Weapon::NEGEV;
-  if (weapon_name == "SAWEDOFF")
+  if (weapon_name == "weapon_sawedoff")
     return Weapon::SAWEDOFF;
-  if (weapon_name == "TEC9")
+  if (weapon_name == "weapon_tec9")
     return Weapon::TEC9;
-  if (weapon_name == "ZEUS")
+  if (weapon_name == "weapon_taser")
     return Weapon::ZEUS;
-  if (weapon_name == "HKP2000")
+  if (weapon_name == "weapon_hkp2000")
     return Weapon::HKP2000;
-  if (weapon_name == "MP7")
+  if (weapon_name == "weapon_mp7")
     return Weapon::MP7;
-  if (weapon_name == "MP9")
+  if (weapon_name == "weapon_mp9")
     return Weapon::MP9;
-  if (weapon_name == "NOVA")
+  if (weapon_name == "weapon_nova")
     return Weapon::NOVA;
-  if (weapon_name == "P250")
+  if (weapon_name == "weapon_p250")
     return Weapon::P250;
-  if (weapon_name == "SCAR20")
+  if (weapon_name == "weapon_scar20")
     return Weapon::SCAR20;
-  if (weapon_name == "SG556")
+  if (weapon_name == "weapon_sg556")
     return Weapon::SG556;
-  if (weapon_name == "SCOUT")
+  if (weapon_name == "weapon_scout")
     return Weapon::SSG08;
-  if (weapon_name == "SSG08")
+  if (weapon_name == "weapon_ssg08")
     return Weapon::SSG08;
-  if (weapon_name == "KNIFE")
-    return Weapon::KNIFE;
-  if (weapon_name == "FLASHBANG")
+  if (weapon_name == "weapon_flashbang")
     return Weapon::FLASHBANG;
-  if (weapon_name == "HEGRENADE")
+  if (weapon_name == "weapon_hegrenade")
     return Weapon::HEGRENADE;
-  if (weapon_name == "SMOKEGRENADE")
+  if (weapon_name == "weapon_smokegrenade")
     return Weapon::SMOKEGRENADE;
-  if (weapon_name == "MOLOTOV")
+  if (weapon_name == "weapon_molotov")
     return Weapon::MOLOTOV;
-  if (weapon_name == "DECOY")
+  if (weapon_name == "weapon_decoy")
     return Weapon::DECOY;
-  if (weapon_name == "INCGRENADE")
+  if (weapon_name == "weapon_incgrenade")
     return Weapon::INCGRENADE;
-  if (weapon_name == "C4")
+  if (weapon_name == "weapon_c4")
     return Weapon::C4;
-  if (weapon_name == "KNIFE_T")
-    return Weapon::KNIFE_T;
-  if (weapon_name == "M4A1")
+  if (weapon_name == "weapon_m4a1")
     return Weapon::M4A1;
-  if (weapon_name == "M4A1_SILENCER")
+  if (weapon_name == "weapon_m4a1_silencer")
     return Weapon::M4A1;
-  if (weapon_name == "USP")
+  if (weapon_name == "weapon_usp")
     return Weapon::USP;
-  if (weapon_name == "CZ75A")
+  if (weapon_name == "weapon_cz75a")
     return Weapon::CZ75A;
-  if (weapon_name == "REVOLVER")
+  if (weapon_name == "weapon_revolver")
     return Weapon::REVOLVER;
-  if (weapon_name == "KNIFE_BAYONET")
-    return Weapon::KNIFE_BAYONET;
-  if (weapon_name == "KNIFE_FLIP")
-    return Weapon::KNIFE_FLIP;
-  if (weapon_name == "KNIFE_GUT")
-    return Weapon::KNIFE_GUT;
-  if (weapon_name == "KNIFE_KARAMBIT")
-    return Weapon::KNIFE_KARAMBIT;
-  if (weapon_name == "KNIFE_M9_BAYONET")
-    return Weapon::KNIFE_M9_BAYONET;
-  if (weapon_name == "KNIFE_TACTICAL")
-    return Weapon::KNIFE_TACTICAL;
-  if (weapon_name == "KNIFE_FALCHION")
-    return Weapon::KNIFE_FALCHION;
-  if (weapon_name == "KNIFE_SURVIVAL_BOWIE")
-    return Weapon::KNIFE_SURVIVAL_BOWIE;
-  if (weapon_name == "KNIFE_BUTTERFLY")
-    return Weapon::KNIFE_BUTTERFLY;
-  if (weapon_name == "KNIFE_PUSH")
-    return Weapon::KNIFE_PUSH;
+  if (weapon_name.substr(0, 12) == "weapon_knife")
+    return Weapon::KNIFE;
   return Weapon::NONE;
 }
 

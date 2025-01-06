@@ -1,5 +1,6 @@
 #pragma once
 #include "memory_access.hpp"
+#include "netvar_finder.hpp"
 #include "pattern_scanner.h"
 #include "typedef.hpp"
 #include "util.hpp"
@@ -71,8 +72,11 @@ public:
   // Returns the entity address for a given handle
   addr_type getEntityFromHandle(std::uint32_t handle);
 
+  void test();
+
 private:
   MemoryAccess &mem;
+  NetvarFinder netvar_finder;
   PatternScanner pattern_scanner;
   Settings &settings;
   std::vector<PlayerPtr> players;

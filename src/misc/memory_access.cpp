@@ -39,9 +39,21 @@ MemoryAccess::~MemoryAccess() {
 
 unsigned int MemoryAccess::read_offset(void *addr) { return read_uint32(addr); }
 
+std::uint64_t MemoryAccess::read_uint64(void *addr) {
+  std::uint64_t value;
+  read(addr, &value, sizeof(std::uint64_t));
+  return value;
+}
+
 unsigned int MemoryAccess::read_uint32(void *addr) {
   std::uint32_t value;
   read(addr, &value, sizeof(std::uint32_t));
+  return value;
+}
+
+std::uint16_t MemoryAccess::read_uint16(void *addr) {
+  std::uint16_t value;
+  read(addr, &value, sizeof(std::uint16_t));
   return value;
 }
 
@@ -210,18 +222,28 @@ bool MemoryAccess::read(addr_type addr, void *buff, size_t size) {
   return read((void *)addr, buff, size);
 }
 
+std::string MemoryAccess::read_string(void *addr) {
+  addr_type current_addr{(addr_type)(addr)};
+  unsigned char current{};
+  read(current_addr, &current, 1);
+  std::string result{""};
+  while (current != 0) {
+    // std::cout << current << std::endl;
+    result += current;
+    current_addr += 1;
+    read(current_addr, &current, 1);
+  }
+  return result;
+}
+
 bool MemoryAccess::read(void *addr, void *buff, size_t size) {
   void *filtered_addr = (void *)vac_bypass.filter_address(pid, (addr_type)addr);
   if (filtered_addr && settings->use_kernel_module) {
-    int ret = fseeko64(kernel_module_file, (off64_t)addr, SEEK_SET);
+    std::size_t ret =
+        pread(fileno(kernel_module_file), buff, size, (off64_t)filtered_addr);
     if (ret < 0) {
-      cout << "Failed to seek to address: "
-           << std::to_string((off64_t)filtered_addr) << std::endl;
-      return false;
-    }
-    ret = fread(buff, 1, size, kernel_module_file);
-    if (ret < 0) {
-      cout << "Failed to read from kernel module file.";
+      cout << "Failed to read from kernel module file: "
+           << std::to_string((std::uint64_t)filtered_addr);
       return false;
     }
     return true;
@@ -330,4 +352,19 @@ vector<int> MemoryAccess::diffMem(addr_type addr, size_t size) {
   if (result.size() > 0)
     memcpy(diffBuffer, buffer, size);
   return result;
+}
+
+std::uint64_t MemoryAccess::getModuleSize(addr_type module_base) {
+  static constexpr std::uint64_t ELF_SECTION_HEADER_OFFSET = 0x28;
+  static constexpr std::uint64_t ELF_SECTION_HEADER_ENTRY_SIZE = 0x3A;
+  static constexpr std::uint64_t ELF_SECTION_HEADER_NUM_ENTRIES = 0x3C;
+
+  auto section_header_offset =
+      read_uint64((void *)(module_base + ELF_SECTION_HEADER_OFFSET));
+  auto section_header_entry_size =
+      read_uint16((void *)(module_base + ELF_SECTION_HEADER_ENTRY_SIZE));
+  auto section_header_num_entries =
+      read_uint16((void *)(module_base + ELF_SECTION_HEADER_NUM_ENTRIES));
+  return section_header_offset +
+         section_header_entry_size * section_header_num_entries;
 }
