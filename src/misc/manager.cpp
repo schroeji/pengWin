@@ -268,14 +268,8 @@ PlayerPtr GameManager::makePlayerPtr(addr_type entity) {
   addr_type entity_team_addr{entity + pattern_scanner.getTeamNumberOffset()};
   addr_type game_scene_node_addr{entity +
                                  pattern_scanner.getGameSceneNodeOffset()};
-  if (settings.debug)
-    std::cout << "Reading health:" << std::endl;
   auto const health = mem.read_uint32((void *)entity_health_addr);
-  if (settings.debug)
-    std::cout << "Reading team:" << std::endl;
   auto const team = static_cast<Team>(mem.read_uint8((void *)entity_team_addr));
-  if (settings.debug)
-    std::cout << "Game scene node addr:" << std::endl;
   auto const game_scene_node = mem.get_address((void *)game_scene_node_addr);
   auto const abs_origin_addr =
       game_scene_node + pattern_scanner.getAbsOriginOffset();
@@ -417,8 +411,6 @@ QAngle GameManager::getAimPunch(addr_type player_addr) {
 
 bool GameManager::isDefusing(addr_type player_addr) {
   char buf;
-  if (settings.debug)
-    std::cout << "Reading is defusing" << std::endl;
   if (!mem.read(player_addr + pattern_scanner.getIsDefusingOffset(), &buf,
                 sizeof(buf)))
     return false;

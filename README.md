@@ -1,16 +1,14 @@
 
 # pengWin
-pengWin is a fully external hack for Counter-Strike\: Global Offensive.
+pengWin is a fully external hack for Counter-Strike\: 2.
 In comparison to internal cheats (e.g. AimTux) it does not inject any code into the game.
 Unlike other external hacks it does not write to the games memory at all.
+You also have the option to use a kernel module for accessing the game's memory which further increases security.
 
 # Current Features:
 - External Radar
-- Triggerbot
-- BunnyHop
 - Aimbot
 - Visibility check (BSP parsing)
-- Offset Dumper
 - Loading settings from file
 - Defining Hotkeys
 - Panic key

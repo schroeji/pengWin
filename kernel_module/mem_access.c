@@ -73,8 +73,8 @@ static ssize_t read_maps(struct file *file, char __user *user_buffer,
                                "0x%lx-0x%lx %s\n", vma->vm_start, vma->vm_end,
                                filename);
   }
-  printk(KERN_INFO "%lx bytes were requested.", count);
-  printk(KERN_INFO "Wrote total %x bytes to maps buffer.", cursor);
+  // printk(KERN_INFO "%lx bytes were requested.", count);
+  // printk(KERN_INFO "Wrote total %x bytes to maps buffer.", cursor);
   mmap_read_unlock(mm);
   if (cursor < count) {
     count = cursor;
@@ -83,7 +83,7 @@ static ssize_t read_maps(struct file *file, char __user *user_buffer,
   if (ret < 0) {
     printk(KERN_INFO "Copy to user failed for %lx bytes.", count);
   }
-  printk(KERN_INFO "Copied %lx bytes to user buffer.", count);
+  // printk(KERN_INFO "Copied %lx bytes to user buffer.", count);
   kfree(maps_buffer);
 
   return count;
@@ -97,7 +97,8 @@ static ssize_t read_cs2_mem(struct file *file, char __user *user_buffer,
     return 0;
   }
   /* printk(KERN_INFO "Requesting to read %lx bytes from address 0x%lx\n",
-   * count,  *offset); */
+   * count, */
+  /*        *offset); */
   struct task_struct *task;
   struct pid *pid_struct;
   int pid = get_cs_pid();
@@ -149,12 +150,12 @@ static struct proc_ops fops = {
 // Custom init and exit methods
 static int __init custom_init(void) {
   proc_create(PROC_FILE_NAME, S_IRUSR, NULL, &fops);
-  printk(KERN_INFO "Hello world driver loaded.");
+  // printk(KERN_INFO "Hello world driver loaded.");
   return 0;
 }
 static void __exit custom_exit(void) {
   remove_proc_entry(PROC_FILE_NAME, NULL);
-  printk(KERN_INFO "Goodbye my friend, I shall miss you dearly...");
+  // printk(KERN_INFO "Goodbye my friend, I shall miss you dearly...");
 }
 
 module_init(custom_init);

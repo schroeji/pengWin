@@ -16,14 +16,6 @@ std::string readString(std::vector<std::uint8_t>::const_iterator iter) {
 }
 std::uint64_t read_uint64(std::uint8_t *const addr) {
   std::uint64_t result;
-  // std::cout << "addr[0]: " << std::to_string(addr[0]) << std::endl;
-  // std::cout << "addr[1]: " << std::to_string(addr[1]) << std::endl;
-  // std::cout << "addr[2]: " << std::to_string(addr[2]) << std::endl;
-  // std::cout << "addr[3]: " << std::to_string(addr[3]) << std::endl;
-  // std::cout << "addr[4]: " << std::to_string(addr[4]) << std::endl;
-  // std::cout << "addr[5]: " << std::to_string(addr[5]) << std::endl;
-  // std::cout << "addr[6]: " << std::to_string(addr[6]) << std::endl;
-  // std::cout << "addr[7]: " << std::to_string(addr[7]) << std::endl;
   std::memcpy(&result, addr, sizeof(result));
   return result;
 }

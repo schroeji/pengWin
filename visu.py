@@ -8,16 +8,12 @@ import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 
-# import _thread
 
 SEPERATOR = "|"
 matplotlib.rcParams["toolbar"] = "None"
 fig, ax = plt.subplots()
 xdata, ydata = [], []
 ln = plt.scatter([], [], animated=True)
-# ln.set_offsets([[0.5], [0.4]])
-# print(ln.get_offsets())
-# location_file = "/tmp/locs.csv"
 xlims, ylims = [], []
 
 
@@ -230,6 +226,12 @@ def blit_init():
     elif map_name == "de_nuke":
         xlims = (-3453, 3750)
         ylims = (-4290, 2887)
+    elif map_name == "de_ancient":
+        xlims = (-2910, 2120)
+        ylims = (-2910, 2100)
+    elif map_name == "de_anubis":
+        xlims = (-2707, 2509)
+        ylims = (-1938, 3260)
     elif map_name == "dz_blacksite":
         xlims = (-8604, 8350)
         ylims = (-8300, 8804)
