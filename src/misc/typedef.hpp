@@ -75,12 +75,10 @@ struct GlowObjectDefinition_t {
 #define MAX_BONES 128
 
 struct BoneInfo {
-  char __pad0x0[0xA];
   float x;
-  char __pad0x10[0xA];
   float y;
-  char __pad0x20[0xA];
   float z;
+  char __pad0x0[0x14];
 };
 
 class GlowObjectManager_t {
@@ -96,48 +94,43 @@ public:
 
 enum Bone {
   PELVIS = 0,
-  ORIGIN = 1,
-  BACK_NECK = 2,
-  SPINE0 = 3,
-  SPINE1 = 4,
-  SPINE2 = 5,
-  SPINE3 = 6,
-  NECK = 7,
-  HEAD0 = 8,
-  HEAD1 = 9,
-  NECK_FRONT = 10,
-  LEFT_SHOULDER = 11,
-  LEFT_ELBOW = 12,
-  LEFT_LOWER_ARM = 13,
-  LEFT_HAND = 14,
-  // for dust2 T
-  RIGHT_SHOULDER = 39,
-  RIGHT_ELBOW = 40,
-  RIGHT_LOWER_ARM = 41,
-  RIGHT_HAND = 42,
-
-  LEFT_FOOT = 70,
-  LEFT_THIGH = 71,
-  LEFT_KNEE = 72,
-
-  RIGHT_FOOT = 77,
-  RIGHT_THIGH = 78,
-  RIGHT_KNEE = 79,
-
-  // for dust 2 CT
-  // RIGHT_SHOULDER = 41,
-  // RIGHT_ELBOW = 42,
-  // RIGHT_LOWER_ARM = 43,
-  // RIGHT_HAND = 44
-
-  // LEFT_THIGH = 70,
-  // LEFT_KNEE = 71,
-  // LEFT_FOOT = 72,
-
-  // RIGHT_THIGH = 77,
-  // RIGHT_KNEE = 78,
-  // RIGHT_FOOT = 79,
-
+  SPINE0 = 1,
+  SPINE1 = 2,
+  SPINE2 = 3,
+  SPINE3 = 4,
+  NECK = 5,
+	HEAD_0 = 6,
+	CLAVICLE_L= 7,
+	ARM_UPPER_L = 8,
+	ARM_LOWER_L = 9,
+	HAND_L    = 10,
+	WEAPON_HAND_L = 11,
+	CLAVICLE_R  = 12,
+	ARM_UPPER_R = 13,
+	ARM_LOWER_R = 14,
+	HAND_R  = 15,
+	WEAPON_HAND_R = 16,
+	BACK =  17, //JIGGLE_PRIMARY
+	TORSO = 18, //WEAPONHIER_JNT
+	TORSO2 = 19, //JIGGLE_SECONDARY
+	WRIST_R = 20,
+	WRIST_L = 21,
+	LEG_UPPER_R = 22,
+	LEG_LOWER_R = 23,
+	ANKLE_R = 24,
+	LEG_UPPER_L = 25,
+	LEG_LOWER_L = 26,
+	ANKLE_L = 27,
+	ROOT_MOTION = 28,
+	LEG_L_OFFSET  = 29,
+	LEG_L_IKTARGET  = 30,
+	LEG_R_OFFSET  = 31,
+	LEG_R_IKTARGET  = 32,
+	EYEBALL_L = 33,
+	EYEBALL_R = 34,
+	EYE_TARGET  = 35,
+	NAPE, //JIGGLE_HOOD
+	BONE_COUNT
 };
 
 // m_fFlags

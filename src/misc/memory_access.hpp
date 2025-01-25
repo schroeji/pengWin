@@ -106,7 +106,6 @@ public:
 
   void printAddrRangeVec(std::vector<Addr_Range> const &range_vec);
   void updateLocalPlayerAddr();
-  BoneInfo *getBoneMatrix(addr_type);
   void printBlock(addr_type, size_t);
   std::vector<int> diffMem(addr_type, size_t);
 };

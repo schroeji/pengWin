@@ -313,19 +313,6 @@ void MemoryAccess::updateLocalPlayerAddr() {
   //     cout << "WARNING: could not get localplayer" << endl;
 }
 
-BoneInfo *MemoryAccess::getBoneMatrix(addr_type player) {
-  if (player == 0)
-    throw runtime_error("getBoneMatrix: Player is nullptr.");
-  addr_type boneMatrix_addr;
-  if (!read((void *)(player + m_dwBoneMatrix), &boneMatrix_addr,
-            sizeof(boneMatrix_addr)))
-    throw runtime_error("Could not get BoneMatrix address.");
-  BoneInfo *boneMatrix = new BoneInfo[MAX_BONES];
-  if (!read((void *)boneMatrix_addr, boneMatrix, sizeof(BoneInfo) * MAX_BONES))
-    throw runtime_error("Could not get BoneMatrix");
-  return boneMatrix;
-}
-
 // Vector MemoryAccess::getBone(BoneInfo* boneMatrix, unsigned int boneID) {
 
 //   BoneInfo bone;

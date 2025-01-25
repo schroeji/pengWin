@@ -23,11 +23,14 @@ Dependencies:
 - xdotool
 - python3 + matplotlib + numpy
 
-Use the included Makefile to build.
-Then run `chmod 100 pengWin` and `chown root pengWin` to make the hack unaccessible for VAC.
+The project uses CMake and you can build by executing `cmake -S . -B build` and then `cmake --build build/ --target all`.
+Run `chmod 100 build/src/pengWin` and `chown root build/src/pengWin` to make the hack unaccessible for VAC.
 
 # Usage
-`sudo ./pengWin [options]`
+In case you want to use the kernel module for instead of reading the memory via `process_vm_read`
+you first nee to load the kernel module with `insmod build/kernel_module/mem_access.ko`.
+Then run `sudo ./pengWin [options]`
+
 Possible options are:
 --aimbot
 --bhop

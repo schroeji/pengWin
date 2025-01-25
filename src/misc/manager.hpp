@@ -46,6 +46,8 @@ public:
   bool isFlashed(addr_type);
   // returns the total duration of the flashed status for the player
   float getFlashDuration(addr_type);
+
+  std::array<BoneInfo, MAX_BONES> getBoneMatrix(addr_type player);
   // returns if the local player is flashed because it is used in the aimbot it
   // does not wait until the flash is fully gone but until the player can see
   // again

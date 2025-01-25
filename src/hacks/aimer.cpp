@@ -95,11 +95,7 @@ void Aimer::aimCheck(unsigned int i) {
     return;
   bool use_smooth = settings.aim_smooth_first_shot || i != 0;
 
-  QAngle aimPunch;
-  // if (rcs)
-  //   aimPunch = csgo.getAimPunch(local_player->entity_addr) * 2.0;
-  // else
-  aimPunch = {0, 0, 0};
+  QAngle aimPunch = rcs ? csgo.getAimPunch(local_player->entity_addr) * 2.0 : QAngle{0, 0, 0};
   MouseMovement move = mouseMovementDispatcher(
       csgo.getNetworkAngles(local_player->entity_addr) + aimPunch, dist,
       use_smooth, i);
@@ -124,60 +120,60 @@ void Aimer::aimCheck(unsigned int i) {
 
 MouseMovement Aimer::mouseMovementDispatcher(QAngle curr_angle, Vector dist,
                                              bool use_smooth, unsigned int i) {
-  // Weapon weapon = csgo.getWeapon(mem.local_player_addr);
-  // switch (weapon) {
-  // // pistols
-  // case Weapon::DEAGLE:
-  //   // return spline_calcMouseMovement(curr_angle, dist, i);
-  // case Weapon::GLOCK:
-  // case Weapon::USP:
-  // case Weapon::FIVESEVEN:
-  // case Weapon::HKP2000:
-  // case Weapon::P250:
-  // case Weapon::TEC9:
-  //   if (i == 0)
-  //     return default_calcMouseMovement(curr_angle, dist, false);
-  //   else if (settings.debug)
-  //     cout << "Aiming disabled for holding." << endl;
-  //   break;
-  // case Weapon::REVOLVER:
-  //   return default_calcMouseMovement(curr_angle, dist, false);
-  //   // snipers
-  // case Weapon::AWP:
-  // case Weapon::SSG08:
-  //   if (i == 0)
-  //     return default_calcMouseMovement(curr_angle, dist, false);
-  //   else if (settings.debug)
-  //     cout << "Aiming disabled for holding." << endl;
-  //   break;
-  //   // auto snipers
-  // case Weapon::G3SG1:
-  // case Weapon::SCAR20:
-  //   return default_calcMouseMovement(curr_angle, dist, use_smooth);
-  //   // disable for nades / knives
-  // case Weapon::SMOKEGRENADE:
-  // case Weapon::FLASHBANG:
-  // case Weapon::HEGRENADE:
-  // case Weapon::MOLOTOV:
-  // case Weapon::INCGRENADE:
-  // case Weapon::DECOY:
-  // case Weapon::C4:
-  // case Weapon::KNIFE:
-  // case Weapon::KNIFE_T:
-  //   if (settings.debug)
-  //     cout << "Aiming disabled for this weapon." << endl;
-  //   return {0, 0};
-  //   break;
-  // case Weapon::ZEUS:
-  //   if (i == 0)
-  //     return default_calcMouseMovement(curr_angle, dist, false);
-  //   else if (settings.debug)
-  //     cout << "Aiming disabled for holding." << endl;
-  //   break;
-  // default:
-  return default_calcMouseMovement(curr_angle, dist, use_smooth);
-  // }
-  // return {0, 0};
+  Weapon const weapon{ csgo.getLocalPlayer()->weapon};
+  switch (weapon) {
+  // pistols
+  case Weapon::DEAGLE:
+    // return spline_calcMouseMovement(curr_angle, dist, i);
+  case Weapon::GLOCK:
+  case Weapon::USP:
+  case Weapon::FIVESEVEN:
+  case Weapon::HKP2000:
+  case Weapon::P250:
+  case Weapon::TEC9:
+    if (i == 0)
+      return default_calcMouseMovement(curr_angle, dist, false);
+    else if (settings.debug)
+      cout << "Aiming disabled for holding." << endl;
+    break;
+  case Weapon::REVOLVER:
+    return default_calcMouseMovement(curr_angle, dist, false);
+    // snipers
+  case Weapon::AWP:
+  case Weapon::SSG08:
+    if (i == 0)
+      return default_calcMouseMovement(curr_angle, dist, false);
+    else if (settings.debug)
+      cout << "Aiming disabled for holding." << endl;
+    break;
+    // auto snipers
+  case Weapon::G3SG1:
+  case Weapon::SCAR20:
+    return default_calcMouseMovement(curr_angle, dist, use_smooth);
+    // disable for nades / knives
+  case Weapon::SMOKEGRENADE:
+  case Weapon::FLASHBANG:
+  case Weapon::HEGRENADE:
+  case Weapon::MOLOTOV:
+  case Weapon::INCGRENADE:
+  case Weapon::DECOY:
+  case Weapon::C4:
+  case Weapon::KNIFE:
+  case Weapon::KNIFE_T:
+    if (settings.debug)
+      cout << "Aiming disabled for this weapon." << endl;
+    return {0, 0};
+    break;
+  case Weapon::ZEUS:
+    if (i == 0)
+      return default_calcMouseMovement(curr_angle, dist, false);
+    else if (settings.debug)
+      cout << "Aiming disabled for holding." << endl;
+    break;
+  default:
+    return default_calcMouseMovement(curr_angle, dist, use_smooth);
+  }
+  return {0, 0};
 }
 
 MouseMovement Aimer::spline_calcMouseMovement(QAngle curr_angle, Vector dist,
@@ -326,51 +322,31 @@ MouseMovement Aimer::default_calcMouseMovement(QAngle curr_angle, Vector dist,
   normalize_vector(dist);
   if (settings.debug)
     printVec("dist", dist);
-  Vector const view{curr_angle.x, curr_angle.y, curr_angle.z};
-  Vector2D dist_z{dist.x, dist.y};
-  Vector2D view_z{view.x, view.y};
-  normalize_vector(dist_z);
-  normalize_vector(view_z);
-  float dot = scalar_prod(view_z, dist_z);
-  float det = view_z.x * dist_z.y - view_z.y * dist_z.x;
-  float yaw = atan2(det, dot);
-  QAngle target_angle = {dist.x, dist.y, dist.z};
-  // target_angle = radian_to_degree(target_angle);
-  if (settings.debug)
-    printVec("curr Angle", curr_angle);
-  if (settings.debug)
-    printVec("target_angle", target_angle);
-  Vector missing_vec = dist - view;
-  // Vector missing_vec = cross_prod(view, dist);
-  QAngle missing_angle = {
-      atan2(missing_vec.y, missing_vec.z),
-      atan2(missing_vec.y, sqrt(missing_vec.x * missing_vec.x +
-                                missing_vec.z * missing_vec.z)),
-      0};
-
+  // curr_angle and target angle are in format {pitch, yaw, 0}
+  QAngle target_angle = {asin(-dist.z), atan2(dist.y, dist.x), 0};
+  target_angle = radian_to_degree(target_angle);
+  if (settings.debug) printVec("curr Angle", curr_angle);
+  if (settings.debug) printVec("target_angle", target_angle);
+  QAngle missing_angle = target_angle - curr_angle;
   if (missing_angle.y > 180)
     missing_angle.y -= 360;
   else if (missing_angle.y < -180)
     missing_angle.y += 360;
-  if (settings.debug) {
-    printVec("missing angles", missing_angle);
-    cout << "yaw: " << radian_to_degree(yaw) << endl;
-    // cout << "X: " << radian_to_degree(missing_angle.x) << endl;
-    // cout << "Y: " << radian_to_degree(missing_angle.y) << endl;
-  }
+  if (settings.debug) printVec("missing angles", missing_angle);
+  // cout << settings.aim_fov << endl;
+  // cout << degree_to_radian(missing_angle.x) << endl;
+  // cout << degree_to_radian(missing_angle.y) << endl;
   // assert(fabs(degree_to_radian(missing_angle.x)) <= settings.aim_fov);
   // assert(fabs(degree_to_radian(missing_angle.y)) <= settings.aim_fov);
   float multiplier = angle_multiplier;
-  // if (csgo.isScoped(mem.local_player_addr))
-  // multiplier = angle_multiplier_scoped;
+  if (csgo.isScoped(mem.local_player_addr))
+    multiplier = angle_multiplier_scoped;
   // not usign 1.0 because: prevents overshooting when player moves mouse;
   // and  not perfectly hitting the center of the bone is less obvious
   float smooth = use_smooth ? settings.smoothing_factor : 0.98;
   // because format is {pitch, yaw, roll} the y and x have to be swapped
-  int mouseAngle_x = static_cast<int>(-radian_to_degree(yaw) * multiplier *
-                                      inverse_sens * smooth);
-  int mouseAngle_y = 0;
-  // static_cast<int>(missing_angle.y * multiplier * inverse_sens * smooth);
+  int mouseAngle_x = static_cast<int>(-missing_angle.y * multiplier * inverse_sens * smooth);
+  int mouseAngle_y = static_cast<int>(missing_angle.x * multiplier * inverse_sens * smooth);
   return {mouseAngle_x, mouseAngle_y};
 }
 
@@ -404,35 +380,34 @@ Vector Aimer::getView(bool rcs) {
   QAngle aimPunch = local_player->aimPunch;
   if (rcs)
     currAngle = currAngle + aimPunch;
-  // float radians_x = degree_to_radian(-currAngle.x); // pitch
-  // float radians_y = degree_to_radian(currAngle.y);  // yaw
-  // float v1 = cos(radians_x) * cos(radians_y);
-  // float v2 = cos(radians_x) * sin(radians_y);
-  // float v3 = sin(radians_x);
+  float radians_x = degree_to_radian(-currAngle.x); // pitch
+  float radians_y = degree_to_radian(currAngle.y);  // yaw
+  float v1 = cos(radians_x) * cos(radians_y);
+  float v2 = cos(radians_x) * sin(radians_y);
+  float v3 = sin(radians_x);
   // is normalized because sin*sin + cos*cos = 1
-  // return {v1, v2, v3};
-  return {currAngle.x, currAngle.y, currAngle.z};
+  return {v1, v2, v3};
 }
 
 pair<PlayerPtr, Vector> Aimer::findTargetDispatcher(Vector view,
                                                     unsigned int i) {
   float fov = settings.aim_fov;
-  // Weapon weapon = csgo.getWeapon(mem.local_player_addr);
-  // if (!(settings.weapon_fovs.find(weapon) ==
-  //       settings.weapon_fovs.end())) // special fov is set
-  //   fov = settings.weapon_fovs[weapon];
-  // // apply fov scaling on hold
-  // if (settings.aim_fov_max_scale > 1.0 && weapon != Weapon::NEGEV) {
-  //   float t = min((i * settings.aim_sleep) / MAGAZINE_DURATION, 1.0f);
-  //   float scaling = 1 + t * (settings.aim_fov_max_scale - 1);
-  //   fov *= scaling;
-  // }
-  // switch (weapon) {
-  // case Weapon::ZEUS:
-  //   return zeusTarget(view, fov);
-  // default:
-  return closestTargetInFov(view, fov);
-  // }
+  Weapon weapon = csgo.getWeapon(mem.local_player_addr);
+  if (!(settings.weapon_fovs.find(weapon) ==
+        settings.weapon_fovs.end())) // special fov is set
+    fov = settings.weapon_fovs[weapon];
+  // apply fov scaling on hold
+  if (settings.aim_fov_max_scale > 1.0 && weapon != Weapon::NEGEV) {
+    float t = min((i * settings.aim_sleep) / MAGAZINE_DURATION, 1.0f);
+    float scaling = 1 + t * (settings.aim_fov_max_scale - 1);
+    fov *= scaling;
+  }
+  switch (weapon) {
+  case Weapon::ZEUS:
+    return zeusTarget(view, fov);
+  default:
+    return closestTargetInFov(view, fov);
+  }
 }
 
 /**
@@ -555,33 +530,33 @@ pair<std::shared_ptr<Player>, Vector> Aimer::closestTargetInFov(Vector view,
     //   continue;
     // }
     addr_type enemy_addr = enemy->entity_addr;
-    Vector distVec = getDist(player_pos, enemy->origin);
-    // BoneInfo *boneMatrix = mem.getBoneMatrix(enemy_addr);
-    // for (unsigned int boneID : settings.bone_ids) {
-    //   // cout << "bone ID:" << boneID << endl;
-    //   bone_pos = {boneMatrix[boneID].x, boneMatrix[boneID].y,
-    //               boneMatrix[boneID].z};
-    //   if (settings.debug)
-    //     printVec("bone", bone_pos);
-    //   // find angle between player and target
-    printVec("DistVec:", distVec);
-    normalize_vector(distVec);
-    printVec("Normalized distvec:", distVec);
-    printVec("view:", view);
-    cout << "Len(view): " << len(view) << endl;
-    cout << "Len(distVec): " << len(distVec) << endl;
-    float angle = acos(distVec.Dot(view));
-    if (settings.debug)
-      cout << "Angle: " << angle << endl;
-    if (angle > fov / 2.)
-      continue;
-    if (closestPlayer == nullptr || angle < closestAngle) {
-      closestPlayer = enemy;
-      closestAngle = angle;
-      closestBone = enemy->origin;
+    auto boneMatrix = csgo.getBoneMatrix(enemy_addr);
+    for (unsigned int boneID : settings.bone_ids) {
+      cout << "bone ID:" << boneID << endl;
+      bone_pos = {boneMatrix[boneID].x, boneMatrix[boneID].y,
+                  boneMatrix[boneID].z};
+
+      if (settings.debug)
+        printVec("bone", bone_pos);
+      // find angle between player and target
+      Vector distVec = getDist(player_pos, bone_pos);
+      printVec("DistVec:", distVec);
+      normalize_vector(distVec);
+      printVec("Normalized distvec:", distVec);
+      printVec("view:", view);
+      cout << "Len(view): " << len(view) << endl;
+      cout << "Len(distVec): " << len(distVec) << endl;
+      float angle = acos(distVec.Dot(view));
+      if (settings.debug)
+        cout << "Angle: " << angle << endl;
+      if (angle > fov / 2.)
+        continue;
+      if (closestPlayer == nullptr || angle < closestAngle) {
+        closestPlayer = enemy;
+        closestAngle = angle;
+        closestBone = bone_pos;
+      }
     }
-    // }
-    // delete boneMatrix;
   }
   if (closestPlayer == nullptr)
     throw runtime_error("No player in FOV");
@@ -592,7 +567,7 @@ pair<std::shared_ptr<Player>, Vector> Aimer::closestTargetInFov(Vector view,
   if (lineSphereIntersection(player_pos, target, closestBone, BONE_RADIUS))
     throw runtime_error("No adjustment needed");
   // do visibility check last to minimize load
-  cout << "Is visible: " << map.is_visible(player_pos, closestBone) << endl;
+  // cout << "Is visible: " << map.is_visible(player_pos, closestBone) << endl;
   if (settings.debug)
     cout << "Returning player" << endl;
   return pair<PlayerPtr, Vector>(closestPlayer, closestBone);

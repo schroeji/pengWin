@@ -77,10 +77,10 @@ int main(int argc, char **argv) {
   GameManager csgo = GameManager(mem);
 
   // Trigger trigger(csgo);
-  // Aimer aimer(csgo);
+  Aimer aimer(csgo);
   // BunnyHopper bhopper(csgo);
   Radar radar(csgo);
-  // HotkeyManager hotkeyMan(csgo);
+  HotkeyManager hotkeyMan(csgo);
 
   while (!panicked && csgo.gameRunning()) {
     if (debug)
@@ -109,22 +109,22 @@ int main(int argc, char **argv) {
     //       &Trigger::triggerCheck, &trigger, boost::placeholders::_1);
     //   hotkeyMan.bind(settings.trigger_key, triggerFunc);
     // }
-    // if (use_aimbot) {
-    //   boost::function<void(unsigned int)> aimFunc =
+    if (use_aimbot) {
+      boost::function<void(unsigned int)> aimFunc =
 
-    //       boost::bind(&Aimer::aimCheck, &aimer, boost::placeholders::_1);
-    //   hotkeyMan.bind(settings.aim_key, aimFunc);
-    // }
+          boost::bind(&Aimer::aimCheck, &aimer, boost::placeholders::_1);
+      hotkeyMan.bind(settings.aim_key, aimFunc);
+    }
     // function for panic key to stop everything
-    // boost::function<void(unsigned int)> stop = [&hotkeyMan, &radar,
-    //                                             &panicked](unsigned int x) {
-    //   radar.stop();
-    //   hotkeyMan.stopListen();
-    //   if (x == 0)
-    //     panicked = true;
-    // };
-    // hotkeyMan.bind(settings.panic_key, stop);
-    // hotkeyMan.startListen();
+    boost::function<void(unsigned int)> stop = [&hotkeyMan, &radar,
+                                                &panicked](unsigned int x) {
+      radar.stop();
+      hotkeyMan.stopListen();
+      if (x == 0)
+        panicked = true;
+    };
+    hotkeyMan.bind(settings.panic_key, stop);
+    hotkeyMan.startListen();
     // if (settings.aim_vis_check && use_aimbot) {
     //   if (bspParser.parse_map(settings.maps_path, csgo.getMapName() +
     //   ".bsp")) {

@@ -232,6 +232,9 @@ def blit_init():
     elif map_name == "de_anubis":
         xlims = (-2707, 2509)
         ylims = (-1938, 3260)
+    elif map_name == "de_vertigo":
+        xlims = (-3112, 872)
+        ylims = (-2277, 1691)
     elif map_name == "dz_blacksite":
         xlims = (-8604, 8350)
         ylims = (-8300, 8804)

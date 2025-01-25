@@ -263,6 +263,21 @@ void GameManager::printPlayerLocationsToFile(const string &filename) {
 
 MemoryAccess &GameManager::getMemoryAccess() { return mem; }
 
+std::array<BoneInfo, MAX_BONES> GameManager::getBoneMatrix(addr_type player) {
+  if (player == 0)
+    throw runtime_error("getBoneMatrix: Player is nullptr.");
+  addr_type const game_scene_node_addr{player +
+                                 pattern_scanner.getGameSceneNodeOffset()};
+  auto const game_scene_node = mem.get_address((void *)game_scene_node_addr);
+  addr_type const bone_matrix_ptr {game_scene_node + netvar_finder.getNetvar("m_modelState") + 0x80};
+  addr_type bone_matrix_addr = mem.get_address((void*)bone_matrix_ptr);
+  mem.printBlock(bone_matrix_addr, 0x100);
+  std::array<BoneInfo, MAX_BONES> boneMatrix;
+  if (!mem.read(bone_matrix_addr, boneMatrix.data(), boneMatrix.size() * sizeof(BoneInfo)))
+    throw runtime_error("Could not read boneMatrix.");
+  return boneMatrix;
+}
+
 PlayerPtr GameManager::makePlayerPtr(addr_type entity) {
   addr_type entity_health_addr{entity + pattern_scanner.getHealthOffset()};
   addr_type entity_team_addr{entity + pattern_scanner.getTeamNumberOffset()};
