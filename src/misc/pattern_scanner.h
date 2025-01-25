@@ -9,6 +9,7 @@ class PatternScanner {
 public:
   PatternScanner(MemoryAccess &mem) : mem(mem) {}
   addr_type getLocalPlayerController();
+  addr_type getGlobalVars();
   addr_type getEntitySystem();
   addr_type getHealthOffset();
   addr_type getEntityListOffset();
@@ -34,6 +35,7 @@ private:
   MemoryAccess &mem;
   addr_type local_player_controller_PP{0};
   addr_type entity_system_PP{0};
+  addr_type global_vars_PP{0};
   // Offsets to entity_system
   addr_type entity_list_offset{0};
   addr_type entity_list_max_index_offset{0};

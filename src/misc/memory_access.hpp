@@ -18,8 +18,10 @@ private:
   std::vector<Addr_Range> engine_range;
   std::vector<Addr_Range> client_range;
   std::vector<Addr_Range> panorama_client_range;
+  std::vector<Addr_Range> libmatchmaking_range;
   unsigned char *diffBuffer = nullptr;
   FILE *kernel_module_file;
+  std::string maps_string{""};
 
   addr_type local_player_addr_location;
   addr_type attack_addr_call_location;
@@ -79,15 +81,23 @@ public:
   bool read(addr_type, void *, size_t);
   bool write(void *, void *, size_t);
   unsigned int read_offset(void *);
+  std::uint64_t read_uint64(addr_type);
+  std::uint32_t read_uint32(addr_type);
+  std::uint16_t read_uint16(addr_type);
+  std::uint8_t read_uint8(addr_type);
+  std::string read_string(addr_type);
+  addr_type get_address(addr_type);
   std::uint64_t read_uint64(void *);
   std::uint32_t read_uint32(void *);
   std::uint16_t read_uint16(void *);
   std::uint8_t read_uint8(void *);
   std::string read_string(void *);
   addr_type get_address(void *);
-  std::vector<Addr_Range> getPanoramaClientRange();
+  std::vector<Addr_Range> &getPanoramaClientRange();
   std::vector<Addr_Range> &getClientRange();
-  std::vector<Addr_Range> getEngineRange();
+  std::vector<Addr_Range> &getEngineRange();
+  std::vector<Addr_Range> &getLibMatchmakingRange();
+
   std::uint64_t getModuleSize(addr_type module_base);
   // returns the address of the call located at the first argument
   addr_type getCallAddress(void *);

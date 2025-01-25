@@ -1,6 +1,8 @@
 #include "netvar_finder.hpp"
 #include "util.hpp"
 #include <cstring>
+#include <iostream>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -14,6 +16,14 @@ std::string readString(std::vector<std::uint8_t>::const_iterator iter) {
 }
 std::uint64_t read_uint64(std::uint8_t *const addr) {
   std::uint64_t result;
+  // std::cout << "addr[0]: " << std::to_string(addr[0]) << std::endl;
+  // std::cout << "addr[1]: " << std::to_string(addr[1]) << std::endl;
+  // std::cout << "addr[2]: " << std::to_string(addr[2]) << std::endl;
+  // std::cout << "addr[3]: " << std::to_string(addr[3]) << std::endl;
+  // std::cout << "addr[4]: " << std::to_string(addr[4]) << std::endl;
+  // std::cout << "addr[5]: " << std::to_string(addr[5]) << std::endl;
+  // std::cout << "addr[6]: " << std::to_string(addr[6]) << std::endl;
+  // std::cout << "addr[7]: " << std::to_string(addr[7]) << std::endl;
   std::memcpy(&result, addr, sizeof(result));
   return result;
 }
@@ -93,25 +103,34 @@ void NetvarFinder::insert(std::string name, std::uint8_t *const addr,
   } else if (name == "m_modelState") {
     netvar_map_.insert(
         std::pair<std::string, addr_type>(name, read_uint32(addr + 0x08)));
+  } else if (name == "m_aimPunchAngle") {
+    netvar_map_.insert(
+        std::pair<std::string, addr_type>(name, read_uint32(addr + 0x08)));
   } else if (name == "m_bSpotted") {
     netvar_map_.insert(
         std::pair<std::string, addr_type>(name, read_uint32(addr + 0x10)));
-  } else if (name == "m_bSpttedByMask" && network_enable) {
+  } else if (name == "m_bSpottedByMask" && network_enable) {
     netvar_map_.insert(std::pair<std::string, addr_type>(
         name, read_uint32(addr + 0x08 + 0x10)));
   } else if (name == "m_hObserverTarget") {
     netvar_map_.insert(
         std::pair<std::string, addr_type>(name, read_uint32(addr + 0x08)));
   } else {
-    // if (name.substr(0, 2) == "m_") {
+    // if (name.find("de_dust2") != std::string::npos) {
     //   std::cout << "Ignored netvar " << name << std::endl;
     // }
   }
 }
 
 addr_type NetvarFinder::getNetvar(std::string const &name) const {
-  return netvar_map_.at(name);
+  if (netvar_map_.find(name) != netvar_map_.end()) {
+    return netvar_map_.at(name);
+  } else {
+    std::cout << "Requested unknown netvar: " << name << std::endl;
+  }
+  return 0;
 }
+
 void NetvarFinder::dump() {
   auto client_range = mem_.getClientRange();
   auto const base = client_range[0].first;
@@ -119,13 +138,18 @@ void NetvarFinder::dump() {
   cout << "Module has size: " << module_size << std::endl;
   std::vector<std::uint8_t> client_dump{};
   client_dump.resize(module_size);
-  std::cout << "Reserved " << module_size << "bytes of mem_ory" << std::endl;
-  if (mem_.read(base, client_dump.data(), module_size)) {
-    std::cout << "Dumped module." << std::endl;
-  } else {
-    std::cout << "Failed to dump module." << std::endl;
-    return;
+  std::cout << "Reserved " << module_size << " bytes of memory" << std::endl;
+  std::size_t const block_size{0x8000};
+  std::size_t const num_blocks{module_size / block_size};
+  for (std::size_t block{0}; block < num_blocks; ++block) {
+    std::size_t const offset{block * block_size};
+    std::size_t const size{block_size};
+    if (!mem_.read(base + offset, &client_dump[offset], size)) {
+      std::cout << "Failed to read block " << block << std::endl;
+      break;
+    }
   }
+  std::cout << "Dumped module." << std::endl;
   for (unsigned long i{module_size - 8}; i > 0; i -= 8) {
     bool network_enable = false;
     addr_type name_pointer{read_uint64(&client_dump[i])};

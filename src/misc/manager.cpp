@@ -343,34 +343,30 @@ bool GameManager::isOnServer() {
   return connected;
 }
 
-// addr_type GameManager::getPlayerAddr(PlayerPtr player) {
-//   for (unsigned int i = 0; i < players.size(); i++) {
-//     if (player == players[i])
-//       return player_addrs[i];
-//   }
-//   return 0;
-// }
-
 string GameManager::getMapName() {
   if (current_map_ == "") {
     if (settings.find_map) {
-      if (settings.debug)
-        cout << "Scanning for map..." << endl;
+      cout << "Scanning for map..." << endl;
       if (settings.radar_generic)
         current_map_ = "generic";
-      while (current_map_ == "") {
-        char MapName[32];
-        if (!mem.read((void *)(mem.map_name_addr), &MapName, sizeof(MapName)))
-          throw runtime_error("Could not get MapName.");
-        // mem.read((void*)(Address + OFFSET_MAPNAME), &MapName,
-        // sizeof(MapName));
-        string map_path(MapName);
-        // vector<string> no_path = split_string(map_path, "/");
-        vector<string> no_bsp = split_string(map_path, ".");
-        current_map_ = string(no_bsp[0]);
-        this_thread::sleep_for(chrono::milliseconds(1000));
+      auto global_vars = pattern_scanner.getGlobalVars();
+      if(settings.debug)
+        cout << "Global vars: " << global_vars << endl;
+      for (int i = 0; i < 0x300; i += 8) {
+        addr_type addr = mem.read_uint64((void *)(global_vars + i));
+        auto map_name_candidate = mem.read_string((void *)addr);
+        if(map_name_candidate.substr(0,5) == "maps/") {
+          auto map_file_name = map_name_candidate.substr(5);
+          current_map_ = split_string(map_file_name, ".")[0];
+          cout << "Found Map: " << current_map_ << endl;
+          break;
+        }
       }
-      cout << "Found Map: " << current_map_ << endl;
+      if (current_map_ == "") {
+        cout << "Could not find map. Please choose map:" << endl;
+        cin >> current_map_;
+      }
+      this_thread::sleep_for(chrono::milliseconds(1000));
     } else {
       cout << "Map detection deactivated. Please choose map:" << endl;
       cin >> current_map_;
@@ -411,14 +407,10 @@ Vector GameManager::getViewOrigin(addr_type player_addr) {
 
 QAngle GameManager::getAimPunch(addr_type player_addr) {
   QAngle ang;
-  // auto diffs = mem.diffMem(player_addr, 10000);
-  // for (auto i : diffs) {
-  //   QAngle angle;
-  //   mem.read(player_addr + i, &angle, sizeof(angle));
-  //   printVec(std::to_string(i), angle);
-  // }
 
-  if (!mem.read((void *)(player_addr + 5420), &ang, sizeof(ang)))
+  if (!mem.read(
+          (void *)(player_addr + netvar_finder.getNetvar("m_aimPunchAngle")),
+          &ang, sizeof(ang)))
     throw runtime_error("Could not get AimPunch.");
   return ang;
 }
@@ -454,7 +446,8 @@ QAngle GameManager::getNetworkAngles(addr_type player_addr) {
   // }
   // Offset found by running diffMem and sanity checking
   QAngle ang;
-  if (!mem.read((void *)(player_addr + 0x1338), &ang, sizeof(ang)))
+  if (!mem.read((void *)(player_addr + netvar_finder.getNetvar("v_angle")),
+                &ang, sizeof(ang)))
     throw runtime_error("Could not get NetworkAngles.");
   return ang;
 }

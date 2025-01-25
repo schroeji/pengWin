@@ -1,10 +1,9 @@
 #pragma once
-#include "vpk_parsing/vector.h"
+#include "../vpk_parsing/typedefs.h"
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <math.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string>
 #include <vector>
 

@@ -23,6 +23,7 @@ int x_error_handler(Display* d, XErrorEvent* e) {
 
 HotkeyManager::HotkeyManager(GameManager& csgo) : csgo(csgo),
                                                   settings(Settings::getInstance()) {
+  std::cout << "Starting HotkeyManager" << std::endl;
   // enable multi threading for X11
   XInitThreads();
   // sets the error handler so the program does not crash for invalid grabs

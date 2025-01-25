@@ -1,6 +1,6 @@
 #ifndef RAY_TRACE_H
 #define RAY_TRACE_H
-#include "vector.h"
+#include "typedefs.h"
 #include <algorithm>
 #include <chrono>
 #include <fstream>

@@ -14,6 +14,18 @@ addr_type PatternScanner::getLocalPlayerController() {
   return mem.get_address((void *)(local_player_controller_PP));
 }
 
+addr_type PatternScanner::getGlobalVars() {
+  if (global_vars_PP == 0) {
+    PatternScanner::BytePattern global_vars_pattern{
+        compile_byte_pattern("8D ?? ?? ?? ?? ?? 48 89 35 ?? ?? ?? ?? 48 89 ?? ?? C3")};
+    std::vector<addr_type> global_vars_match =
+        find_pattern_vec(global_vars_pattern, mem.getClientRange());
+    global_vars_PP =
+        mem.getAbsoluteAddress((void *)global_vars_match[0], 9, 4);
+  }
+  return mem.get_address((void *)(global_vars_PP));
+}
+
 addr_type PatternScanner::getEntitySystem() {
   if (entity_system_PP == 0) {
     PatternScanner::BytePattern entitySystem_pattern{

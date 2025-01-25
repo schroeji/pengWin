@@ -29,7 +29,7 @@ MemoryAccess::MemoryAccess(Settings *settings) : settings(settings) {
     cout << "Successfully opened " << kernel_module_file_path << " for reading."
          << std::endl;
   }
-  vac_bypass.set_inotify_max();
+  // vac_bypass.set_inotify_max();
 }
 MemoryAccess::~MemoryAccess() {
   if (settings->use_kernel_module) {
@@ -38,6 +38,14 @@ MemoryAccess::~MemoryAccess() {
 }
 
 unsigned int MemoryAccess::read_offset(void *addr) { return read_uint32(addr); }
+
+std::uint64_t MemoryAccess::read_uint64(addr_type addr) {
+  return read_uint64((void *)addr);
+}
+
+std::uint32_t MemoryAccess::read_uint32(addr_type addr) {
+  return read_uint32((void *)addr);
+}
 
 std::uint64_t MemoryAccess::read_uint64(void *addr) {
   std::uint64_t value;
@@ -124,19 +132,30 @@ std::vector<Addr_Range> &MemoryAccess::getClientRange() {
   return client_range;
 }
 
-std::vector<Addr_Range> MemoryAccess::getPanoramaClientRange() {
-  panorama_client_range = getModule("libpanoramauiclient.so");
-  cout << hex << "Panorama Client Range: " << endl;
-  printAddrRangeVec(panorama_client_range);
-  updateAddrs();
+std::vector<Addr_Range> &MemoryAccess::getPanoramaClientRange() {
+  if (panorama_client_range.empty()) {
+    panorama_client_range = getModule("libpanoramauiclient.so");
+    cout << hex << "Panorama Client Range: " << endl;
+    printAddrRangeVec(panorama_client_range);
+  }
   return panorama_client_range;
 }
 
-std::vector<Addr_Range> MemoryAccess::getEngineRange() {
-  engine_range = getModule("libengine2.so");
-  cout << hex << "Engine Range: " << endl;
-  printAddrRangeVec(engine_range);
-  updateAddrs();
+std::vector<Addr_Range> &MemoryAccess::getLibMatchmakingRange() {
+  if (libmatchmaking_range.empty()) {
+    libmatchmaking_range = getModule("libmatchmaking.so");
+    cout << hex << "Matchmaking Range: " << endl;
+    printAddrRangeVec(libmatchmaking_range);
+  }
+  return libmatchmaking_range;
+}
+
+std::vector<Addr_Range> &MemoryAccess::getEngineRange() {
+  if (engine_range.empty()) {
+    engine_range = getModule("libengine2.so");
+    cout << hex << "Engine Range: " << endl;
+    printAddrRangeVec(engine_range);
+  }
   return engine_range;
 }
 
@@ -147,34 +166,30 @@ MemoryAccess::getModuleFromKernelModule(const string &modname) {
   // Magic number that is handled by the kernel module to get the memory
   // mappings of the file.
   static constexpr off64_t kMapsMagicNumber{0xFFFF};
-  char maps_buffer[kMapsBufferSize];
-  std::size_t read_sum = pread(fileno(kernel_module_file), maps_buffer,
-                               kMapsBufferSize, kMapsMagicNumber);
-  std::cout << "Read " << read_sum << " bytes from kernel module maps."
-            << std::endl;
-  std::string maps_string(maps_buffer, &maps_buffer[read_sum]);
+
+  if (maps_string == "") {
+    char maps_buffer[kMapsBufferSize];
+    std::size_t read_sum = pread(fileno(kernel_module_file), maps_buffer,
+                                 kMapsBufferSize, kMapsMagicNumber);
+    std::cout << "Read " << read_sum << " bytes from kernel module maps."
+              << std::endl;
+    maps_string = std::string(maps_buffer, &maps_buffer[read_sum]);
+  }
+
   std::istringstream maps_stream(maps_string);
   std::string line;
   std::cout << "Memory mappings for library: " << modname << std::endl;
   while (std::getline(maps_stream, line)) {
     if (line.find(modname) != std::string::npos) {
       std::istringstream iss(line);
-      std::string addressRange, perms, offset, dev, inode, pathname;
+      std::string addressRange, pathname;
 
       // Read the line into respective fields
-      iss >> addressRange >> perms >> offset >> dev >> inode;
+      iss >> addressRange;
       std::getline(iss, pathname);
       auto split = split_string(addressRange, "-");
       result.push_back(Addr_Range(strtoul(split[0].c_str(), NULL, 16),
                                   strtoul(split[1].c_str(), NULL, 16)));
-      // Output the parsed information
-      // std::cout << "Address Range: " << addressRange << std::endl;
-      // std::cout << "Permissions: " << perms << std::endl;
-      // std::cout << "Offset: " << offset << std::endl;
-      // std::cout << "Device: " << dev << std::endl;
-      // std::cout << "Inode: " << inode << std::endl;
-      // std::cout << "Pathname: " << pathname << std::endl;
-      // std::cout << "-----------------------------" << std::endl;
     }
   }
   return result;
