@@ -8,6 +8,8 @@
 #include "misc/settings.hpp"
 #include "misc/typedef.hpp"
 #include "misc/util.hpp"
+#include "misc/wayland_hotkey.hpp"
+#include "misc/hotkey.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -30,6 +32,18 @@ void printUsage(const string &name, const string &config_file) {
   cout << endl;
   cout << "For advanced configuration use: " << config_file << endl;
   ;
+}
+
+
+auto createHotkeyManager(GameManager& csgo) -> std::shared_ptr<HotkeyManagerInterface> {
+  bool const isWayland{
+    std::getenv("WAYLAND_DISPLAY") != NULL || std::getenv("XDG_CURRENT_DESKTOP") == "Hyprland"
+  };
+  if (isWayland) {
+    return std::make_shared<WaylandHotkeyManager>(csgo);
+  } else {
+    return std::make_shared<X11HotkeyManager>(csgo);
+  }
 }
 
 int main(int argc, char **argv) {
@@ -80,7 +94,7 @@ int main(int argc, char **argv) {
   Aimer aimer(csgo);
   // BunnyHopper bhopper(csgo);
   Radar radar(csgo);
-  HotkeyManager hotkeyMan(csgo);
+  std::shared_ptr<HotkeyManagerInterface> hotkeyMan{createHotkeyManager(csgo)};
 
   while (!panicked && csgo.gameRunning()) {
     if (debug)
@@ -113,27 +127,18 @@ int main(int argc, char **argv) {
       boost::function<void(unsigned int)> aimFunc =
 
           boost::bind(&Aimer::aimCheck, &aimer, boost::placeholders::_1);
-      hotkeyMan.bind(settings.aim_key, aimFunc);
+      hotkeyMan->bind(settings.aim_key, aimFunc);
     }
     // function for panic key to stop everything
     boost::function<void(unsigned int)> stop = [&hotkeyMan, &radar,
                                                 &panicked](unsigned int x) {
       radar.stop();
-      hotkeyMan.stopListen();
+      hotkeyMan->stopListen();
       if (x == 0)
         panicked = true;
     };
-    hotkeyMan.bind(settings.panic_key, stop);
-    hotkeyMan.startListen();
-    // if (settings.aim_vis_check && use_aimbot) {
-    //   if (bspParser.parse_map(settings.maps_path, csgo.getMapName() +
-    //   ".bsp")) {
-    //     cout << "Parsed map: " << csgo.getMapName() << endl;
-    //   } else {
-    //     cout << "WARNING: Could not parse: " << settings.maps_path
-    //          << csgo.getMapName() + ".bsp" << endl;
-    //   }
-    // }
+    hotkeyMan->bind(settings.panic_key, stop);
+    hotkeyMan->startListen();
 
     // main loop
     while (!panicked && csgo.isOnServer()) {

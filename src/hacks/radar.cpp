@@ -21,7 +21,7 @@ void Radar::start() {
 
   // start visualization
   string cmd =
-      "python3 visu.py " + map_name + " " + to_string(settings.radar_sleep);
+      "sudo -u " + settings.username +" python3 visu.py " + map_name + " " + to_string(settings.radar_sleep);
   handle = popen(cmd.c_str(), "w");
   running = true;
   writeLocations = boost::thread(boost::bind(&Radar::writeFunc, this));

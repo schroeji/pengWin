@@ -6,8 +6,8 @@ from select import select
 import matplotlib
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
-import numpy as np
 
+import numpy as np
 
 SEPERATOR = "|"
 matplotlib.rcParams["toolbar"] = "None"
@@ -268,7 +268,6 @@ def catch_term_sig():
 
 map_name = sys.argv[1]
 interval = int(sys.argv[2])
-fig.canvas.setWindowTitle("Radar - {}".format(map_name))
 
 has_plotted = False
 # _thread.start_new_thread(catch_term_sig, ())

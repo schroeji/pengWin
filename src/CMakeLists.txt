@@ -22,14 +22,10 @@ find_package(
   COMPONENTS system
   REQUIRED)
 find_package(X11 REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(WAYLAND REQUIRED wayland-client)
 
-target_link_libraries(${pengwin} PRIVATE Boost::thread Boost::system X11
-                                         Threads::Threads)
-set(CMAKE_BUILD_RPATH "$ORIGIN/bin/linux64")
-set(CMAKE_INSTALL_RPATH "$ORIGIN/bin/linux64")
-
-add_executable("offsetDumper" ${dumper_srcs})
-target_link_libraries(${offsetDumper} PRIVATE Boost::thread Boost::system X11
-                                              Threads::Threads)
-target_include_directories(
-  ${offsetDumper} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>)
+target_link_libraries(${pengwin} PRIVATE Boost::thread 
+                                         Boost::system 
+                                         X11
+                                         ${WAYLAND_LIBRARIES})

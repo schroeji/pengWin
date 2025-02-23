@@ -218,47 +218,6 @@ void GameManager::printEntities() {
       cout << "Health: " << health << endl;
     }
   }
-
-  // for (unsigned int i = 0; i < count; i++) {
-  //   if (g_glow[i].m_pEntity == nullptr)
-  //     continue;
-  //   cout << dec << "Nr: " << i << endl;
-  //   cout << hex << "Addr:" << g_glow[i].m_pEntity << endl;
-  //   mem.read(g_glow[i].m_pEntity, entity, sizeof(EntityType));
-  //   printf("ID: %d\n", entity->m_iEntityId);
-  //   cout << "hp: " << entity->m_iHealth << endl;
-  //   printf("Origin x=%f y=%f z=%f\n", entity->m_vecOrigin.x,
-  //          entity->m_vecOrigin.y, entity->m_vecOrigin.z);
-  //   printf("m_fFlags: %u\n", entity->m_fFlags);
-  //   printf("m_iEFlags: %d\n", entity->m_iEFlags);
-  //   vector<int> diffs = mem.diffMem((addr_type)g_glow[i].m_pEntity, 0x200);
-  //   if (diffs.size() > 0) {
-  //     // for (int i : diffs)
-  //     // cout << hex << i << endl;
-  //     mem.printBlock((addr_type)g_glow[i].m_pEntity, 0x200);
-  //   }
-  //   cout << "-----" << endl;
-  // }
-}
-
-void GameManager::printPlayerLocationsToFile(const string &filename) {
-  // if (players.empty())
-  //   return;
-  // ofstream file;
-  // file.open(filename);
-  // // print local player index into array[0,0]
-  // file << local_player_index << ",0,0,0,0,0" << endl;
-  // // Format: number,hp,team,x,y,z
-  // int i = 0;
-  // for (PlayerPtr player : players) {
-  //   file << i << ",";
-  //   file << player->m_iHealth << ",";
-  //   file << player->m_iTeamNum << ",";
-  //   file << player->m_vecOrigin.x << "," << player->m_vecOrigin.y << ","
-  //        << player->m_vecOrigin.z << endl;
-  //   i++;
-  // }
-  // file.close();
 }
 
 MemoryAccess &GameManager::getMemoryAccess() { return mem; }
@@ -271,7 +230,7 @@ std::array<BoneInfo, MAX_BONES> GameManager::getBoneMatrix(addr_type player) {
   auto const game_scene_node = mem.get_address((void *)game_scene_node_addr);
   addr_type const bone_matrix_ptr {game_scene_node + netvar_finder.getNetvar("m_modelState") + 0x80};
   addr_type bone_matrix_addr = mem.get_address((void*)bone_matrix_ptr);
-  mem.printBlock(bone_matrix_addr, 0x100);
+  // mem.printBlock(bone_matrix_addr, 0x100);
   std::array<BoneInfo, MAX_BONES> boneMatrix;
   if (!mem.read(bone_matrix_addr, boneMatrix.data(), boneMatrix.size() * sizeof(BoneInfo)))
     throw runtime_error("Could not read boneMatrix.");

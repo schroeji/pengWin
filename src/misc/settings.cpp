@@ -41,25 +41,8 @@ void Settings::load(const string &file) {
           continue;
         }
         name_splits = split_string(splits[0], "_");
-        // offsets
-        if (splits[0] == "glow_offset")
-          glow_offset = strtoul(splits[1].c_str(), NULL, 16);
-        else if (splits[0] == "attack_offset")
-          attack_offset = strtoul(splits[1].c_str(), NULL, 16);
-        else if (splits[0] == "local_player_offset")
-          local_player_offset = strtoul(splits[1].c_str(), NULL, 16);
-        else if (splits[0] == "maps_path")
-          maps_path = splits[1];
-        else if (splits[0] == "map_name_offset")
-          map_name_offset = strtoul(splits[1].c_str(), NULL, 16);
-        else if (splits[0] == "force_jump_offset")
-          force_jump_offset = strtoul(splits[1].c_str(), NULL, 16);
-        else if (splits[0] == "isConnected_offset")
-          isConnected_offset = strtoul(splits[1].c_str(), NULL, 16);
-        else if (splits[0] == "clientState_offset")
-          clientState_offset = strtoul(splits[1].c_str(), NULL, 16);
         // settings
-        else if (splits[0] == "main_loop_sleep")
+        if (splits[0] == "main_loop_sleep")
           main_loop_sleep = strtol(splits[1].c_str(), NULL, 10);
         else if (splits[0] == "mouse_file")
           mouse_file = splits[1];
@@ -113,6 +96,8 @@ void Settings::load(const string &file) {
             bone_ids.push_back(stoi(bone));
         } else if (splits[0] == "panic_key") {
           panic_key = splits[1];
+        } else if (splits[0] == "user") {
+          username = splits[1];
         } else {
           // weapon specific fov settings
           if (name_splits[0] == "aim" && name_splits[2] == "fov") {
@@ -134,16 +119,6 @@ void Settings::print() {
   // for (std::pair<std::string, std::uint64_t> const& netvar : netvars) {
   // cout << hex << netvar.first << "=0x" << netvar.second << endl;
   // }
-
-  cout << "--------- Offsets ---------" << endl;
-  cout << hex << "glow offset: " << glow_offset << endl;
-  cout << "attack offset: " << attack_offset << endl;
-  cout << "local player offset: " << local_player_offset << endl;
-  cout << "map_name_offset: " << map_name_offset << endl;
-  cout << "force_jump_offset: " << force_jump_offset << endl;
-  cout << "isConnected_offset: " << isConnected_offset << endl;
-  cout << "clientState_offset: " << clientState_offset << endl;
-
   cout << "--------- Settings ---------" << endl;
   cout << "[General]" << endl;
   cout << dec << "main_loop_sleep: " << main_loop_sleep << endl;

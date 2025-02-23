@@ -17,7 +17,6 @@ public:
   // printing stuff for debugging
   void printPlayers();
   void printEntities();
-  void printPlayerLocationsToFile(const std::string &);
   // return the MemoryAccess  isntance of this object
   MemoryAccess &getMemoryAccess();
   // return the players (read by the last grabPlayers call)

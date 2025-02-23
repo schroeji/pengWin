@@ -13,20 +13,12 @@ private:
   static Settings *instance;
 
 public:
-  // offsets
-  addr_type glow_offset;
-  addr_type attack_offset;
-  addr_type local_player_offset;
-  addr_type map_name_offset;
-  addr_type force_jump_offset;
-  addr_type isConnected_offset;
-  addr_type clientState_offset;
-
   // main settings
   long int main_loop_sleep;
   bool debug = false;
   string mouse_file;
   string panic_key;
+  string username;
   string maps_path;
 
   // trigger settings

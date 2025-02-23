@@ -21,7 +21,7 @@ int x_error_handler(Display* d, XErrorEvent* e) {
   return 0;
 }
 
-HotkeyManager::HotkeyManager(GameManager& csgo) : csgo(csgo),
+X11HotkeyManager::X11HotkeyManager(GameManager& csgo) : csgo(csgo),
                                                   settings(Settings::getInstance()) {
   std::cout << "Starting HotkeyManager" << std::endl;
   // enable multi threading for X11
@@ -33,9 +33,9 @@ HotkeyManager::HotkeyManager(GameManager& csgo) : csgo(csgo),
   csWindow = findCSWindow();
 }
 
-HotkeyManager::~HotkeyManager() {}
+X11HotkeyManager::~X11HotkeyManager() {}
 
-void HotkeyManager::bind(string key, boost::function<void(unsigned int)> func){
+void X11HotkeyManager::bind(string key, boost::function<void(unsigned int)> func){
   bool isKeyboard = (key.compare(0, 5, "mouse") &&
                      key.compare(0, 5, "MOUSE") &&
                      key.compare(0, 5, "Mouse"));
@@ -58,7 +58,7 @@ void HotkeyManager::bind(string key, boost::function<void(unsigned int)> func){
   listening = false;
 }
 
-void HotkeyManager::unbind(string key) {
+void X11HotkeyManager::unbind(string key) {
   bool isKeyboard = (key.compare(0, 5, "mouse") &&
                      key.compare(0, 5, "MOUSE") &&
                      key.compare(0, 5, "Mouse"));
@@ -73,17 +73,17 @@ void HotkeyManager::unbind(string key) {
   bindings.erase(keycode);
 }
 
-void HotkeyManager::startListen() {
+void X11HotkeyManager::startListen() {
   if (bindings.size() < 1)
     return;
   listening = true;
-  keyPressListener = boost::thread(boost::bind(&HotkeyManager::keyPressListen, this));
-  mousePressListener = boost::thread(boost::bind(&HotkeyManager::mousePressListen, this));
+  keyPressListener = boost::thread(boost::bind(&X11HotkeyManager::keyPressListen, this));
+  mousePressListener = boost::thread(boost::bind(&X11HotkeyManager::mousePressListen, this));
   this_thread::sleep_for(chrono::milliseconds(3));
   if (settings.debug) cout << "Started Hotkey listener..." << endl;
 }
 
-void HotkeyManager::stopListen() {
+void X11HotkeyManager::stopListen() {
   if (!listening)
     return;
   listening = false;
@@ -99,12 +99,12 @@ void HotkeyManager::stopListen() {
   if (settings.debug) cout << "Stopped Hotkey listener." << endl;
 }
 
-unsigned int HotkeyManager::eventCodeToMouseButton(unsigned int code) {
+unsigned int X11HotkeyManager::eventCodeToMouseButton(unsigned int code) {
   // -271 for event.code and +mouseListOffset to map to the right position in bindings
   return code + mouseListOffset - 271;
 }
 
-void HotkeyManager::mousePressListen() {
+void X11HotkeyManager::mousePressListen() {
   int fd;
   struct input_event event;
 
@@ -131,7 +131,7 @@ void HotkeyManager::mousePressListen() {
         throw runtime_error("No binding for pressed key. This should not happen.");
       }
       holding_key[keycode] = true;
-      threads[keycode] = boost::thread(boost::bind(&HotkeyManager::callLoop,
+      threads[keycode] = boost::thread(boost::bind(&X11HotkeyManager::callLoop,
                                                    this,
                                                    keycode,
                                                    func));
@@ -148,7 +148,7 @@ void HotkeyManager::mousePressListen() {
   }
 }
 
-void HotkeyManager::keyPressListen() {
+void X11HotkeyManager::keyPressListen() {
   unsigned int modifiers;
   int pointer_mode = GrabModeAsync;
   int keyboard_mode = GrabModeAsync;
@@ -189,7 +189,7 @@ void HotkeyManager::keyPressListen() {
         throw runtime_error("No binding for pressed Key. This should not happen.");
       }
       holding_key[event.xbutton.button] = true;
-      threads[event.xbutton.button] = boost::thread(boost::bind(&HotkeyManager::callLoop,
+      threads[event.xbutton.button] = boost::thread(boost::bind(&X11HotkeyManager::callLoop,
                                                                 this,
                                                                 event.xbutton.button,
                                                                 func));
@@ -204,7 +204,7 @@ void HotkeyManager::keyPressListen() {
   }
 }
 
-void HotkeyManager::callLoop(unsigned int keycode, boost::function<void(unsigned int)> func) {
+void X11HotkeyManager::callLoop(unsigned int keycode, boost::function<void(unsigned int)> func) {
   unsigned int call_count = 0;
   while (holding_key.at(keycode)) {
     func(call_count);
@@ -212,12 +212,12 @@ void HotkeyManager::callLoop(unsigned int keycode, boost::function<void(unsigned
   }
 }
 
-void HotkeyManager::forwardEvent(XEvent event) {
+void X11HotkeyManager::forwardEvent(XEvent event) {
   XSendEvent(display, csWindow, true, NoEventMask, &event);
   XFlush(display);
 }
 
-Window HotkeyManager::findCSWindow() {
+Window X11HotkeyManager::findCSWindow() {
   FILE* in;
   char buf[128];
   string cmd = "xdotool search --any --pid \"" + to_string(csgo.getMemoryAccess().getPid()) + "\"";
@@ -231,7 +231,7 @@ Window HotkeyManager::findCSWindow() {
   return w;
 }
 
-Window HotkeyManager::activeWindow() {
+Window X11HotkeyManager::activeWindow() {
   FILE* in;
   char buf[128];
   string cmd = "xdotool getWindowfocus";
@@ -244,6 +244,6 @@ Window HotkeyManager::activeWindow() {
   return w;
 }
 
-bool HotkeyManager::isListening() {
+bool X11HotkeyManager::isListening() {
   return listening;
 }

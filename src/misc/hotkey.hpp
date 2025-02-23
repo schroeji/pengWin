@@ -1,23 +1,25 @@
+#pragma once
 #include "settings.hpp"
 #include "manager.hpp"
+#include "hotkey_manager_interface.hpp"
 
 #include <boost/thread.hpp>
 #include <X11/Xlib.h>
 #include <map>
 
-class HotkeyManager {
+class X11HotkeyManager : public HotkeyManagerInterface {
 public:
-  HotkeyManager(GameManager&);
-  ~HotkeyManager();
-  void bind(string, boost::function<void(unsigned int)>);
-  void unbind(string);
-  void startListen();
-  void stopListen();
-  bool isListening();
+  X11HotkeyManager(GameManager&);
+  ~X11HotkeyManager();
+  void bind(string, HotkeyPressedCallback) override;
+  void unbind(string) override;
+  void startListen() override;
+  void stopListen() override;
+  bool isListening() override;
 
 private:
   boost::thread keyListener;
-  std::map<unsigned int, boost::function<void(unsigned int)>> bindings;
+  std::map<unsigned int, HotkeyPressedCallback> bindings;
   std::map<unsigned int, bool> holding_key;
   std::map<unsigned int, boost::thread> threads;
   boost::thread keyPressListener;

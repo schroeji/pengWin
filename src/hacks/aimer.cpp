@@ -532,7 +532,6 @@ pair<std::shared_ptr<Player>, Vector> Aimer::closestTargetInFov(Vector view,
     addr_type enemy_addr = enemy->entity_addr;
     auto boneMatrix = csgo.getBoneMatrix(enemy_addr);
     for (unsigned int boneID : settings.bone_ids) {
-      cout << "bone ID:" << boneID << endl;
       bone_pos = {boneMatrix[boneID].x, boneMatrix[boneID].y,
                   boneMatrix[boneID].z};
 
@@ -540,15 +539,16 @@ pair<std::shared_ptr<Player>, Vector> Aimer::closestTargetInFov(Vector view,
         printVec("bone", bone_pos);
       // find angle between player and target
       Vector distVec = getDist(player_pos, bone_pos);
-      printVec("DistVec:", distVec);
+      // printVec("DistVec:", distVec);
       normalize_vector(distVec);
-      printVec("Normalized distvec:", distVec);
-      printVec("view:", view);
-      cout << "Len(view): " << len(view) << endl;
-      cout << "Len(distVec): " << len(distVec) << endl;
       float angle = acos(distVec.Dot(view));
-      if (settings.debug)
+      if (settings.debug) {
+        printVec("Normalized distvec:", distVec);
+        printVec("view:", view);
+        cout << "Len(view): " << len(view) << endl;
+        cout << "Len(distVec): " << len(distVec) << endl;
         cout << "Angle: " << angle << endl;
+      }
       if (angle > fov / 2.)
         continue;
       if (closestPlayer == nullptr || angle < closestAngle) {
@@ -567,7 +567,8 @@ pair<std::shared_ptr<Player>, Vector> Aimer::closestTargetInFov(Vector view,
   if (lineSphereIntersection(player_pos, target, closestBone, BONE_RADIUS))
     throw runtime_error("No adjustment needed");
   // do visibility check last to minimize load
-  // cout << "Is visible: " << map.is_visible(player_pos, closestBone) << endl;
+  bool const is_visible{map.is_visible({player_pos.y, player_pos.x, player_pos.z}, {closestBone.y, closestBone.x, closestBone.z})};
+  cout << "Is visible: " << is_visible << endl;
   if (settings.debug)
     cout << "Returning player" << endl;
   return pair<PlayerPtr, Vector>(closestPlayer, closestBone);
